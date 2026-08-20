@@ -97,7 +97,9 @@ The main area of the screen cycles through photos from completed task submission
 - The MVP supports **photo** proof only. Video support may be added later.
 - Each slide displays the submitted photo, the team name, and the task title.
 - Slides advance automatically every few seconds and loop through the collection.
-- Newly approved task photos can be added to the rotation as they arrive.
+- The Viewer should show the latest approved photos as the completions load, so spectators see new action as it happens.
+- When a new task completes, its photo can be inserted at the front of the rotation or briefly surfaced before the slideshow continues.
+- Newly approved task photos can also be added to the ongoing loop as they arrive.
 
 Example slide:
 
@@ -152,6 +154,7 @@ The photo slideshow can continue to loop through all the approved photos from th
 - No user interaction required; it is a passive, always-on display.
 - Read-only. The Viewer cannot modify game state.
 - Real-time updates via Socket.io so spectators see progress as it happens.
+- The latest completed-task photos should appear in the slideshow as they load.
 - Photos only for the initial version. Video slideshow is a future enhancement.
 - Use team names, not individual player names.
 - Celebrate completed tasks; do not display rejected or pending proof as part of the slideshow.

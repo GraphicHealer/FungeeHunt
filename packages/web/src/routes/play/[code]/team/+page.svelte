@@ -1,0 +1,130 @@
+<script lang="ts">
+  import { page } from '$app/stores';
+  import { onMount } from 'svelte';
+
+  const code = $page.params.code;
+
+  let state: any = null;
+  let newName = '';
+  let error = '';
+
+  function token() {
+    return localStorage.getItem(`token:${code}`) ?? '';
+  }
+
+  function isManager() {
+    return state && state.team && state.player.id === state.team.managerId;
+  }
+
+  async function load() {
+    const res = await fetch(`/api/play/${code}`, {
+      headers: { Authorization: `Bearer ${token()}` },
+    });
+    if (res.ok) {
+      state = await res.json();
+      newName = state.team?.name ?? '';
+    } else {
+      error = 'Could not load team';
+    }
+  }
+
+  async function rename() {
+    error = '';
+    const res = await fetch(`/api/play/${code}/team`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ name: newName }),
+    });
+    if (res.ok) {
+      await load();
+    } else {
+      const data = await res.json();
+      error = data.error ?? 'Could not rename team';
+    }
+  }
+
+  onMount(load);
+</script>
+
+<main class="container">
+  {#if state}
+    <h1>{state.team?.name ?? 'Unnamed team'}</h1>
+    <p class="score">{state.team?.score ?? 0} POINTS</p>
+
+    {#if isManager()}
+      <div class="rename">
+        <input type="text" bind:value={newName} placeholder="Team name" />
+        <button on:click={rename}>RENAME TEAM</button>
+      </div>
+    {/if}
+
+    {#if error}<p class="error">{error}</p>{/if}
+
+    <h2>Members</h2>
+    <ul class="members">
+      {#each state.team?.members ?? [] as member (member.id)}
+        <li>
+          {#if member.id === state.team?.managerId}
+            <span class="manager">★ {member.displayName}</span>
+            <span class="role">Manager</span>
+          {:else}
+            <span>{member.displayName}</span>
+            {#if member.type === 'OFFLINE'}<span class="offline">Offline</span>{/if}
+          {/if}
+        </li>
+      {/each}
+    </ul>
+
+    <a href="/play/{code}/tasks">← Back to tasks</a>
+  {:else if error}
+    <p class="error">{error}</p>
+  {:else}
+    <p>Loading...</p>
+  {/if}
+</main>
+
+<style>
+  .container {
+    padding: 2rem;
+    font-family: system-ui, sans-serif;
+  }
+
+  .score {
+    font-weight: bold;
+    font-size: 1.25rem;
+  }
+
+  .rename {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+
+  .members {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .manager {
+    font-weight: bold;
+  }
+
+  .role {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .offline {
+    color: #666;
+  }
+
+  .error {
+    color: red;
+  }
+</style>

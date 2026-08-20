@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id                    String         @id @default(cuid())
+  code                  String         @unique
+  name                  String
+  status                GameStatus     @default(NOT_STARTED)
+  startAt               DateTime?
+  endAt                 DateTime?
+  submissionMode        SubmissionMode @default(AUTOMATIC)
+  returnBonusEnabled    Boolean        @default(false)
+  returnStart           DateTime?
+  returnEnd             DateTime?
+  returnPoints          Int            @default(0)
+  foodDriveEnabled      Boolean        @default(false)
+  foodDrivePointsPerItem Int           @default(0)
+  foodDrivePermissible  String?
+  foodDriveSuggested    String?
+  players               Player[]
+  teams                 Team[]
+  tasks                 Task[]
+  rulesSections         RuleSection[]
+}
+
+model Player {
+  id           String     @id @default(cuid())
+  gameId       String
+  displayName  String
+  type         PlayerType
+  sessionToken String?    @unique
+  joinedAt     DateTime   @default(now())
+  team         Team?      @relation(fields: [teamId], references: [id])
+  teamId       String?
+  managerOf    Team?      @relation("TeamManager")
+}
+
+model Team {
+  id                      String       @id @default(cuid())
+  gameId                  String
+  name                    String?
+  managerId               String?      @unique
+  manager                 Player?      @relation("TeamManager", fields: [managerId], references: [id])
+  members                 Player[]
+  submissions             Submission[]
+  returnedAt              DateTime?
+  returnBonusAwarded      Boolean      @default(false)
+  foodDriveItems          Int          @default(0)
+  foodDriveBonusAwarded   Boolean      @default(false)
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  gameId      String
+  title       String
+  description String
+  points      Int
+  proofType   ProofType
+  order       Int
+}
+
+model Submission {
+  id          String           @id @default(cuid())
+  taskId      String
+  teamId      String
+  proofUrl    String
+  status      SubmissionStatus
+  reason      String?
+  submittedAt DateTime         @default(now())
+  reviewedAt  DateTime?
+}
+
+model RuleSection {
+  id    String @id @default(cuid())
+  gameId String
+  title  String
+  body   String
+}
+
+enum GameStatus {
+  NOT_STARTED
+  LIVE
+  COMPLETED
+}
+
+enum PlayerType {
+  APP
+  OFFLINE
+}
+
+enum ProofType {
+  PHOTO
+  VIDEO
+  EITHER
+}
+
+enum SubmissionMode {
+  AUTOMATIC
+  MANUAL
+}
+
+enum SubmissionStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  COMPLETED
+  INCOMPLETE
+}

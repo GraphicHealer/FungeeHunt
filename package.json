@@ -1,0 +1,13 @@
+{
+  "name": "fungee-hunt",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fungee-Hunt full-stack PWA",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {},
+  "engines": {
+    "node": ">=20"
+  }
+}
