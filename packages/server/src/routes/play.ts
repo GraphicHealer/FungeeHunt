@@ -17,7 +17,10 @@ router.get('/', async (req, res) => {
     });
 
     const submissions = player.teamId
-      ? await db.submission.findMany({ where: { teamId: player.teamId } })
+      ? await db.submission.findMany({
+          where: { teamId: player.teamId },
+          orderBy: { submittedAt: 'desc' },
+        })
       : [];
 
     const byTask = new Map(submissions.map((s: any) => [s.taskId, s]));

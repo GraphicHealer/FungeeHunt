@@ -9,6 +9,10 @@
   let name = '';
   let managerId = '';
   let selectedMembers: string[] = [];
+  let editing: string | null = null;
+  let editName = '';
+  let editManagerId = '';
+  let editMembers: string[] = [];
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -38,6 +42,36 @@
       selectedMembers = [];
       await load();
     }
+  }
+
+  function startEdit(team: any) {
+    editing = team.id;
+    editName = team.name ?? '';
+    editManagerId = team.managerId ?? '';
+    editMembers = (team.members ?? []).map((m: any) => m.id);
+  }
+
+  async function saveEdit(teamId: string) {
+    const res = await fetch(`/api/gm/games/${gameId}/teams/${teamId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({
+        name: editName,
+        managerId: editManagerId,
+        memberIds: editMembers,
+      }),
+    });
+    if (res.ok) {
+      editing = null;
+      await load();
+    }
+  }
+
+  function cancelEdit() {
+    editing = null;
   }
 
   onMount(load);
@@ -74,7 +108,38 @@
 
   <ul>
     {#each teams as team (team.id)}
-      <li>{team.name ?? 'Unnamed team'} — Manager: {team.manager?.displayName ?? '—'} ({team.members?.length ?? 0} members)</li>
+      <li>
+        {#if editing === team.id}
+          <input type="text" bind:value={editName} placeholder="Team name" />
+          <select bind:value={editManagerId}>
+            <option value="">No manager</option>
+            {#each players.filter((p) => p.type === 'APP') as player (player.id)}
+              <option value={player.id}>{player.displayName}</option>
+            {/each}
+          </select>
+
+          <div class="members">
+            {#each players as player (player.id)}
+              <label>
+                <input
+                  type="checkbox"
+                  value={player.id}
+                  bind:group={editMembers}
+                />
+                {player.displayName} ({player.type})
+              </label>
+            {/each}
+          </div>
+
+          <div class="actions">
+            <button on:click={() => saveEdit(team.id)}>SAVE</button>
+            <button on:click={cancelEdit}>CANCEL</button>
+          </div>
+        {:else}
+          <span>{team.name ?? 'Unnamed team'} — Manager: {team.manager?.displayName ?? '—'} ({team.members?.length ?? 0} members)</span>
+          <button on:click={() => startEdit(team)}>EDIT</button>
+        {/if}
+      </li>
     {/each}
   </ul>
 </main>
@@ -97,5 +162,27 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    margin: 0.5rem 0;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.5rem;
   }
 </style>

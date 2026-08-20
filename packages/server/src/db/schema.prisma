@@ -15,6 +15,7 @@ model Game {
   startAt               DateTime?
   endAt                 DateTime?
   submissionMode        SubmissionMode @default(AUTOMATIC)
+  viewerEnabled         Boolean        @default(false)
   returnBonusEnabled    Boolean        @default(false)
   returnStart           DateTime?
   returnEnd             DateTime?
@@ -74,6 +75,8 @@ model Submission {
   reason      String?
   submittedAt DateTime         @default(now())
   reviewedAt  DateTime?
+
+  @@unique([taskId, teamId])
 }
 
 model RuleSection {

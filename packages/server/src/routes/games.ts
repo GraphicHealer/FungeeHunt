@@ -36,6 +36,9 @@ function buildGameData(body: any, partial = false) {
   if (body.submissionMode !== undefined || !partial) {
     data.submissionMode = body.submissionMode === 'MANUAL' ? 'MANUAL' : 'AUTOMATIC';
   }
+  if (body.viewerEnabled !== undefined || !partial) {
+    data.viewerEnabled = asBool(body.viewerEnabled);
+  }
   if (body.status !== undefined) {
     const status = validStatus(body.status);
     if (status) data.status = status;
@@ -69,7 +72,11 @@ function buildGameData(body: any, partial = false) {
 }
 
 function withJoinUrl(game: any) {
-  return { ...game, joinUrl: `${config.PUBLIC_URL}/play/${game.code}` };
+  return {
+    ...game,
+    joinUrl: `${config.PUBLIC_URL}/play/${game.code}`,
+    viewUrl: `${config.PUBLIC_URL}/view/${game.code}`,
+  };
 }
 
 router.post('/', async (req, res) => {

@@ -16,6 +16,9 @@ router.get('/', async (req, res) => {
   try {
     const game = await db.game.findUnique({ where: { code: code.toUpperCase() } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
+    if (!game.viewerEnabled) {
+      return res.status(403).json({ enabled: false, error: 'Public viewer is not enabled for this game' });
+    }
 
     const teams = await db.team.findMany({
       where: { gameId: game.id },
@@ -36,6 +39,11 @@ router.get('/', async (req, res) => {
         status: 'COMPLETED',
       },
       orderBy: { submittedAt: 'desc' },
+    });
+
+    const photoSubmissions = completedSubmissions.filter((s) => {
+      const task = taskMap.get(s.taskId);
+      return task && task.proofType !== 'VIDEO';
     });
 
     const scoreMap = new Map<string, number>();
@@ -60,7 +68,7 @@ router.get('/', async (req, res) => {
       })
       .sort((a, b) => b.score - a.score);
 
-    const recent = completedSubmissions.slice(0, 20).map((sub) => ({
+    const recent = photoSubmissions.slice(0, 20).map((sub) => ({
       ...sub,
       team: teamMap.get(sub.teamId),
       task: taskMap.get(sub.taskId),
@@ -72,7 +80,15 @@ router.get('/', async (req, res) => {
     }
 
     res.json({
-      game,
+      game: {
+        id: game.id,
+        name: game.name,
+        status: game.status,
+        startAt: game.startAt,
+        endAt: game.endAt,
+        foodDriveEnabled: game.foodDriveEnabled,
+        foodDrivePointsPerItem: game.foodDrivePointsPerItem,
+      },
       leaderboard,
       recent,
       remaining: remainingMs ? formatDuration(remainingMs) : null,

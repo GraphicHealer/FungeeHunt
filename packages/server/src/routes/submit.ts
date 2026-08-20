@@ -34,24 +34,39 @@ router.post('/', playerAuth, upload.single('proof'), async (req, res) => {
       return res.status(400).json({ error: 'This task does not accept that proof type' });
     }
 
-    const isManager = player.id === player.team.managerId;
-    if (!isManager) {
-      return res.status(403).json({ error: 'Only the team manager can submit proof' });
+    const existing = await db.submission.findUnique({
+      where: { taskId_teamId: { taskId, teamId: player.teamId } },
+    });
+
+    if (existing && ['SUBMITTED', 'UNDER_REVIEW', 'COMPLETED'].includes(existing.status)) {
+      return res.status(409).json({ error: 'A submission for this task is already in progress or approved' });
     }
 
-    const isVideo2 = isVideo; // keep for type narrowing below
     const proofUrl = `/uploads/${req.file.filename}`;
+    const status = game.submissionMode === 'AUTOMATIC' ? 'COMPLETED' : 'SUBMITTED';
 
-    const status = game.submissionMode === 'AUTOMATIC' ? 'COMPLETED' : 'UNDER_REVIEW';
-
-    const submission = await db.submission.create({
-      data: {
-        taskId,
-        teamId: player.teamId,
-        proofUrl,
-        status,
-      },
-    });
+    let submission;
+    if (existing && existing.status === 'INCOMPLETE') {
+      submission = await db.submission.update({
+        where: { id: existing.id },
+        data: {
+          proofUrl,
+          status,
+          submittedAt: new Date(),
+          reviewedAt: null,
+          reason: null,
+        },
+      });
+    } else {
+      submission = await db.submission.create({
+        data: {
+          taskId,
+          teamId: player.teamId,
+          proofUrl,
+          status,
+        },
+      });
+    }
 
     const io = req.app.get('io') as any;
     io.emit(`game:${game.code}`, { type: 'submission' });

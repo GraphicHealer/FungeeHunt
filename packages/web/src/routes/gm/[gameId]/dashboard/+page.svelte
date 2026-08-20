@@ -34,6 +34,18 @@
     if (res.ok) await load();
   }
 
+  async function setViewerEnabled(enabled: boolean) {
+    const res = await fetch(`/api/gm/games/${gameId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ viewerEnabled: enabled }),
+    });
+    if (res.ok) await load();
+  }
+
   function remaining() {
     if (!game || game.status !== 'LIVE' || !game.endAt) return null;
     const ms = Math.max(0, new Date(game.endAt).getTime() - Date.now());
@@ -65,6 +77,19 @@
     <p class="join">
       Join: <a href={game.joinUrl} target="_blank" rel="noreferrer">{game.joinUrl}</a>
       <button on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
+    </p>
+
+    <p class="view">
+      Viewer:
+      {#if game.viewerEnabled}
+        <a href={game.viewUrl} target="_blank" rel="noreferrer">{game.viewUrl}</a>
+        <button on:click={() => navigator.clipboard.writeText(game.viewUrl)}>COPY</button>
+      {:else}
+        <span class="disabled">disabled</span>
+      {/if}
+      <button on:click={() => setViewerEnabled(!game.viewerEnabled)}>
+        {game.viewerEnabled ? 'DISABLE VIEWER' : 'ENABLE VIEWER'}
+      </button>
     </p>
 
     <div class="controls">
@@ -111,11 +136,16 @@
     letter-spacing: 0.25rem;
   }
 
-  .join {
+  .join,
+  .view {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin: 1rem 0;
+  }
+
+  .disabled {
+    color: #666;
   }
 
   .controls {
