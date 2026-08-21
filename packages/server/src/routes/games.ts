@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { db } from '../db/client';
 import { config } from '../config';
 import { generateGameCode } from '../lib/gameCode';
+import { getSystemSettings } from '../lib/defaults';
 
 const router = Router();
 
@@ -79,15 +80,107 @@ function withJoinUrl(game: any) {
   };
 }
 
+function fmtTime(iso?: string | Date) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+function fmtDate(iso?: string | Date) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US');
+}
+
+async function syncAutoRuleSections(game: any) {
+  try {
+    if (game.returnBonusEnabled) {
+      const body = `Teams that return to the finish between ${fmtTime(game.returnStart)} and ${fmtTime(game.returnEnd)} on ${fmtDate(game.returnEnd)} will receive an additional ${game.returnPoints} points.\n\nThe Game Master must confirm your team's return to receive the bonus.`;
+      await syncSection(game.id, 'RETURN TIME BONUS', body);
+    } else {
+      await removeSection(game.id, 'RETURN TIME BONUS');
+    }
+
+    if (game.foodDriveEnabled) {
+      const body = `Each eligible food drive item turned in is worth ${game.foodDrivePointsPerItem} points.\n\nPermissible items: ${game.foodDrivePermissible || 'as announced by the Game Master'}.\nSuggested items: ${game.foodDriveSuggested || 'none specified'}.`;
+      await syncSection(game.id, 'FOOD DRIVE BONUS', body);
+    } else {
+      await removeSection(game.id, 'FOOD DRIVE BONUS');
+    }
+  } catch (err) {
+    console.error('sync rules failed', err);
+  }
+}
+
+async function findSection(gameId: string, title: string) {
+  return db.ruleSection.findFirst({
+    where: { gameId, title: { equals: title, mode: 'insensitive' } },
+  });
+}
+
+async function syncSection(gameId: string, title: string, body: string) {
+  const existing = await findSection(gameId, title);
+  if (existing) {
+    await db.ruleSection.update({ where: { id: existing.id }, data: { body } });
+  } else {
+    await db.ruleSection.create({ data: { gameId, title, body } });
+  }
+}
+
+async function removeSection(gameId: string, title: string) {
+  const existing = await findSection(gameId, title);
+  if (existing) await db.ruleSection.delete({ where: { id: existing.id } });
+}
+
 router.post('/', async (req, res) => {
   try {
+    const settings = await getSystemSettings();
+    const defaults = {
+      returnBonusEnabled: settings.returnBonusEnabled,
+      returnBonusPoints: settings.returnBonusPoints,
+      foodDriveEnabled: settings.foodDriveEnabled,
+      foodDrivePointsPerItem: settings.foodDrivePointsPerItem,
+      foodDrivePermissible: settings.foodDrivePermissible,
+      foodDriveSuggested: settings.foodDriveSuggested,
+    };
+    const body = { ...defaults, ...(req.body ?? {}) };
+
     const code = await generateGameCode();
     const game = await db.game.create({
       data: {
         code,
-        ...buildGameData(req.body ?? {}),
+        ...buildGameData(body),
       },
     });
+
+    const defaultTasks = settings.defaultTasks ? JSON.parse(settings.defaultTasks) : [];
+    const defaultRules = settings.defaultRules ? JSON.parse(settings.defaultRules) : [];
+
+    if (defaultTasks.length) {
+      await db.task.createMany({
+        data: defaultTasks.map((t: any) => ({
+          gameId: game.id,
+          title: t.title ?? 'Task',
+          description: t.description ?? '',
+          points: Number(t.points) || 0,
+          proofType: ['PHOTO', 'VIDEO', 'EITHER'].includes(t.proofType) ? t.proofType : 'PHOTO',
+          order: Number(t.order) || 0,
+        })),
+      });
+    }
+
+    if (defaultRules.length) {
+      await db.ruleSection.createMany({
+        data: defaultRules.map((r: any) => ({
+          gameId: game.id,
+          title: r.title ?? '',
+          body: r.body ?? '',
+        })),
+      });
+    }
+
+    await syncAutoRuleSections(game);
+
     res.json(withJoinUrl(game));
   } catch (err) {
     console.error('create game failed', err);
@@ -173,6 +266,8 @@ router.patch('/:gameId', async (req, res) => {
       where: { id: gameId },
       data: updates,
     });
+
+    await syncAutoRuleSections(game);
 
     const io = req.app.get('io') as any;
     io.emit(`game:${game.code}`, { type: 'game' });

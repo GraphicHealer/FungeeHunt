@@ -93,6 +93,19 @@ model RuleSection {
   game   Game   @relation(fields: [gameId], references: [id])
 }
 
+model SystemSettings {
+  id                       String  @id @default(cuid())
+  foodDriveEnabled         Boolean @default(true)
+  foodDrivePointsPerItem   Int     @default(1)
+  foodDrivePermissible     String?
+  foodDriveSuggested       String?
+  returnBonusEnabled       Boolean @default(true)
+  returnBonusWindowMinutes Int     @default(10)
+  returnBonusPoints        Int     @default(100)
+  defaultRules             String?
+  defaultTasks             String?
+}
+
 enum GameStatus {
   NOT_STARTED
   LIVE

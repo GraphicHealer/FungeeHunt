@@ -41,7 +41,10 @@
 <main class="board">
   <header class="topbar">
     <h1>Game Master Board</h1>
-    <button on:click={() => goto('/gm/new')}>NEW GAME</button>
+    <div class="actions">
+      <button on:click={() => goto('/gm/settings')}>SYSTEM SETTINGS</button>
+      <button on:click={() => goto('/gm/new')}>NEW GAME</button>
+    </div>
   </header>
 
   <section class="games">

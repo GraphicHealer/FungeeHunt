@@ -16,6 +16,8 @@ import viewRoute from './routes/view';
 import submissionsRoute from './routes/submissions';
 import bonusesRoute from './routes/bonuses';
 import rulesRoute from './routes/rules';
+import settingsRoute from './routes/settings';
+import { seedSystemSettings } from './lib/defaults';
 import { gmAuth } from './middleware/gmAuth';
 
 const app = express();
@@ -41,6 +43,7 @@ app.use('/api/gm/games/:gameId/teams', gmAuth, teamsRoute);
 app.use('/api/gm/games/:gameId/players', gmAuth, playersRoute);
 app.use('/api/gm/games/:gameId/bonuses', gmAuth, bonusesRoute);
 app.use('/api/gm/games/:gameId/rules', gmAuth, rulesRoute);
+app.use('/api/gm/settings', gmAuth, settingsRoute);
 
 app.use(express.static(config.FRONTEND_BUILD_DIR));
 app.get('*', (_req, res) => {
@@ -55,6 +58,8 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(config.WEB_UI, () => {
-  console.log(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
+seedSystemSettings().then(() => {
+  server.listen(config.WEB_UI, () => {
+    console.log(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
+  });
 });

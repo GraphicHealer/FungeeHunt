@@ -20,8 +20,13 @@
         headers: { Authorization: `Bearer ${token()}` },
       }),
     ]);
-    if (rRes.ok) sections = await rRes.json();
     if (gRes.ok) game = await gRes.json();
+    if (rRes.ok) {
+      sections = await rRes.json();
+      if (game && sections.length === 0) {
+        generate();
+      }
+    }
   }
 
   async function save() {
@@ -97,7 +102,6 @@
   <header class="page-header">
     <h2>Game Rules</h2>
     <div class="actions">
-      <button on:click={generate}>GENERATE RULES</button>
       <button on:click={add}>+ ADD SECTION</button>
       <button on:click={save}>SAVE RULES</button>
     </div>
