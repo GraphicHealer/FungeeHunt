@@ -24,6 +24,7 @@ services:
       DATABASE_URL: postgresql://fungeehunt:changeme@postgres:5432/fungeehunt
       WEB_UI: 3000
       UPLOAD_DIR: /data/uploads
+      LOG_LEVEL: debug
     volumes:
       - uploads_data:/data/uploads
 

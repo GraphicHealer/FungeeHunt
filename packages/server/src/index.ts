@@ -18,6 +18,7 @@ import bonusesRoute from './routes/bonuses';
 import rulesRoute from './routes/rules';
 import settingsRoute from './routes/settings';
 import { seedSystemSettings } from './lib/defaults';
+import { logger } from './lib/logger';
 import { gmAuth } from './middleware/gmAuth';
 
 const app = express();
@@ -51,15 +52,15 @@ app.get('*', (_req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('socket connected', socket.id);
+  logger.debug('socket connected', socket.id);
 
   socket.on('disconnect', () => {
-    console.log('socket disconnected', socket.id);
+    logger.debug('socket disconnected', socket.id);
   });
 });
 
 seedSystemSettings().then(() => {
   server.listen(config.WEB_UI, () => {
-    console.log(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
+    logger.info(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
   });
 });

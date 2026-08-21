@@ -9,6 +9,7 @@ const envSchema = z.object({
   WEB_UI: z.coerce.number().int().positive().default(3000),
   FRONTEND_BUILD_DIR: z.string().min(1).default('/app/packages/web/build'),
   UPLOAD_DIR: z.string().min(1),
+  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 });
 
 export const config = envSchema.parse(process.env);

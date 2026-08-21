@@ -1,4 +1,5 @@
 import { db } from '../db/client';
+import { logger } from './logger';
 
 const defaultTasks = [
   {
@@ -60,10 +61,10 @@ export async function seedSystemSettings() {
     const existing = await db.systemSettings.findFirst();
     if (!existing) {
       await db.systemSettings.create({ data: defaultSystemSettings });
-      console.log('Seeded default system settings');
+      logger.info('Seeded default system settings');
     }
   } catch (err) {
-    console.error('Could not seed system settings', err);
+    logger.error('Could not seed system settings', err);
   }
 }
 
