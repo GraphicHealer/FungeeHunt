@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { formatPoints } from '$lib/format';
 
   const gameId = $page.params.gameId;
 
@@ -93,7 +94,7 @@
 <div class="page">
   <header class="page-header">
     <h2>Tasks</h2>
-    <button on:click={openNew}>+ ADD TASK</button>
+    <button class="fungee-btn" on:click={openNew} style="width: auto; margin: 0;">+ ADD TASK</button>
   </header>
 
   <ul class="task-list">
@@ -102,9 +103,8 @@
         <div class="task-main">
           <span class="order">{task.order}</span>
           <span class="title">{task.title}</span>
-          <span class="meta">+{task.points} · {task.proofType}</span>
+          <span class="meta">+{formatPoints(task.points)} · {task.proofType}</span>
         </div>
-        <button class="danger" on:click|stopPropagation={() => remove(task.id)}>DELETE</button>
       </li>
     {/each}
   </ul>
@@ -122,7 +122,7 @@
       <textarea id="description" bind:value={description} placeholder="Description" />
 
       <label for="points">Points</label>
-      <input id="points" type="number" bind:value={points} />
+      <input id="points" type="number" step="0.1" bind:value={points} />
 
       <label for="proofType">Proof Type</label>
       <select id="proofType" bind:value={proofType}>
@@ -137,8 +137,11 @@
       {#if error}<p class="error">{error}</p>{/if}
 
       <div class="actions">
-        <button on:click={close}>Cancel</button>
-        <button on:click={save} disabled={!title}>Save</button>
+        <button class="fungee-btn secondary" on:click={close}>Cancel</button>
+        {#if editId}
+          <button class="fungee-btn danger" on:click={() => remove(editId)}>Delete</button>
+        {/if}
+        <button class="fungee-btn" on:click={save} disabled={!title}>Save</button>
       </div>
     </div>
   </div>
@@ -228,7 +231,7 @@
     border-radius: 0.75rem;
     padding: 2rem;
     width: 90%;
-    max-width: 28rem;
+    max-width: 40rem;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: var(--shadow);
@@ -248,6 +251,10 @@
     width: 100%;
     box-sizing: border-box;
     margin-bottom: 0.75rem;
+  }
+
+  .modal textarea {
+    min-height: 8rem;
   }
 
   .actions {

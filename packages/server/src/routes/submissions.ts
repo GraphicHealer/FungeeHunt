@@ -1,5 +1,8 @@
 import { Router } from 'express';
+import { unlinkSync } from 'node:fs';
+import { join } from 'node:path';
 import { db } from '../db/client';
+import { config } from '../config';
 
 const router = Router({ mergeParams: true });
 
@@ -47,9 +50,22 @@ router.patch('/:submissionId', async (req, res) => {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
 
+    const current = await db.submission.findUnique({ where: { id: submissionId } });
+    if (!current) return res.status(404).json({ error: 'Submission not found' });
+
     const updateData: any = { status };
     if (status === 'INCOMPLETE') {
       updateData.reason = reason ?? '';
+      updateData.proofUrl = null;
+      updateData.reviewedAt = null;
+      if (current.proofUrl) {
+        const filename = current.proofUrl.replace('/uploads/', '');
+        try {
+          unlinkSync(join(config.UPLOAD_DIR, filename));
+        } catch (e) {
+          console.warn('could not delete denied file', current.proofUrl, e);
+        }
+      }
     } else if (status === 'COMPLETED') {
       updateData.reviewedAt = new Date();
     } else if (status === 'UNDER_REVIEW') {

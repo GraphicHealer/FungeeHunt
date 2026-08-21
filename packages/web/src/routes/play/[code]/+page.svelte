@@ -23,12 +23,10 @@
     });
     if (res.ok) {
       const state = await res.json();
-      if (!state.team) {
-        goto(`/play/${code}/lobby`);
-      } else if (state.game?.status === 'LIVE') {
+      if (state.game?.status === 'LIVE' || state.game?.status === 'COMPLETED') {
         goto(`/play/${code}/tasks`);
       } else {
-        goto(`/play/${code}/pending`);
+        goto(`/play/${code}/lobby`);
       }
     } else {
       goto(`/play/${code}/name`);

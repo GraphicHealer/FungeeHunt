@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import { onMount, onDestroy } from 'svelte';
   import { io } from 'socket.io-client';
+  import { formatPoints } from '$lib/format';
 
   const code = $page.params.code;
 
@@ -113,7 +114,7 @@
               <li>
                 <span class="rank">{i + 1}</span>
                 <span class="name">{team.name ?? 'Unnamed team'}</span>
-                <span class="score">{team.score}</span>
+                <span class="score">{formatPoints(team.score)}</span>
               </li>
             {/each}
           </ol>
@@ -129,7 +130,7 @@
               <figcaption>
                 <span class="team">{data.recent[currentSlide].team?.name ?? 'Unknown team'}</span>
                 <span class="task">{data.recent[currentSlide].task?.title ?? ''}</span>
-                <span class="points">+{data.recent[currentSlide].task?.points ?? 0}</span>
+                <span class="points">+{formatPoints(data.recent[currentSlide].task?.points ?? 0)}</span>
               </figcaption>
             </figure>
           {:else}
@@ -145,7 +146,7 @@
             <div class="viewer-item">
               <strong>{item.team?.name ?? 'Unknown team'}</strong>
               completed <em>{item.task?.title ?? ''}</em>
-              <span class="viewer-pts">+{item.task?.points ?? 0}</span>
+              <span class="viewer-pts">+{formatPoints(item.task?.points ?? 0)}</span>
             </div>
           {/each}
         </div>

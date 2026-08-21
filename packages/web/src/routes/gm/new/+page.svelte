@@ -20,8 +20,8 @@
   let submissionMode = 'AUTOMATIC';
 
   let returnBonusEnabled = false;
-  let returnStart = '';
-  let returnEnd = '';
+  let returnStartTime = '';
+  let returnEndTime = '';
   let returnPoints = 100;
   let returnBonusWindowMinutes = 10;
 
@@ -31,6 +31,18 @@
   let foodDriveSuggested = '';
 
   let error = '';
+
+  $: startAt = `${date}T${startTime}`;
+  $: endAt = `${date}T${endTime}`;
+  $: returnStart = date && returnStartTime ? `${date}T${returnStartTime}` : '';
+  $: returnEnd = date && returnEndTime ? `${date}T${returnEndTime}` : '';
+
+  $: if (date && startTime && endTime) {
+    const end = fromInputValue(endAt);
+    const retStart = new Date(end.getTime() - returnBonusWindowMinutes * 60 * 1000);
+    returnStartTime = toInputValue(retStart).slice(11, 16);
+    returnEndTime = endTime;
+  }
 
   onMount(async () => {
     const now = new Date();
@@ -57,15 +69,6 @@
       foodDriveSuggested = s.foodDriveSuggested ?? '';
     }
   });
-
-  $: startAt = `${date}T${startTime}`;
-  $: endAt = `${date}T${endTime}`;
-  $: if (date && startTime && endTime) {
-    const end = fromInputValue(endAt);
-    const retStart = new Date(end.getTime() - returnBonusWindowMinutes * 60 * 1000);
-    returnStart = toInputValue(retStart);
-    returnEnd = endAt;
-  }
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -131,17 +134,19 @@
         <button class="fungee-btn" on:click={() => step = 2} disabled={!name || !date || !startTime || !endTime}>NEXT</button>
       {:else if step === 2}
         <h2 class="fungee-section-title">2. Return Bonus</h2>
-        <label style="display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0 0.5rem;">
+        <label class="fungee-check">
           <input type="checkbox" bind:checked={returnBonusEnabled} />
           Enable return bonus
         </label>
         {#if returnBonusEnabled}
-          <label class="fungee-label" for="rs">Window Start (default is last {returnBonusWindowMinutes} minutes)</label>
-          <input class="fungee-input" id="rs" type="datetime-local" bind:value={returnStart} />
-          <label class="fungee-label" for="re">Window End</label>
-          <input class="fungee-input" id="re" type="datetime-local" bind:value={returnEnd} />
+          <label class="fungee-label" for="rbw">Window Length (minutes)</label>
+          <input class="fungee-input" id="rbw" type="number" bind:value={returnBonusWindowMinutes} min="1" />
+          <label class="fungee-label" for="rs">Window Start Time</label>
+          <input class="fungee-input" id="rs" type="time" bind:value={returnStartTime} />
+          <label class="fungee-label" for="re">Window End Time</label>
+          <input class="fungee-input" id="re" type="time" bind:value={returnEndTime} />
           <label class="fungee-label" for="rp">Points</label>
-          <input class="fungee-input" id="rp" type="number" bind:value={returnPoints} />
+          <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={returnPoints} />
         {/if}
 
         <div class="fungee-btn-row">
@@ -150,7 +155,7 @@
         </div>
       {:else if step === 3}
         <h2 class="fungee-section-title">3. Food Drive</h2>
-        <label style="display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0 0.5rem;">
+        <label class="fungee-check">
           <input type="checkbox" bind:checked={foodDriveEnabled} />
           Enable food drive bonus
         </label>

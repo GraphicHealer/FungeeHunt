@@ -1,11 +1,13 @@
 <script lang="ts">
   import { theme, toggleTheme } from './theme';
 
+  export let style = '';
+
   let current: 'light' | 'dark' = 'light';
   theme.subscribe((t) => (current = t));
 </script>
 
-<button class="theme-toggle" on:click={toggleTheme} title="Toggle {current === 'light' ? 'dark' : 'light'} mode">
+<button class="theme-toggle" on:click={toggleTheme} style={style} title="Toggle {current === 'light' ? 'dark' : 'light'} mode">
   <span class="mdi {current === 'light' ? 'mdi-weather-night' : 'mdi-white-balance-sunny'}"></span>
 </button>
 

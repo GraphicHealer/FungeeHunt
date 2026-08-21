@@ -20,9 +20,8 @@
   onMount(load);
 </script>
 
-<main class="fungee-page">
+<main class="fungee-page" style="padding-top: 3rem; padding-bottom: 7rem;">
   <div class="fungee-card wide">
-    <a class="fungee-link" href="/play/{code}/tasks">← Back to tasks</a>
     <h1 class="fungee-title">RULES</h1>
 
     {#each sections as section (section.id)}

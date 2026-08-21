@@ -1,10 +1,14 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { io } from 'socket.io-client';
 
   const gameId = $page.params.gameId;
 
   let game: any = null;
+  let socket: any;
+  let remainingStr = '';
+  let interval: ReturnType<typeof setInterval>;
 
   const nav = [
     { label: 'Dashboard', path: 'dashboard' },
@@ -27,7 +31,32 @@
     if (res.ok) game = await res.json();
   }
 
-  onMount(load);
+  function remaining() {
+    if (!game || !game.endAt) return '';
+    const target = game.status === 'NOT_STARTED' ? new Date(game.startAt) : new Date(game.endAt);
+    const ms = Math.max(0, target.getTime() - Date.now());
+    const s = Math.floor(ms / 1000) % 60;
+    const m = Math.floor(ms / 1000 / 60) % 60;
+    const h = Math.floor(ms / 1000 / 60 / 60);
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  onMount(async () => {
+    await load();
+    remainingStr = remaining();
+    if (game?.code) {
+      socket = io({ transports: ['websocket', 'polling'] });
+      socket.on(`game:${game.code.toUpperCase()}`, load);
+    }
+    interval = setInterval(() => {
+      remainingStr = remaining();
+    }, 1000);
+  });
+
+  onDestroy(() => {
+    if (socket) socket.disconnect();
+    if (interval) clearInterval(interval);
+  });
 
   $: active = $page.url.pathname.split('/').pop() ?? '';
 
@@ -62,10 +91,17 @@
           <span class="code">{game.code}</span>
           <span class="status">{game.status}</span>
         </div>
-        <div class="timer">
-          {#if game.startAt && game.endAt}
-            <span>{fmtTime(game.startAt)} – {fmtTime(game.endAt)}</span>
-          {/if}
+        <div class="countdown">{remainingStr}</div>
+        <div class="topbar-actions">
+          <div class="timer">
+            {#if game.startAt && game.endAt}
+              <span>{fmtTime(game.startAt)} – {fmtTime(game.endAt)}</span>
+            {/if}
+          </div>
+          <a class="spectator" href={game.viewUrl} target="_blank" rel="noreferrer" title="Open spectator screen">
+            <span class="mdi mdi-open-in-new"></span>
+            <span class="label">SPECTATOR</span>
+          </a>
         </div>
       {:else}
         <h1>Loading…</h1>
@@ -128,6 +164,7 @@
   }
 
   .topbar {
+    position: relative;
     background: var(--card);
     border-bottom: 1px solid var(--border);
     padding: 1rem 1.5rem;
@@ -160,6 +197,40 @@
 
   .timer {
     color: var(--muted);
+  }
+
+  .countdown {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--brand);
+  }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .spectator {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .spectator .mdi {
+    font-size: 1.25rem;
+  }
+
+  .spectator:hover {
+    color: var(--brand);
   }
 
   .content {

@@ -30,7 +30,7 @@
       });
       if (res.ok) {
         const state = await res.json();
-        if (state.game?.status === 'LIVE') {
+        if (state.game?.status === 'LIVE' || state.game?.status === 'COMPLETED') {
           clearInterval(interval);
           window.location.href = `/play/${code}/tasks`;
         }

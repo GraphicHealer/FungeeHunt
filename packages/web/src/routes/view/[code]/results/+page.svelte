@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { formatPoints } from '$lib/format';
 
   const code = $page.params.code;
 
@@ -36,7 +37,7 @@
           <li class="fungee-list-item" style="display: flex; align-items: center; gap: 1rem; font-size: 1.25rem;">
             <span class="rank">{i + 1}</span>
             <span class="name" style="flex: 1;">{team.name ?? 'Unnamed team'}</span>
-            <span class="score" style="font-weight: bold; color: var(--success);">{team.score} POINTS</span>
+            <span class="score" style="font-weight: bold; color: var(--success);">{formatPoints(team.score)} POINTS</span>
           </li>
         {/each}
       </ol>

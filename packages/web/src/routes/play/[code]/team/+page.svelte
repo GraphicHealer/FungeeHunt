@@ -1,12 +1,15 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { io } from 'socket.io-client';
+  import { formatPoints } from '$lib/format';
 
   const code = $page.params.code;
 
   let state: any = null;
   let newName = '';
   let error = '';
+  let socket: any;
 
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
@@ -46,16 +49,22 @@
     }
   }
 
-  onMount(load);
+  onMount(() => {
+    load();
+    socket = io({ transports: ['websocket', 'polling'] });
+    socket.on(`game:${code.toUpperCase()}`, load);
+  });
+
+  onDestroy(() => {
+    if (socket) socket.disconnect();
+  });
 </script>
 
-<main class="fungee-page">
+<main class="fungee-page" style="padding-top: 3rem; padding-bottom: 7rem;">
   <div class="fungee-card wide">
-    <a class="fungee-link" href="/play/{code}/tasks">← Back to tasks</a>
-
     {#if state}
       <h1 class="fungee-title">{state.team?.name ?? 'Unnamed team'}</h1>
-      <p class="fungee-subtitle" style="font-size: 1.25rem; font-weight: 600;">{state.team?.score ?? 0} POINTS</p>
+      <p class="fungee-subtitle" style="font-size: 1.25rem; font-weight: 600;">{formatPoints(state.team?.score ?? 0)} POINTS</p>
 
       {#if isManager()}
         <div style="display: flex; gap: 0.75rem; margin: 1rem 0; flex-wrap: wrap;">

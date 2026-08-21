@@ -1,12 +1,18 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { toast } from '$lib/toast';
+  import { io } from 'socket.io-client';
+  import SubmissionReview from '$lib/SubmissionReview.svelte';
 
   const gameId = $page.params.gameId;
 
   let game: any = null;
+  let submissions: any[] = [];
+  let reviewing: any = null;
   let error = '';
+  let socket: any;
+  let interval: ReturnType<typeof setInterval>;
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -21,6 +27,13 @@
     } else {
       error = 'Could not load game';
     }
+  }
+
+  async function loadSubmissions() {
+    const res = await fetch(`/api/gm/games/${gameId}/submissions`, {
+      headers: { Authorization: `Bearer ${token()}` },
+    });
+    if (res.ok) submissions = await res.json();
   }
 
   async function setStatus(status: string) {
@@ -51,13 +64,25 @@
   }
 
   let remainingStr = '';
-  let interval: ReturnType<typeof setInterval>;
 
-  onMount(() => {
-    load();
+  onMount(async () => {
+    await load();
+    await loadSubmissions();
+    if (game?.code) {
+      socket = io({ transports: ['websocket', 'polling'] });
+      socket.on(`game:${game.code.toUpperCase()}`, async () => {
+        await load();
+        await loadSubmissions();
+      });
+    }
     interval = setInterval(() => {
       remainingStr = remaining() ?? '';
     }, 1000);
+  });
+
+  onDestroy(() => {
+    if (socket) socket.disconnect();
+    if (interval) clearInterval(interval);
   });
 </script>
 
@@ -69,27 +94,46 @@
     <p class="code">GAME CODE: {game.code}</p>
     <p class="join">
       Join: <a href={game.joinUrl} target="_blank" rel="noreferrer">{game.joinUrl}</a>
-      <button on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
+      <button class="fungee-btn" style="width: auto; margin: 0;" on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
     </p>
 
-    <a class="fungee-btn" style="margin-top: 0; margin-bottom: 1rem;" href={game.viewUrl} target="_blank" rel="noreferrer">
-      <span class="mdi mdi-open-in-new" style="margin-right: 0.5rem;"></span>
-      OPEN SPECTATOR SCREEN
-    </a>
-
     <div class="controls">
-      <button on:click={() => setStatus('LIVE')} disabled={game.status !== 'NOT_STARTED'}>START GAME</button>
-      <button on:click={() => setStatus('COMPLETED')} disabled={game.status !== 'LIVE'}>END GAME</button>
+      <button class="fungee-btn" on:click={() => setStatus('LIVE')} disabled={game.status !== 'NOT_STARTED'}>START GAME</button>
+      <button class="fungee-btn danger" on:click={() => setStatus('COMPLETED')} disabled={game.status !== 'LIVE'}>END GAME</button>
       {#if game.status === 'COMPLETED'}
-        <a href="/view/{game.code}/results">VIEW RESULTS</a>
+        <a class="fungee-btn secondary" href="/view/{game.code}/results">VIEW RESULTS</a>
       {/if}
     </div>
+
+    <section class="feed" style="margin-top: 2rem;">
+      <h2 class="fungee-section-title" style="margin-bottom: 1rem;">Submission Feed</h2>
+      {#if submissions.length === 0}
+        <p class="empty">No submissions yet.</p>
+      {:else}
+        <ul class="submissions">
+          {#each submissions.slice(0, 20) as sub (sub.id)}
+            <li on:click={() => (reviewing = sub)}>
+              <div class="meta">
+                <span class="team">{sub.team?.name ?? 'Unknown'}</span>
+                <span class="task">{sub.task?.title ?? ''}</span>
+                <span class="status">{sub.status}</span>
+              </div>
+              <span class="hint">Review</span>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </section>
   {:else if error}
     <p class="error">{error}</p>
   {:else}
     <p>Loading...</p>
   {/if}
 </main>
+
+{#if reviewing}
+  <SubmissionReview {gameId} sub={reviewing} on:close={() => (reviewing = null)} on:review={loadSubmissions} />
+{/if}
 
 <style>
   .container {
@@ -117,10 +161,11 @@
     align-items: center;
     gap: 1rem;
     margin: 1rem 0;
+    flex-wrap: wrap;
   }
 
-  .disabled {
-    color: var(--muted);
+  .join a {
+    color: var(--text);
   }
 
   .controls {
@@ -130,11 +175,72 @@
     flex-wrap: wrap;
   }
 
-  a {
-    padding: 0.75rem 1.5rem;
+  .feed {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .submissions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .submissions li {
     background: var(--bg);
-    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .submissions li:hover {
+    box-shadow: var(--shadow);
+  }
+
+  .meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .team {
+    font-weight: bold;
+  }
+
+  .task {
+    color: var(--muted);
+  }
+
+  .status {
+    font-weight: bold;
+  }
+
+  .hint {
+    color: var(--brand);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .empty {
+    color: var(--muted);
+  }
+
+  a {
     color: var(--text);
+    text-decoration: none;
   }
 
   .error {

@@ -15,27 +15,30 @@ router.post('/', async (req, res) => {
     const game = await db.game.findUnique({ where: { code: code.toUpperCase() } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
 
-    const existing = await db.player.findFirst({
+    let player = await db.player.findFirst({
       where: {
         gameId: game.id,
         displayName: { equals: trimmed, mode: 'insensitive' },
       },
     });
-    if (existing) return res.status(400).json({ error: 'That name is already taken in this game' });
 
-    const player = await db.player.create({
-      data: {
-        gameId: game.id,
-        displayName: trimmed,
-        type: 'APP',
-      },
-    });
+    if (!player) {
+      player = await db.player.create({
+        data: {
+          gameId: game.id,
+          displayName: trimmed,
+          type: 'APP',
+        },
+      });
+    }
 
-    const token = createPlayerToken(player.id, game.id);
-    await db.player.update({
-      where: { id: player.id },
-      data: { sessionToken: token },
-    });
+    const token = player.sessionToken ?? createPlayerToken(player.id, game.id);
+    if (!player.sessionToken) {
+      await db.player.update({
+        where: { id: player.id },
+        data: { sessionToken: token },
+      });
+    }
 
     res.json({ token, player, game });
   } catch (err) {

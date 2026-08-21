@@ -6,6 +6,12 @@
 
   let sections: any[] = [];
   let game: any = null;
+  let editIndex = -1;
+  $: displaySections = sections
+    .map((s, i) => ({ ...s, realIndex: i }))
+    .filter((s) => !['RETURN TIME BONUS', 'FOOD DRIVE BONUS'].includes(s.title));
+  let editTitle = '';
+  let editBody = '';
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -43,13 +49,34 @@
     if (res.ok) await load();
   }
 
-  function add() {
-    sections = [...sections, { title: '', body: '' }];
+  function openModal(displayIndex: number) {
+    editIndex = displaySections[displayIndex].realIndex;
+    editTitle = sections[editIndex]?.title ?? '';
+    editBody = sections[editIndex]?.body ?? '';
   }
 
-  function remove(index: number) {
+  function closeModal() {
+    editIndex = -1;
+  }
+
+  function applyEdit() {
+    sections = sections.map((s, i) =>
+      i === editIndex ? { ...s, title: editTitle, body: editBody } : s
+    );
+    closeModal();
+    save();
+  }
+
+  function add() {
+    sections = [...sections, { title: '', body: '' }];
+    openModal(sections.length - 1);
+  }
+
+  function remove() {
     if (confirm('Remove this rules section?')) {
-      sections = sections.filter((_, i) => i !== index);
+      sections = sections.filter((_, i) => i !== editIndex);
+      closeModal();
+      save();
     }
   }
 
@@ -78,20 +105,6 @@
       },
     ];
 
-    if (game.returnBonusEnabled) {
-      generated.push({
-        title: 'RETURN TIME BONUS',
-        body: `Teams that return to the finish between ${fmtTime(game.returnStart)} and ${fmtTime(game.returnEnd)} on ${fmtDate(game.returnEnd)} will receive an additional ${game.returnPoints} points.\n\nThe Game Master must confirm your team's return to receive the bonus.`,
-      });
-    }
-
-    if (game.foodDriveEnabled) {
-      generated.push({
-        title: 'FOOD DRIVE BONUS',
-        body: `Each eligible food drive item turned in is worth ${game.foodDrivePointsPerItem} points.\n\nPermissible items: ${game.foodDrivePermissible || 'as announced by the Game Master'}.\nSuggested items: ${game.foodDriveSuggested || 'none specified'}.`,
-      });
-    }
-
     sections = generated;
   }
 
@@ -101,20 +114,33 @@
 <div class="page">
   <header class="page-header">
     <h2>Game Rules</h2>
-    <div class="actions">
-      <button on:click={add}>+ ADD SECTION</button>
-      <button on:click={save}>SAVE RULES</button>
-    </div>
+    <button class="fungee-btn" on:click={add}>+ ADD SECTION</button>
   </header>
 
-  {#each sections as section, i (i)}
-    <div class="section-card">
-      <input type="text" bind:value={section.title} placeholder="Section title" />
-      <textarea bind:value={section.body} placeholder="Section body" />
-      <button class="remove" on:click={() => remove(i)}>REMOVE SECTION</button>
-    </div>
+  {#each displaySections as section, i (section.realIndex)}
+    <button class="fungee-accordion section" on:click={() => openModal(i)}>
+      <span class="fungee-section-title" style="margin: 0;">{section.title}</span>
+      <p class="body fungee-section-body">{section.body}</p>
+    </button>
   {/each}
 </div>
+
+{#if editIndex >= 0}
+  <div class="modal-backdrop" on:click={closeModal}>
+    <div class="modal fungee-card" on:click|stopPropagation>
+      <h3>Edit Section</h3>
+      <label class="fungee-label" for="title">Title</label>
+      <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" />
+      <label class="fungee-label" for="body">Body</label>
+      <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" />
+      <div class="fungee-btn-row">
+        <button class="fungee-btn secondary" on:click={closeModal}>CANCEL</button>
+        <button class="fungee-btn danger" on:click={remove}>REMOVE</button>
+        <button class="fungee-btn" on:click={applyEdit}>SAVE SECTION</button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   .page {
@@ -132,43 +158,59 @@
     margin: 0;
   }
 
-  .actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+  .page-header .fungee-btn {
+    width: auto;
+    margin: 0;
   }
 
-  .section-card {
+  .section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    text-align: left;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 0.5rem;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+
+  .section:hover {
+    box-shadow: var(--shadow);
+  }
+
+  .section .body {
+    margin: 0;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 40rem;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  input, textarea {
-    padding: 0.5rem 0.75rem;
-    font-size: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.25rem;
-    width: 100%;
-    box-sizing: border-box;
+  .modal :global(.fungee-textarea) {
+    min-height: 12rem;
   }
 
-  textarea {
-    min-height: 6rem;
-  }
-
-  .remove {
-    align-self: flex-start;
-    background: var(--danger);
-    color: #fff;
-    border: none;
-    border-radius: 0.25rem;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
+  .modal h3 {
+    margin: 0 0 0.5rem;
   }
 </style>

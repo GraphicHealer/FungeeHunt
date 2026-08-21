@@ -8,53 +8,87 @@
       goto(`/play/${code.trim()}/name`);
     }
   }
-
-  function goToLogin() {
-    goto('/login');
-  }
 </script>
 
-<main class="container">
-  <h1>FUNGEE-HUNT</h1>
+<header class="topbar">
+  <div class="logo-placeholder">
+    <span class="mdi mdi-trophy"></span>
+    <span class="logo-text">FUNGEE-HUNT</span>
+  </div>
+  <button class="login" on:click={() => goto('/login')}>LOG IN</button>
+</header>
 
-  <label for="code">Enter Game Code</label>
-  <input
-    id="code"
-    type="text"
-    bind:value={code}
-    placeholder="74KJP2"
-    autocomplete="off"
-  />
+<main class="fungee-page" style="padding-top: 5rem;">
+  <div class="fungee-card" style="text-align: center;">
+    <h1 class="fungee-title">ENTER GAME CODE</h1>
+    <p class="fungee-subtitle">Join the hunt and start completing challenges.</p>
 
-  <button on:click={join} disabled={!code.trim()}>JOIN</button>
+    <input
+      class="fungee-input code-input"
+      type="text"
+      bind:value={code}
+      placeholder="74KJP2"
+      autocomplete="off"
+      maxlength="8"
+    />
 
-  <hr />
-
-  <button on:click={goToLogin}>LOG IN</button>
+    <button class="fungee-btn" on:click={join} disabled={!code.trim()}>JOIN GAME</button>
+  </div>
 </main>
 
 <style>
-  .container {
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4rem;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    padding: 2rem;
-    font-family: system-ui, sans-serif;
+    padding: 0 1.5rem;
+    z-index: 1000;
+    box-shadow: var(--shadow);
   }
 
-  input {
-    font-size: 1.5rem;
-    letter-spacing: 0.25rem;
+  .logo-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--brand);
+    font-weight: 800;
+    font-size: 1.25rem;
+    text-decoration: none;
+  }
+
+  .logo-placeholder .mdi {
+    font-size: 1.75rem;
+  }
+
+  .login {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .login:hover {
+    background: var(--brand);
+    color: #fff;
+    border-color: var(--brand);
+  }
+
+  .code-input {
+    font-size: 2rem;
+    letter-spacing: 0.4rem;
     text-align: center;
     text-transform: uppercase;
-    padding: 0.5rem 1rem;
-    width: 12rem;
-  }
-
-  button {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    cursor: pointer;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
   }
 </style>

@@ -26,7 +26,7 @@
 <main class="fungee-page">
   <div class="fungee-card">
     <h1 class="fungee-title">JOIN FUNGEE-HUNT</h1>
-    <p class="fungee-subtitle">Enter the game code and your name to get started.</p>
+    <p class="fungee-subtitle">Enter your name to get started.</p>
     <p class="fungee-code">{code}</p>
 
     <label class="fungee-label" for="name">What's your name?</label>

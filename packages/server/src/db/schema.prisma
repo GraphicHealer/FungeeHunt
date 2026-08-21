@@ -19,9 +19,9 @@ model Game {
   returnBonusEnabled     Boolean        @default(false)
   returnStart            DateTime?
   returnEnd              DateTime?
-  returnPoints           Int            @default(0)
+  returnPoints           Float          @default(0)
   foodDriveEnabled       Boolean        @default(false)
-  foodDrivePointsPerItem Int            @default(0)
+  foodDrivePointsPerItem Float          @default(0)
   foodDrivePermissible   String?
   foodDriveSuggested     String?
   players                Player[]
@@ -63,7 +63,7 @@ model Task {
   gameId      String
   title       String
   description String
-  points      Int
+  points      Float
   proofType   ProofType
   order       Int
   game        Game         @relation(fields: [gameId], references: [id])
@@ -96,12 +96,12 @@ model RuleSection {
 model SystemSettings {
   id                       String  @id @default(cuid())
   foodDriveEnabled         Boolean @default(true)
-  foodDrivePointsPerItem   Int     @default(1)
+  foodDrivePointsPerItem   Float   @default(1)
   foodDrivePermissible     String?
   foodDriveSuggested       String?
   returnBonusEnabled       Boolean @default(true)
   returnBonusWindowMinutes Int     @default(10)
-  returnBonusPoints        Int     @default(100)
+  returnBonusPoints        Float   @default(100)
   defaultRules             String?
   defaultTasks             String?
 }

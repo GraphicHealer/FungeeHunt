@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
   try {
     const players = await db.player.findMany({
       where: { gameId },
-      include: { team: { select: { id: true, name: true } } },
+      include: { team: { select: { id: true, name: true, managerId: true } } },
       orderBy: { joinedAt: 'desc' },
     });
     res.json(players);
@@ -72,6 +72,25 @@ router.post('/:playerId/reissue', async (req, res) => {
   } catch (err) {
     console.error('reissue join link failed', err);
     res.status(500).json({ error: 'Could not reissue join link' });
+  }
+});
+
+router.delete('/:playerId', async (req, res) => {
+  const { gameId, playerId } = req.params;
+  try {
+    const player = await db.player.findFirst({
+      where: { id: playerId, gameId },
+      include: { team: true },
+    });
+    if (!player) return res.status(404).json({ error: 'Player not found' });
+    if (player.team && player.team.managerId === playerId) {
+      return res.status(400).json({ error: 'Cannot delete a team manager' });
+    }
+    await db.player.delete({ where: { id: playerId } });
+    res.status(204).end();
+  } catch (err) {
+    console.error('delete player failed', err);
+    res.status(500).json({ error: 'Could not delete player' });
   }
 });
 

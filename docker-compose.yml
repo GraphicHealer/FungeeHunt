@@ -25,6 +25,7 @@ services:
       WEB_UI: 3000
       UPLOAD_DIR: /data/uploads
       LOG_LEVEL: debug
+      TZ: America/New_York
     volumes:
       - uploads_data:/data/uploads
 

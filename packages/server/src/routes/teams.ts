@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Player is already manager of another team' });
     }
 
-    const trimmedName = name ? name.trim() : '';
+    let trimmedName = name ? name.trim() : '';
     if (trimmedName) {
       const existing = await db.team.findFirst({
         where: { gameId, name: { equals: trimmedName, mode: 'insensitive' } },
@@ -46,6 +46,9 @@ router.post('/', async (req, res) => {
       if (existing) {
         return res.status(400).json({ error: 'A team with that name already exists' });
       }
+    } else {
+      const count = await db.team.count({ where: { gameId } });
+      trimmedName = `Team ${count + 1}`;
     }
 
     const uniqueMemberIds = Array.from(new Set([managerId, ...memberIds]));

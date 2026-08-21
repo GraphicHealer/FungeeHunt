@@ -92,7 +92,7 @@ function fmtDate(iso?: string | Date) {
 async function syncAutoRuleSections(game: any) {
   try {
     if (game.returnBonusEnabled) {
-      const body = `Teams that return to the finish between ${fmtTime(game.returnStart)} and ${fmtTime(game.returnEnd)} on ${fmtDate(game.returnEnd)} will receive an additional ${game.returnPoints} points.\n\nThe Game Master must confirm your team's return to receive the bonus.`;
+      const body = `Teams that return to the finish between ${fmtTime(game.returnStart)} and ${fmtTime(game.returnEnd)} will receive an additional ${game.returnPoints} points.\n\nThe Game Master must confirm your team's return to receive the bonus.`;
       await syncSection(game.id, 'RETURN TIME BONUS', body);
     } else {
       await removeSection(game.id, 'RETURN TIME BONUS');

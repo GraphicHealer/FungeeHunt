@@ -5,7 +5,6 @@
   const gameId = $page.params.gameId;
 
   let players: any[] = [];
-  let reissued: Record<string, string> = {};
   let showModal = false;
   let displayName = '';
   let error = '';
@@ -51,16 +50,16 @@
     }
   }
 
-  async function reissue(playerId: string) {
-    const res = await fetch(`/api/gm/games/${gameId}/players/${playerId}/reissue`, {
-      method: 'POST',
+  async function remove(player: any) {
+    if (!confirm(`Delete player "${player.displayName}"? This cannot be undone.`)) return;
+    const res = await fetch(`/api/gm/games/${gameId}/players/${player.id}`, {
+      method: 'DELETE',
       headers: { Authorization: `Bearer ${token()}` },
     });
-    if (res.ok) {
+    if (res.ok) await load();
+    else {
       const data = await res.json();
-      reissued[playerId] = data.joinUrl;
-      reissued = reissued;
-      await load();
+      alert(data.error ?? 'Could not delete player');
     }
   }
 
@@ -70,7 +69,7 @@
 <div class="page">
   <header class="page-header">
     <h2>Players</h2>
-    <button on:click={openNew}>+ ADD OFFLINE PLAYER</button>
+    <button class="fungee-btn" on:click={openNew} style="width: auto; margin: 0;">+ ADD OFFLINE PLAYER</button>
   </header>
 
   <ul class="player-list">
@@ -81,12 +80,13 @@
           <span class="type">{player.type}</span>
           {#if player.team}<span class="team">{player.team.name}</span>{/if}
         </div>
-        {#if player.type === 'APP'}
-          <button on:click={() => reissue(player.id)}>REISSUE JOIN LINK</button>
-        {/if}
-        {#if reissued[player.id]}
-          <span class="link" title={reissued[player.id]}>{reissued[player.id]}</span>
-        {/if}
+        <div class="actions">
+          {#if player.team?.managerId !== player.id}
+            <button class="delete" on:click={() => remove(player)} title="Delete player">
+              <span class="mdi mdi-trash-can-outline"></span>
+            </button>
+          {/if}
+        </div>
       </li>
     {/each}
   </ul>
@@ -155,6 +155,7 @@
     align-items: center;
     gap: 0.75rem;
     flex: 1;
+    flex-wrap: wrap;
   }
 
   .name {
@@ -170,13 +171,17 @@
     font-size: 0.9rem;
   }
 
-  .link {
-    color: var(--brand);
-    font-size: 0.85rem;
-    max-width: 12rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .delete {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--danger);
+    cursor: pointer;
   }
 
   .modal-backdrop {
@@ -191,6 +196,7 @@
 
   .modal {
     background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 0.75rem;
     padding: 2rem;
     width: 90%;
@@ -235,6 +241,7 @@
 
   .actions button:disabled {
     background: var(--border);
+    color: var(--muted);
     cursor: not-allowed;
   }
 
