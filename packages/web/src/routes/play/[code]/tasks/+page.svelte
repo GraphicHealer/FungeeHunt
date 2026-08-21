@@ -23,6 +23,10 @@
     return 'image/*,video/*';
   }
 
+  function handleFile(taskId: string, e: Event) {
+    selected[taskId] = (e.currentTarget as HTMLInputElement).files;
+  }
+
   async function load() {
     const res = await fetch(`/api/play/${code}`, {
       headers: { Authorization: `Bearer ${token()}` },
@@ -76,7 +80,7 @@
     <ul class="tasks">
       {#each state.tasks as task (task.id)}
         <li class:open={expanded === task.id}>
-          <button class="summary" on:click={() => (expanded = expanded === task.id ? '' : task.id))}>
+          <button class="summary" on:click={() => (expanded = expanded === task.id ? '' : task.id)}>
             <span class="title">{task.title}</span>
             <span class="points">+{task.points}</span>
             {#if task.submission}
@@ -97,7 +101,7 @@
                     type="file"
                     accept={accept(task)}
                     capture={task.proofType === 'PHOTO' ? 'environment' : undefined}
-                    on:change={(e) => (selected[task.id] = (e.currentTarget as HTMLInputElement).files)}
+                    on:change={(e) => handleFile(task.id, e)}
                   />
                   <button on:click={() => submitTask(task.id)}>SUBMIT PROOF</button>
                 </div>

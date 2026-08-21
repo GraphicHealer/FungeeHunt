@@ -1,6 +1,8 @@
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 COPY packages/shared/package*.json ./packages/shared/
@@ -18,4 +20,4 @@ ENV FRONTEND_BUILD_DIR=/app/packages/web/build
 
 EXPOSE 3000
 
-CMD ["npx", "tsx", "packages/server/src/index.ts"]
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=packages/server/src/db/schema.prisma && npx tsx packages/server/src/index.ts"]

@@ -4,17 +4,13 @@ A self-hosted scavenger-hunt web app for Game Masters, Managers, Members, and pu
 
 ## Quick start with Docker
 
-1. Copy `.env.example` to `.env` and fill in the values.
-2. Make sure `POSTGRES_HOST=postgres` and `DATABASE_URL` points at the compose Postgres service.
-3. Run:
+All environment variables are set directly in `docker-compose.yml`. To use your own secrets, edit the `environment` blocks for the `fungee-hunt` and `postgres` services, then run:
 
 ```powershell
 docker-compose up --build
 ```
 
-The app will be available on the port you set in `WEB_UI` (default `3000`).
-
-The compose file includes a `postgres` service, so this is the easiest one-command option.
+The app will be available on `http://localhost:3000` by default. Change the `3000:3000` port mapping and the `WEB_UI` value if you want a different port.
 
 ## Local development
 
@@ -42,11 +38,6 @@ PUBLIC_URL=http://localhost:3000
 GM_PASSPHRASE=your-secret-gm-passphrase
 SESSION_SECRET=any-long-random-string
 
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_DB=fungeehunt
-POSTGRES_USER=fungeehunt
-POSTGRES_PASSWORD=your-local-postgres-password
 DATABASE_URL=postgresql://fungeehunt:your-local-postgres-password@localhost:5432/fungeehunt
 
 WEB_UI=3000
@@ -117,6 +108,6 @@ npm run build --workspace=@fungeehunt/web
 
 ## Production notes
 
-- The Docker build produces a single `fungee-hunt` container. It expects an external Postgres container or service.
+- The Docker build produces a single `fungee-hunt` container with all environment variables set in `docker-compose.yml`.
 - Only the `fungee-hunt` container needs a public port exposed.
 - Uploaded media is stored in the `UPLOAD_DIR` volume.

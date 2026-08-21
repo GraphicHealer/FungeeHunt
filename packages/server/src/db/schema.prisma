@@ -8,26 +8,26 @@ datasource db {
 }
 
 model Game {
-  id                    String         @id @default(cuid())
-  code                  String         @unique
-  name                  String
-  status                GameStatus     @default(NOT_STARTED)
-  startAt               DateTime?
-  endAt                 DateTime?
-  submissionMode        SubmissionMode @default(AUTOMATIC)
-  viewerEnabled         Boolean        @default(false)
-  returnBonusEnabled    Boolean        @default(false)
-  returnStart           DateTime?
-  returnEnd             DateTime?
-  returnPoints          Int            @default(0)
-  foodDriveEnabled      Boolean        @default(false)
-  foodDrivePointsPerItem Int           @default(0)
-  foodDrivePermissible  String?
-  foodDriveSuggested    String?
-  players               Player[]
-  teams                 Team[]
-  tasks                 Task[]
-  rulesSections         RuleSection[]
+  id                     String         @id @default(cuid())
+  code                   String         @unique
+  name                   String
+  status                 GameStatus     @default(NOT_STARTED)
+  startAt                DateTime?
+  endAt                  DateTime?
+  submissionMode         SubmissionMode @default(AUTOMATIC)
+  viewerEnabled          Boolean        @default(false)
+  returnBonusEnabled     Boolean        @default(false)
+  returnStart            DateTime?
+  returnEnd              DateTime?
+  returnPoints           Int            @default(0)
+  foodDriveEnabled       Boolean        @default(false)
+  foodDrivePointsPerItem Int            @default(0)
+  foodDrivePermissible   String?
+  foodDriveSuggested     String?
+  players                Player[]
+  teams                  Team[]
+  tasks                  Task[]
+  rulesSections          RuleSection[]
 }
 
 model Player {
@@ -37,33 +37,37 @@ model Player {
   type         PlayerType
   sessionToken String?    @unique
   joinedAt     DateTime   @default(now())
+  game         Game       @relation(fields: [gameId], references: [id])
   team         Team?      @relation(fields: [teamId], references: [id])
   teamId       String?
   managerOf    Team?      @relation("TeamManager")
 }
 
 model Team {
-  id                      String       @id @default(cuid())
-  gameId                  String
-  name                    String?
-  managerId               String?      @unique
-  manager                 Player?      @relation("TeamManager", fields: [managerId], references: [id])
-  members                 Player[]
-  submissions             Submission[]
-  returnedAt              DateTime?
-  returnBonusAwarded      Boolean      @default(false)
-  foodDriveItems          Int          @default(0)
-  foodDriveBonusAwarded   Boolean      @default(false)
+  id                    String       @id @default(cuid())
+  gameId                String
+  name                  String?
+  managerId             String?      @unique
+  manager               Player?      @relation("TeamManager", fields: [managerId], references: [id])
+  members               Player[]
+  submissions           Submission[]
+  game                  Game         @relation(fields: [gameId], references: [id])
+  returnedAt            DateTime?
+  returnBonusAwarded    Boolean      @default(false)
+  foodDriveItems        Int          @default(0)
+  foodDriveBonusAwarded Boolean      @default(false)
 }
 
 model Task {
-  id          String    @id @default(cuid())
+  id          String       @id @default(cuid())
   gameId      String
   title       String
   description String
   points      Int
   proofType   ProofType
   order       Int
+  game        Game         @relation(fields: [gameId], references: [id])
+  submissions Submission[]
 }
 
 model Submission {
@@ -75,15 +79,18 @@ model Submission {
   reason      String?
   submittedAt DateTime         @default(now())
   reviewedAt  DateTime?
+  task        Task             @relation(fields: [taskId], references: [id])
+  team        Team             @relation(fields: [teamId], references: [id])
 
   @@unique([taskId, teamId])
 }
 
 model RuleSection {
-  id    String @id @default(cuid())
+  id     String @id @default(cuid())
   gameId String
   title  String
   body   String
+  game   Game   @relation(fields: [gameId], references: [id])
 }
 
 enum GameStatus {
