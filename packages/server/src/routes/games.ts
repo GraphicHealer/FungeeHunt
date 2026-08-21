@@ -37,9 +37,6 @@ function buildGameData(body: any, partial = false) {
   if (body.submissionMode !== undefined || !partial) {
     data.submissionMode = body.submissionMode === 'MANUAL' ? 'MANUAL' : 'AUTOMATIC';
   }
-  if (body.viewerEnabled !== undefined || !partial) {
-    data.viewerEnabled = asBool(body.viewerEnabled);
-  }
   if (body.status !== undefined) {
     const status = validStatus(body.status);
     if (status) data.status = status;
@@ -259,6 +256,15 @@ router.patch('/:gameId', async (req, res) => {
             error: `Manager for team "${team.name ?? 'Unnamed'}" must be an online player.`,
           });
         }
+      }
+
+      const unassigned = await db.player.count({
+        where: { gameId, teamId: null },
+      });
+      if (unassigned > 0) {
+        return res.status(400).json({
+          error: `All players must be assigned to a team before starting. ${unassigned} player(s) are not assigned.`,
+        });
       }
     }
 

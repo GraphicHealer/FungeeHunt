@@ -55,7 +55,9 @@
           <p class="code">{game.code}</p>
           <span class="status">{game.status}</span>
         </button>
-        <button class="delete" on:click={() => remove(game)} title="Delete game">🗑</button>
+        <button class="delete" on:click={() => remove(game)} title="Delete game">
+          <span class="mdi mdi-trash-can-outline"></span>
+        </button>
       </div>
     {/each}
   </section>
@@ -65,7 +67,7 @@
   .board {
     padding: 2rem;
     font-family: system-ui, sans-serif;
-    background: #f5f5f5;
+    background: var(--bg);
     min-height: 100vh;
   }
 
@@ -87,8 +89,8 @@
   }
 
   .game-card {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 0.5rem;
     padding: 1.5rem;
     display: flex;
@@ -99,7 +101,7 @@
   }
 
   .game-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
   }
 
   .open {
@@ -119,13 +121,13 @@
   .code {
     font-family: monospace;
     letter-spacing: 0.15rem;
-    color: #666;
+    color: var(--muted);
     margin: 0 0 0.5rem;
   }
 
   .status {
     font-weight: bold;
-    color: #0366d6;
+    color: var(--brand);
   }
 
   .delete {

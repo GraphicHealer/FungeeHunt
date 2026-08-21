@@ -169,8 +169,8 @@
   }
 
   .task-list li {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 0.5rem;
     padding: 1rem;
     display: flex;
@@ -181,7 +181,7 @@
   }
 
   .task-list li:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
   }
 
   .task-main {
@@ -192,7 +192,7 @@
 
   .order {
     font-weight: bold;
-    color: #666;
+    color: var(--muted);
     min-width: 1.5rem;
   }
 
@@ -201,11 +201,11 @@
   }
 
   .meta {
-    color: #666;
+    color: var(--muted);
   }
 
   .danger {
-    background: #e74c3c;
+    background: var(--danger);
     color: #fff;
     border: none;
     border-radius: 0.25rem;
@@ -224,14 +224,14 @@
   }
 
   .modal {
-    background: #fff;
+    background: var(--card);
     border-radius: 0.75rem;
     padding: 2rem;
     width: 90%;
     max-width: 28rem;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow);
   }
 
   .modal h3 {
@@ -243,7 +243,7 @@
   .modal textarea {
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     border-radius: 0.25rem;
     width: 100%;
     box-sizing: border-box;
@@ -262,21 +262,21 @@
     cursor: pointer;
     border: none;
     border-radius: 0.25rem;
-    background: #0366d6;
+    background: var(--brand);
     color: #fff;
   }
 
   .actions button:first-child {
-    background: #eee;
-    color: #333;
+    background: var(--bg);
+    color: var(--text);
   }
 
   .actions button:disabled {
-    background: #999;
+    background: var(--border);
     cursor: not-allowed;
   }
 
   .error {
-    color: red;
+    color: var(--danger);
   }
 </style>

@@ -20,26 +20,16 @@
   onMount(load);
 </script>
 
-<main class="container">
-  <h1>RULES</h1>
+<main class="fungee-page">
+  <div class="fungee-card wide">
+    <a class="fungee-link" href="/play/{code}/tasks">← Back to tasks</a>
+    <h1 class="fungee-title">RULES</h1>
 
-  {#each sections as section (section.id)}
-    <section>
-      <h2>{section.title}</h2>
-      <p>{section.body}</p>
-    </section>
-  {/each}
-
-  <a href="/play/{code}/tasks">← Back to tasks</a>
+    {#each sections as section (section.id)}
+      <div class="fungee-list-item" style="margin-top: 1rem;">
+        <h2 class="fungee-section-title">{section.title}</h2>
+        <p class="fungee-section-body">{section.body}</p>
+      </div>
+    {/each}
+  </div>
 </main>
-
-<style>
-  .container {
-    padding: 2rem;
-    font-family: system-ui, sans-serif;
-  }
-
-  section {
-    margin-bottom: 1.5rem;
-  }
-</style>

@@ -1,5 +1,7 @@
 import { Router } from 'express';
+import * as QRCode from 'qrcode';
 import { db } from '../db/client';
+import { config } from '../config';
 
 const router = Router({ mergeParams: true });
 
@@ -16,9 +18,6 @@ router.get('/', async (req, res) => {
   try {
     const game = await db.game.findUnique({ where: { code: code.toUpperCase() } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
-    if (!game.viewerEnabled) {
-      return res.status(403).json({ enabled: false, error: 'Public viewer is not enabled for this game' });
-    }
 
     const teams = await db.team.findMany({
       where: { gameId: game.id },
@@ -74,6 +73,9 @@ router.get('/', async (req, res) => {
       task: taskMap.get(sub.taskId),
     }));
 
+    const joinUrl = `${config.PUBLIC_URL}/play/${game.code}`;
+    const qrUrl = await QRCode.toDataURL(joinUrl, { width: 512, margin: 2 });
+
     let remainingMs: number | null = null;
     if (game.status === 'LIVE' && game.endAt) {
       remainingMs = Math.max(0, new Date(game.endAt).getTime() - Date.now());
@@ -83,11 +85,14 @@ router.get('/', async (req, res) => {
       game: {
         id: game.id,
         name: game.name,
+        code: game.code,
         status: game.status,
         startAt: game.startAt,
         endAt: game.endAt,
         foodDriveEnabled: game.foodDriveEnabled,
         foodDrivePointsPerItem: game.foodDrivePointsPerItem,
+        joinUrl,
+        qrUrl,
       },
       leaderboard,
       recent,

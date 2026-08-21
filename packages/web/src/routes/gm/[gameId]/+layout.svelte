@@ -124,12 +124,12 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: #f5f5f5;
+    background: var(--bg);
   }
 
   .topbar {
-    background: #fff;
-    border-bottom: 1px solid #ddd;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
     padding: 1rem 1.5rem;
     display: flex;
     justify-content: space-between;
@@ -150,16 +150,16 @@
   .code {
     font-family: monospace;
     letter-spacing: 0.15rem;
-    color: #666;
+    color: var(--muted);
   }
 
   .status {
     font-weight: bold;
-    color: #0366d6;
+    color: var(--brand);
   }
 
   .timer {
-    color: #666;
+    color: var(--muted);
   }
 
   .content {

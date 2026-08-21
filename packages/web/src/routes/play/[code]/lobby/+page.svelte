@@ -5,7 +5,7 @@
 
   const code = $page.params.code;
 
-  let status = 'Loading…';
+  let status = 'Checking game state…';
 
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
@@ -18,7 +18,11 @@
     if (res.ok) {
       const state = await res.json();
       if (state.team) {
-        goto(`/play/${code}/tasks`);
+        if (state.game?.status === 'LIVE') {
+          goto(`/play/${code}/tasks`);
+        } else {
+          goto(`/play/${code}/pending`);
+        }
       } else {
         status = 'Waiting for the Game Master to assign you to a team…';
       }
@@ -30,25 +34,10 @@
   onMount(load);
 </script>
 
-<main class="container">
-  <h1>YOU'RE IN!</h1>
-  <p class="code">{code}</p>
-  <p>{status}</p>
+<main class="fungee-page">
+  <div class="fungee-card fungee-pending">
+    <h1 class="fungee-title">YOU'RE IN!</h1>
+    <p class="fungee-code">{code}</p>
+    <p>{status}</p>
+  </div>
 </main>
-
-<style>
-  .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    padding: 2rem;
-    font-family: system-ui, sans-serif;
-  }
-
-  .code {
-    font-size: 1.5rem;
-    letter-spacing: 0.25rem;
-    font-weight: bold;
-  }
-</style>

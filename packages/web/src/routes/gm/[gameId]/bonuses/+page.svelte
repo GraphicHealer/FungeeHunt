@@ -119,8 +119,8 @@
   }
 
   .card {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 0.5rem;
     padding: 1.5rem;
     margin-bottom: 1rem;
@@ -131,7 +131,7 @@
   }
 
   .window {
-    color: #666;
+    color: var(--muted);
   }
 
   ul {
@@ -147,7 +147,7 @@
     align-items: center;
     gap: 1rem;
     padding: 0.75rem;
-    border: 1px solid #eee;
+    border: 1px solid var(--border);
     border-radius: 0.25rem;
   }
 
@@ -159,12 +159,12 @@
   input {
     width: 4rem;
     padding: 0.5rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     border-radius: 0.25rem;
   }
 
   .awarded {
-    color: green;
+    color: var(--success);
     font-weight: bold;
   }
 </style>

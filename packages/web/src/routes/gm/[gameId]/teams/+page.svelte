@@ -163,8 +163,8 @@
   }
 
   .team-list li {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 0.5rem;
     padding: 1rem;
     cursor: pointer;
@@ -172,7 +172,7 @@
   }
 
   .team-list li:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
   }
 
   .team-name {
@@ -181,7 +181,7 @@
   }
 
   .team-meta {
-    color: #666;
+    color: var(--muted);
     margin-top: 0.25rem;
   }
 
@@ -196,14 +196,14 @@
   }
 
   .modal {
-    background: #fff;
+    background: var(--card);
     border-radius: 0.75rem;
     padding: 2rem;
     width: 90%;
     max-width: 28rem;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow);
   }
 
   .modal h3 {
@@ -214,7 +214,7 @@
   .modal select {
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     border-radius: 0.25rem;
     width: 100%;
     box-sizing: border-box;
@@ -233,7 +233,7 @@
     margin-bottom: 1rem;
     max-height: 12rem;
     overflow-y: auto;
-    border: 1px solid #eee;
+    border: 1px solid var(--border);
     padding: 0.5rem;
   }
 
@@ -257,22 +257,22 @@
     cursor: pointer;
     border: none;
     border-radius: 0.25rem;
-    background: #0366d6;
+    background: var(--brand);
     color: #fff;
   }
 
   .actions button:first-child {
-    background: #eee;
-    color: #333;
+    background: var(--bg);
+    color: var(--text);
   }
 
   .actions button:disabled {
-    background: #999;
+    background: var(--border);
     cursor: not-allowed;
   }
 
   .error {
-    color: red;
+    color: var(--danger);
   }
 
   button {

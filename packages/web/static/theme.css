@@ -1,0 +1,336 @@
+:root {
+  color-scheme: light;
+  --brand: #0366d6;
+  --brand-dark: #024ea4;
+  --danger: #e74c3c;
+  --success: #28a745;
+  --warning: #f0ad4e;
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #1f2328;
+  --muted: #656d76;
+  --border: #d0d7de;
+  --shadow: 0 4px 16px rgba(31, 35, 40, 0.08);
+  --radius: 0.75rem;
+  --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --brand: #58a6ff;
+  --brand-dark: #79c0ff;
+  --danger: #f85149;
+  --success: #3fb950;
+  --warning: #f0ad4e;
+  --bg: #0d1117;
+  --card: #161b22;
+  --text: #f0f6fc;
+  --muted: #8b949e;
+  --border: #30363d;
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --brand: #58a6ff;
+    --brand-dark: #79c0ff;
+    --danger: #f85149;
+    --success: #3fb950;
+    --warning: #f0ad4e;
+    --bg: #0d1117;
+    --card: #161b22;
+    --text: #f0f6fc;
+    --muted: #8b949e;
+    --border: #30363d;
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  transition: background 0.2s, color 0.2s;
+}
+
+.fungee-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+.fungee-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  width: 100%;
+  max-width: 28rem;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.fungee-card.wide {
+  max-width: 42rem;
+}
+
+.fungee-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+  color: var(--brand);
+}
+
+.fungee-subtitle {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+}
+
+.fungee-code {
+  font-family: monospace;
+  font-size: 1.5rem;
+  letter-spacing: 0.25rem;
+  font-weight: bold;
+  color: var(--brand);
+  text-align: center;
+}
+
+.fungee-label {
+  display: block;
+  font-weight: 600;
+  margin: 1rem 0 0.35rem;
+}
+
+.fungee-input,
+.fungee-select,
+.fungee-textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--text);
+}
+
+.fungee-input:focus,
+.fungee-select:focus,
+.fungee-textarea:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+.fungee-textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.fungee-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--brand);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.05s;
+  width: 100%;
+  margin-top: 1.25rem;
+}
+
+.fungee-btn:hover {
+  background: var(--brand-dark);
+}
+
+.fungee-btn:disabled {
+  background: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.fungee-btn.secondary {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.fungee-btn.secondary:hover {
+  background: var(--bg);
+}
+
+.fungee-btn.danger {
+  background: var(--danger);
+}
+
+.fungee-btn.danger:hover {
+  background: #c0392b;
+}
+
+.fungee-btn-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.fungee-btn-row .fungee-btn {
+  margin: 0;
+  flex: 1;
+}
+
+.fungee-error {
+  color: var(--danger);
+  font-size: 0.95rem;
+  margin: 0.5rem 0;
+}
+
+.fungee-pending {
+  text-align: center;
+}
+
+.fungee-pending h1 {
+  color: var(--brand);
+  margin-bottom: 0.5rem;
+}
+
+.fungee-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fungee-list-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.fungee-status {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--border);
+  color: var(--text);
+}
+
+.fungee-status.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+[data-theme="dark"] .fungee-status.completed {
+  background: #238636;
+  color: #fff;
+}
+
+.fungee-status.submitted,
+.fungee-status.under_review {
+  background: #fff3cd;
+  color: #856404;
+}
+
+[data-theme="dark"] .fungee-status.submitted,
+[data-theme="dark"] .fungee-status.under_review {
+  background: #b08800;
+  color: #fff;
+}
+
+.fungee-status.incomplete {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+[data-theme="dark"] .fungee-status.incomplete {
+  background: #f85149;
+  color: #fff;
+}
+
+.fungee-nav {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.fungee-nav a,
+.fungee-link {
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.fungee-nav a:hover,
+.fungee-link:hover {
+  text-decoration: underline;
+}
+
+.fungee-accordion {
+  width: 100%;
+  margin: 0.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--card);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.fungee-accordion-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.fungee-accordion-body {
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.fungee-proof {
+  max-width: 100%;
+  max-height: 40vh;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+.fungee-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--brand);
+}
+
+.fungee-section-body {
+  margin: 0;
+  white-space: pre-line;
+  color: var(--text);
+}

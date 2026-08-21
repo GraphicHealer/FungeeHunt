@@ -39,6 +39,9 @@ router.patch('/:submissionId', async (req, res) => {
   if (!['COMPLETED', 'INCOMPLETE', 'UNDER_REVIEW'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status' });
   }
+  if (status === 'INCOMPLETE' && !reason?.trim()) {
+    return res.status(400).json({ error: 'A reason is required when marking a submission incomplete' });
+  }
 
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });

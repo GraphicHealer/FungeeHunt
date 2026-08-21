@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import Toast from '$lib/Toast.svelte';
+  import ThemeToggle from '$lib/ThemeToggle.svelte';
 
   let ready = false;
 
@@ -18,3 +19,4 @@
   <slot />
 {/if}
 <Toast />
+<ThemeToggle />

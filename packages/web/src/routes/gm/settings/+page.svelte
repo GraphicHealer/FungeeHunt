@@ -110,7 +110,7 @@
   .container {
     padding: 2rem;
     font-family: system-ui, sans-serif;
-    background: #f5f5f5;
+    background: var(--bg);
     min-height: 100vh;
   }
 
@@ -126,8 +126,8 @@
   }
 
   .card {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 0.5rem;
     padding: 1.5rem;
     margin-bottom: 1rem;
@@ -143,7 +143,7 @@
   input, textarea {
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     border-radius: 0.25rem;
     width: 100%;
     box-sizing: border-box;

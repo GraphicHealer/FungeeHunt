@@ -41,24 +41,6 @@
     }
   }
 
-  async function setViewerEnabled(enabled: boolean) {
-    const res = await fetch(`/api/gm/games/${gameId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token()}`,
-      },
-      body: JSON.stringify({ viewerEnabled: enabled }),
-    });
-    if (res.ok) {
-      await load();
-      toast.add(`Viewer ${enabled ? 'enabled' : 'disabled'}`, 'success');
-    } else {
-      const data = await res.json();
-      toast.add(data.error ?? 'Could not update viewer', 'error');
-    }
-  }
-
   function remaining() {
     if (!game || game.status !== 'LIVE' || !game.endAt) return null;
     const ms = Math.max(0, new Date(game.endAt).getTime() - Date.now());
@@ -90,18 +72,10 @@
       <button on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
     </p>
 
-    <p class="view">
-      Viewer:
-      {#if game.viewerEnabled}
-        <a href={game.viewUrl} target="_blank" rel="noreferrer">{game.viewUrl}</a>
-        <button on:click={() => navigator.clipboard.writeText(game.viewUrl)}>COPY</button>
-      {:else}
-        <span class="disabled">disabled</span>
-      {/if}
-      <button on:click={() => setViewerEnabled(!game.viewerEnabled)}>
-        {game.viewerEnabled ? 'DISABLE VIEWER' : 'ENABLE VIEWER'}
-      </button>
-    </p>
+    <a class="fungee-btn" style="margin-top: 0; margin-bottom: 1rem;" href={game.viewUrl} target="_blank" rel="noreferrer">
+      <span class="mdi mdi-open-in-new" style="margin-right: 0.5rem;"></span>
+      OPEN SPECTATOR SCREEN
+    </a>
 
     <div class="controls">
       <button on:click={() => setStatus('LIVE')} disabled={game.status !== 'NOT_STARTED'}>START GAME</button>
@@ -146,7 +120,7 @@
   }
 
   .disabled {
-    color: #666;
+    color: var(--muted);
   }
 
   .controls {
@@ -158,12 +132,12 @@
 
   a {
     padding: 0.75rem 1.5rem;
-    background: #eee;
+    background: var(--bg);
     text-decoration: none;
-    color: #000;
+    color: var(--text);
   }
 
   .error {
-    color: red;
+    color: var(--danger);
   }
 </style>

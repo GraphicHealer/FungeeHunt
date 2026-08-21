@@ -135,8 +135,8 @@
   }
 
   .player-list li {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 0.5rem;
     padding: 1rem;
     display: flex;
@@ -147,7 +147,7 @@
   }
 
   .player-list li:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
   }
 
   .player-main {
@@ -162,16 +162,16 @@
   }
 
   .type {
-    color: #666;
+    color: var(--muted);
   }
 
   .team {
-    color: #0366d6;
+    color: var(--brand);
     font-size: 0.9rem;
   }
 
   .link {
-    color: #0366d6;
+    color: var(--brand);
     font-size: 0.85rem;
     max-width: 12rem;
     overflow: hidden;
@@ -190,12 +190,12 @@
   }
 
   .modal {
-    background: #fff;
+    background: var(--card);
     border-radius: 0.75rem;
     padding: 2rem;
     width: 90%;
     max-width: 24rem;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow);
   }
 
   .modal h3 {
@@ -205,7 +205,7 @@
   .modal input {
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     border-radius: 0.25rem;
     width: 100%;
     box-sizing: border-box;
@@ -224,21 +224,21 @@
     cursor: pointer;
     border: none;
     border-radius: 0.25rem;
-    background: #0366d6;
+    background: var(--brand);
     color: #fff;
   }
 
   .actions button:first-child {
-    background: #eee;
-    color: #333;
+    background: var(--bg);
+    color: var(--text);
   }
 
   .actions button:disabled {
-    background: #999;
+    background: var(--border);
     cursor: not-allowed;
   }
 
   .error {
-    color: red;
+    color: var(--danger);
   }
 </style>
