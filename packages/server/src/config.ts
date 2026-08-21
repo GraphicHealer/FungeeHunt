@@ -11,7 +11,7 @@ const envSchema = z.object({
   POSTGRES_PASSWORD: z.string().min(1),
   DATABASE_URL: z.string().min(1),
   SESSION_SECRET: z.string().min(1),
-  API_PORT: z.coerce.number().int().positive().default(3000),
+  WEB_UI: z.coerce.number().int().positive().default(3000),
   FRONTEND_BUILD_DIR: z.string().min(1).default('/app/packages/web/build'),
   UPLOAD_DIR: z.string().min(1),
 });

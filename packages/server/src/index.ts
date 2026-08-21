@@ -55,6 +55,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(config.API_PORT, () => {
-  console.log(`Fungee-Hunt server listening on port ${config.API_PORT}`);
+server.listen(config.WEB_UI, () => {
+  console.log(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
 });

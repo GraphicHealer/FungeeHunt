@@ -12,7 +12,7 @@ A self-hosted scavenger-hunt web app for Game Masters, Managers, Members, and pu
 docker-compose up --build
 ```
 
-The app will be available on the port you set in `API_PORT` (default `3000`).
+The app will be available on the port you set in `WEB_UI` (default `3000`).
 
 The compose file includes a `postgres` service, so this is the easiest one-command option.
 
@@ -49,7 +49,7 @@ POSTGRES_USER=fungeehunt
 POSTGRES_PASSWORD=your-local-postgres-password
 DATABASE_URL=postgresql://fungeehunt:your-local-postgres-password@localhost:5432/fungeehunt
 
-API_PORT=3000
+WEB_UI=3000
 UPLOAD_DIR=./uploads
 ```
 
