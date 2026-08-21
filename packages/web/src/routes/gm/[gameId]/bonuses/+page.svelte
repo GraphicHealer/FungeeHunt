@@ -52,18 +52,20 @@
   onMount(load);
 </script>
 
-<main class="container">
-  <h1>BONUSES</h1>
+<div class="page">
+  <header class="page-header">
+    <h2>Bonuses</h2>
+  </header>
 
   {#if game}
-    <section>
-      <h2>Return Time Bonus</h2>
+    <section class="card">
+      <h3>Return Time Bonus</h3>
       {#if game.returnBonusEnabled}
-        <p>Window: {game.returnStart} — {game.returnEnd} (+{game.returnPoints})</p>
+        <p class="window">Window: {game.returnStart} — {game.returnEnd} (+{game.returnPoints})</p>
         <ul>
           {#each teams as team (team.id)}
             <li>
-              {team.name ?? 'Unnamed team'}
+              <span class="team-name">{team.name ?? 'Unnamed team'}</span>
               {#if team.returnBonusAwarded}
                 <span class="awarded">✓ Returned at {team.returnedAt}</span>
               {:else}
@@ -77,14 +79,14 @@
       {/if}
     </section>
 
-    <section>
-      <h2>Food Drive Bonus</h2>
+    <section class="card">
+      <h3>Food Drive Bonus</h3>
       {#if game.foodDriveEnabled}
-        <p>{game.foodDrivePointsPerItem} points per item</p>
+        <p class="window">{game.foodDrivePointsPerItem} points per item</p>
         <ul>
           {#each teams as team (team.id)}
             <li>
-              {team.name ?? 'Unnamed team'}
+              <span class="team-name">{team.name ?? 'Unnamed team'}</span>
               <input type="number" bind:value={foodDrive[team.id]} min="0" />
               <button on:click={() => saveFoodDrive(team.id)}>SAVE</button>
               {#if team.foodDriveBonusAwarded}
@@ -98,16 +100,38 @@
       {/if}
     </section>
   {/if}
-</main>
+</div>
 
 <style>
-  .container {
-    padding: 2rem;
+  .page {
     font-family: system-ui, sans-serif;
   }
 
-  section {
-    margin-bottom: 2rem;
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .page-header h2 {
+    margin: 0;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .card h3 {
+    margin-top: 0;
+  }
+
+  .window {
+    color: #666;
   }
 
   ul {
@@ -115,17 +139,28 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   li {
     display: flex;
     align-items: center;
     gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #eee;
+    border-radius: 0.25rem;
+  }
+
+  .team-name {
+    flex: 1;
+    font-weight: bold;
   }
 
   input {
     width: 4rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
   }
 
   .awarded {

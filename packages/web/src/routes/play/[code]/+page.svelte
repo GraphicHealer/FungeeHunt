@@ -9,11 +9,29 @@
   onMount(() => {
     if (token) {
       localStorage.setItem(`token:${code}`, token);
-      goto(`/play/${code}/tasks`);
+      loadAndGo();
+    } else if (localStorage.getItem(`token:${code}`)) {
+      loadAndGo();
     } else {
       goto(`/play/${code}/name`);
     }
   });
+
+  async function loadAndGo() {
+    const res = await fetch(`/api/play/${code}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem(`token:${code}`) ?? ''}` },
+    });
+    if (res.ok) {
+      const state = await res.json();
+      if (state.team) {
+        goto(`/play/${code}/tasks`);
+      } else {
+        goto(`/play/${code}/lobby`);
+      }
+    } else {
+      goto(`/play/${code}/name`);
+    }
+  }
 </script>
 
 <p>Loading...</p>

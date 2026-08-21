@@ -14,7 +14,7 @@
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem('gmToken', data.token);
-      goto('/gm/new');
+      goto('/gm');
     } else {
       error = data.error ?? 'Login failed';
     }

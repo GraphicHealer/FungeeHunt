@@ -97,7 +97,7 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (_req, res) => {
   try {
-    const games = await db.game.findMany();
+    const games = await db.game.findMany({ orderBy: { startAt: 'asc' } });
     res.json(games.map(withJoinUrl));
   } catch (err) {
     console.error('list games failed', err);
@@ -116,11 +116,62 @@ router.get('/:gameId', async (req, res) => {
   }
 });
 
+router.delete('/:gameId', async (req, res) => {
+  try {
+    const { gameId } = req.params;
+    const game = await db.game.findUnique({ where: { id: gameId } });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+
+    await db.$transaction(async (tx) => {
+      await tx.submission.deleteMany({ where: { task: { gameId } } });
+      await tx.task.deleteMany({ where: { gameId } });
+      await tx.ruleSection.deleteMany({ where: { gameId } });
+      await tx.team.deleteMany({ where: { gameId } });
+      await tx.player.deleteMany({ where: { gameId } });
+      await tx.game.delete({ where: { id: gameId } });
+    });
+
+    res.status(204).end();
+  } catch (err) {
+    console.error('delete game failed', err);
+    res.status(500).json({ error: 'Could not delete game' });
+  }
+});
+
 router.patch('/:gameId', async (req, res) => {
   try {
+    const { gameId } = req.params;
+    const updates = buildGameData(req.body ?? {}, true);
+
+    if (updates.status === 'LIVE') {
+      const teams = await db.team.findMany({
+        where: { gameId },
+        include: { manager: true },
+      });
+
+      if (teams.length === 0) {
+        return res.status(400).json({
+          error: 'Create at least one team before starting the game.',
+        });
+      }
+
+      for (const team of teams) {
+        if (!team.manager) {
+          return res.status(400).json({
+            error: `Team "${team.name ?? 'Unnamed'}" is missing a manager.`,
+          });
+        }
+        if (team.manager.type !== 'APP') {
+          return res.status(400).json({
+            error: `Manager for team "${team.name ?? 'Unnamed'}" must be an online player.`,
+          });
+        }
+      }
+    }
+
     const game = await db.game.update({
-      where: { id: req.params.gameId },
-      data: buildGameData(req.body ?? {}, true),
+      where: { id: gameId },
+      data: updates,
     });
 
     const io = req.app.get('io') as any;

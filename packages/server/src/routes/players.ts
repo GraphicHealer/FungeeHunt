@@ -23,13 +23,22 @@ router.get('/', async (req, res) => {
 router.post('/offline', async (req, res) => {
   const { gameId } = req.params;
   const { displayName } = req.body ?? {};
-  if (!displayName) return res.status(400).json({ error: 'Display name is required' });
+  const trimmed = displayName ? displayName.trim() : '';
+  if (!trimmed) return res.status(400).json({ error: 'Display name is required' });
 
   try {
+    const existing = await db.player.findFirst({
+      where: {
+        gameId,
+        displayName: { equals: trimmed, mode: 'insensitive' },
+      },
+    });
+    if (existing) return res.status(400).json({ error: 'A player with that name already exists' });
+
     const player = await db.player.create({
       data: {
         gameId,
-        displayName,
+        displayName: trimmed,
         type: 'OFFLINE',
       },
     });

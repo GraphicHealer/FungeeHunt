@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import Toast from '$lib/Toast.svelte';
 
   let ready = false;
 
@@ -16,3 +17,4 @@
 {#if ready}
   <slot />
 {/if}
+<Toast />

@@ -38,6 +38,16 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Player is already manager of another team' });
     }
 
+    const trimmedName = name ? name.trim() : '';
+    if (trimmedName) {
+      const existing = await db.team.findFirst({
+        where: { gameId, name: { equals: trimmedName, mode: 'insensitive' } },
+      });
+      if (existing) {
+        return res.status(400).json({ error: 'A team with that name already exists' });
+      }
+    }
+
     const uniqueMemberIds = Array.from(new Set([managerId, ...memberIds]));
     const memberCount = await db.player.count({
       where: { id: { in: uniqueMemberIds }, gameId },
@@ -49,8 +59,8 @@ router.post('/', async (req, res) => {
     const team = await db.$transaction(async (tx) => {
       const created = await tx.team.create({
         data: {
-          gameId,
-          name,
+          game: { connect: { id: gameId } },
+          name: trimmedName || null,
           manager: { connect: { id: managerId } },
           members: { connect: uniqueMemberIds.map((id: string) => ({ id })) },
         },
@@ -81,7 +91,20 @@ router.patch('/:teamId', async (req, res) => {
     const updateData: any = {};
 
     if (name !== undefined) {
-      updateData.name = name;
+      const trimmed = name ? name.trim() : '';
+      if (trimmed) {
+        const existing = await db.team.findFirst({
+          where: {
+            gameId,
+            id: { not: teamId },
+            name: { equals: trimmed, mode: 'insensitive' },
+          },
+        });
+        if (existing) {
+          return res.status(400).json({ error: 'A team with that name already exists' });
+        }
+      }
+      updateData.name = trimmed || null;
     }
 
     if (managerId !== undefined) {

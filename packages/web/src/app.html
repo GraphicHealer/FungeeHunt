@@ -6,6 +6,15 @@
     <meta name="theme-color" content="#ff6b6b" />
     <link rel="manifest" href="/manifest.json" />
     %sveltekit.head%
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+    </script>
   </head>
   <body data-sveltekit-preload-data="hover">
     <div style="display: contents">%sveltekit.body%</div>

@@ -24,10 +24,18 @@ router.post('/', async (req, res) => {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
 
+    const normalized = (title ?? '').trim().toLowerCase();
+    if (normalized) {
+      const existing = await db.task.findFirst({
+        where: { gameId, title: { equals: title.trim(), mode: 'insensitive' } },
+      });
+      if (existing) return res.status(400).json({ error: 'A task with that title already exists' });
+    }
+
     const task = await db.task.create({
       data: {
         gameId,
-        title: title ?? 'New task',
+        title: (title ?? 'New task').trim(),
         description: description ?? '',
         points: Number(points) || 0,
         proofType: ['PHOTO', 'VIDEO', 'EITHER'].includes(proofType) ? proofType : 'PHOTO',
@@ -42,17 +50,28 @@ router.post('/', async (req, res) => {
 });
 
 router.patch('/:taskId', async (req, res) => {
-  const { taskId } = req.params;
+  const { gameId, taskId } = req.params;
   const { title, description, points, proofType, order } = req.body ?? {};
   try {
     const data: any = {};
-    if (title !== undefined) data.title = title;
+    if (title !== undefined) data.title = title.trim();
     if (description !== undefined) data.description = description;
     if (points !== undefined) data.points = Number(points);
     if (proofType !== undefined && ['PHOTO', 'VIDEO', 'EITHER'].includes(proofType)) {
       data.proofType = proofType;
     }
     if (order !== undefined) data.order = Number(order);
+
+    if (data.title) {
+      const existing = await db.task.findFirst({
+        where: {
+          gameId,
+          id: { not: taskId },
+          title: { equals: data.title, mode: 'insensitive' },
+        },
+      });
+      if (existing) return res.status(400).json({ error: 'A task with that title already exists' });
+    }
 
     const task = await db.task.update({ where: { id: taskId }, data });
     res.json(task);

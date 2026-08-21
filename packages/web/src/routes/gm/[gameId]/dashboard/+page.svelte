@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { toast } from '$lib/toast';
 
   const gameId = $page.params.gameId;
 
@@ -31,7 +32,13 @@
       },
       body: JSON.stringify({ status }),
     });
-    if (res.ok) await load();
+    if (res.ok) {
+      await load();
+      toast.add(`Game ${status === 'LIVE' ? 'started' : status === 'COMPLETED' ? 'ended' : 'status updated'}`, 'success');
+    } else {
+      const data = await res.json();
+      toast.add(data.error ?? 'Could not update game status', 'error');
+    }
   }
 
   async function setViewerEnabled(enabled: boolean) {
@@ -43,7 +50,13 @@
       },
       body: JSON.stringify({ viewerEnabled: enabled }),
     });
-    if (res.ok) await load();
+    if (res.ok) {
+      await load();
+      toast.add(`Viewer ${enabled ? 'enabled' : 'disabled'}`, 'success');
+    } else {
+      const data = await res.json();
+      toast.add(data.error ?? 'Could not update viewer', 'error');
+    }
   }
 
   function remaining() {
@@ -68,8 +81,6 @@
 
 <main class="container">
   {#if game}
-    <h1>{game.name}</h1>
-
     <p class="status">● {game.status}</p>
     {#if remainingStr}<p class="timer">{remainingStr} REMAINING</p>{/if}
 
@@ -99,15 +110,6 @@
         <a href="/view/{game.code}/results">VIEW RESULTS</a>
       {/if}
     </div>
-
-    <nav>
-      <a href="/gm/{gameId}/tasks">Tasks</a>
-      <a href="/gm/{gameId}/teams">Teams</a>
-      <a href="/gm/{gameId}/players">Players</a>
-      <a href="/gm/{gameId}/submissions">Submissions</a>
-      <a href="/gm/{gameId}/bonuses">Bonuses</a>
-      <a href="/gm/{gameId}/rules">Rules</a>
-    </nav>
   {:else if error}
     <p class="error">{error}</p>
   {:else}
@@ -117,7 +119,6 @@
 
 <style>
   .container {
-    padding: 2rem;
     font-family: system-ui, sans-serif;
   }
 
@@ -152,12 +153,7 @@
     display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
-  }
-
-  nav {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
+    flex-wrap: wrap;
   }
 
   a {
