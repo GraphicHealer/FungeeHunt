@@ -1,12 +1,9 @@
 import { Router } from 'express';
-import { config } from '../config';
 
 const router = Router();
 
 router.get('/', (_req, res) => {
-  res.json({
-    publicUrl: config.PUBLIC_URL,
-  });
+  res.json({ publicUrl: null });
 });
 
 export default router;

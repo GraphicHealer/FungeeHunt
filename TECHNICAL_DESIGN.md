@@ -129,7 +129,7 @@ Enter Game Code
 ```
 
 - Typing a code and pressing **Join** → `/play/{code}/name` (or straight to `/play/{code}/lobby` / `/play/{code}/tasks` if a valid session token for that code already exists in `localStorage` — see §5).
-- Opening a join link or scanning a QR code (`{PUBLIC_URL}/play/{code}`) lands directly on the name-entry screen, skipping manual code entry.
+- Opening a join link or scanning a QR code (`{current-host}/play/{code}`) lands directly on the name-entry screen, skipping manual code entry.
 - Pressing **Log In** → `/login`, the Game Master passphrase screen.
 
 No visible "Create Game" button on the landing page itself — creating a game is a Game Master action and lives behind the passphrase (`/gm/new`), not on the public landing page. This keeps the landing page to exactly the two things a player or a returning Game Master needs.
@@ -272,9 +272,6 @@ Socket auth uses the same session tokens as REST — a player's per-game token, 
 ### Environment variables (`.env.example`, shipped in repo — never the real `.env`)
 
 ```bash
-# Identity / branding
-PUBLIC_URL=https://hunt.example.com     # used to build join links + QR codes
-
 # Game Master access
 GM_PASSPHRASE=changeme                  # required, no default — gates game creation/management
 
@@ -298,7 +295,7 @@ UPLOAD_DIR=/data/uploads
 
 ### Key portability rules
 
-- **Never bake config into a build.** The frontend doesn't get `PUBLIC_URL`/`API_URL` compiled in at `npm run build` time. Instead it fetches `GET /api/config` on load and configures itself at runtime — the static build is identical regardless of who's hosting it.
+- **Never bake config into a build.** The frontend doesn't get hardcoded `API_URL` baked in at `npm run build` time. Instead it uses the current host in the browser and the backend derives URLs from each request — the static build is identical regardless of who's hosting it.
 - **Fail loudly on missing required config.** `server/src/config.ts` validates `SESSION_SECRET`, `GM_PASSPHRASE`, DB creds, etc. at startup and crashes with a clear message rather than starting in a broken state.
 - **Named Docker volumes, not host bind-mounts**, in the shipped `docker-compose.yml` — portable across OSes/hosts. Anyone wanting a specific host path overrides it in their own `docker-compose.override.yml`.
 - **Healthchecks + `condition: service_healthy`** on `depends_on`, since startup timing can't be assumed on unfamiliar hardware.

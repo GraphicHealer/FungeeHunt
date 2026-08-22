@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { db } from '../db/client';
-import { config } from '../config';
 import { generateGameCode } from '../lib/gameCode';
 import { getSystemSettings } from '../lib/defaults';
+import { getBaseUrl } from '../lib/urls';
 
 const router = Router();
 
@@ -69,11 +69,11 @@ function buildGameData(body: any, partial = false) {
   return data;
 }
 
-function withJoinUrl(game: any) {
+function withJoinUrl(baseUrl: string, game: any) {
   return {
     ...game,
-    joinUrl: `${config.PUBLIC_URL}/play/${game.code}`,
-    viewUrl: `${config.PUBLIC_URL}/view/${game.code}`,
+    joinUrl: `${baseUrl}/play/${game.code}`,
+    viewUrl: `${baseUrl}/view/${game.code}`,
   };
 }
 
@@ -178,17 +178,17 @@ router.post('/', async (req, res) => {
 
     await syncAutoRuleSections(game);
 
-    res.json(withJoinUrl(game));
+    res.json(withJoinUrl(getBaseUrl(req), game));
   } catch (err) {
     console.error('create game failed', err);
     res.status(500).json({ error: 'Could not create game' });
   }
 });
 
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   try {
     const games = await db.game.findMany({ orderBy: { startAt: 'asc' } });
-    res.json(games.map(withJoinUrl));
+    res.json(games.map((game) => withJoinUrl(getBaseUrl(req), game)));
   } catch (err) {
     console.error('list games failed', err);
     res.status(500).json({ error: 'Could not list games' });
@@ -199,7 +199,7 @@ router.get('/:gameId', async (req, res) => {
   try {
     const game = await db.game.findUnique({ where: { id: req.params.gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
-    res.json(withJoinUrl(game));
+    res.json(withJoinUrl(getBaseUrl(req), game));
   } catch (err) {
     console.error('get game failed', err);
     res.status(500).json({ error: 'Could not load game' });
@@ -278,7 +278,7 @@ router.patch('/:gameId', async (req, res) => {
     const io = req.app.get('io') as any;
     io.emit(`game:${game.code}`, { type: 'game' });
 
-    res.json(withJoinUrl(game));
+    res.json(withJoinUrl(getBaseUrl(req), game));
   } catch (err) {
     console.error('update game failed', err);
     res.status(500).json({ error: 'Could not update game' });

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as QRCode from 'qrcode';
 import { db } from '../db/client';
-import { config } from '../config';
+import { getBaseUrl } from '../lib/urls';
 import { toSafeTeam } from '../lib/safePlayer';
 
 const router = Router({ mergeParams: true });
@@ -75,7 +75,7 @@ router.get('/', async (req, res) => {
       task: taskMap.get(sub.taskId),
     }));
 
-    const joinUrl = `${config.PUBLIC_URL}/play/${game.code}`;
+    const joinUrl = `${getBaseUrl(req)}/play/${game.code}`;
     const qrUrl = await QRCode.toDataURL(joinUrl, { width: 512, margin: 2 });
 
     let remainingMs: number | null = null;

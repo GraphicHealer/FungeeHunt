@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db/client';
-import { config } from '../config';
 import { createPlayerToken } from '../lib/auth';
+import { getBaseUrl } from '../lib/urls';
 
 const router = Router({ mergeParams: true });
 
@@ -67,7 +67,7 @@ router.post('/:playerId/reissue', async (req, res) => {
     });
 
     res.json({
-      joinUrl: `${config.PUBLIC_URL}/play/${game.code}?token=${token}`,
+      joinUrl: `${getBaseUrl(req)}/play/${game.code}?token=${token}`,
     });
   } catch (err) {
     console.error('reissue join link failed', err);

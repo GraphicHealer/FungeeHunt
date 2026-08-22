@@ -34,7 +34,6 @@ cp .env.example .env
 Edit `.env` for local dev:
 
 ```text
-PUBLIC_URL=http://localhost:3000
 GM_PASSPHRASE=your-secret-gm-passphrase
 SESSION_SECRET=any-long-random-string
 

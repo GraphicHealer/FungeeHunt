@@ -3,7 +3,6 @@ import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import path from 'node:path';
 import { config } from './config';
-import configRoute from './routes/config';
 import authRoute from './routes/auth';
 import gamesRoute from './routes/games';
 import joinRoute from './routes/join';
@@ -31,7 +30,6 @@ app.set('io', io);
 
 app.use(express.json());
 app.use('/uploads', express.static(config.UPLOAD_DIR));
-app.use('/api/config', configRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/join', joinRoute);
 app.use('/api/play/:code', playRoute);

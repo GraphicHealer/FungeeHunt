@@ -2,7 +2,6 @@ import 'dotenv/config';
 import { z } from 'zod';
 
 const envSchema = z.object({
-  PUBLIC_URL: z.string().url(),
   GM_PASSPHRASE: z.string().min(1),
   DATABASE_URL: z.string().min(1),
   SESSION_SECRET: z.string().min(1),
