@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { db } from '../db/client';
 import { verifyPlayerToken } from '../lib/auth';
+import { toSafePlayer, toSafeTeam } from '../lib/safePlayer';
 
 export async function playerAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization ?? '';
@@ -24,7 +25,7 @@ export async function playerAuth(req: Request, res: Response, next: NextFunction
     });
     if (!player) throw new Error('player not found');
 
-    (res.locals as any).player = player;
+    (res.locals as any).player = { ...toSafePlayer(player), team: player.team ? toSafeTeam(player.team) : null };
     (res.locals as any).game = game;
     next();
   } catch {

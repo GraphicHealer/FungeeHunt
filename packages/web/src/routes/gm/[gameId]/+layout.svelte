@@ -18,6 +18,7 @@
     { label: 'Submissions', path: 'submissions' },
     { label: 'Bonuses', path: 'bonuses' },
     { label: 'Rules', path: 'rules' },
+    { label: 'Settings', path: 'settings' },
   ];
 
   function token() {

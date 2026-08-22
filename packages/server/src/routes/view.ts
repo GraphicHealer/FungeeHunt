@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as QRCode from 'qrcode';
 import { db } from '../db/client';
 import { config } from '../config';
+import { toSafeTeam } from '../lib/safePlayer';
 
 const router = Router({ mergeParams: true });
 
@@ -19,10 +20,11 @@ router.get('/', async (req, res) => {
     const game = await db.game.findUnique({ where: { code: code.toUpperCase() } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
 
-    const teams = await db.team.findMany({
+    const rawTeams = await db.team.findMany({
       where: { gameId: game.id },
       include: { manager: true },
     });
+    const teams = rawTeams.map(toSafeTeam);
 
     const tasks = await db.task.findMany({
       where: { gameId: game.id },
