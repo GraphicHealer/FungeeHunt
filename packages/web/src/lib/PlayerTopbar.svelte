@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import { onMount, onDestroy } from 'svelte';
   import { io } from 'socket.io-client';
+  import { formatPoints } from './format';
 
   const code = $page.params.code;
 
@@ -26,7 +27,7 @@
       target = new Date(game.startAt);
       label = 'STARTS IN';
     }
-    if (!target) return '';
+    if (!target) return game.status === 'COMPLETED' ? 'GAME OVER' : '';
     const ms = Math.max(0, target.getTime() - Date.now());
     const s = Math.floor(ms / 1000) % 60;
     const m = Math.floor(ms / 1000 / 60) % 60;
@@ -61,7 +62,9 @@
 
 {#if state?.game}
   <header class="player-topbar">
+    <span class="side left">{state.team?.name ?? ''}</span>
     <span class="countdown">{remainingStr}</span>
+    <span class="side right">{formatPoints(state.team?.score ?? 0)} pts</span>
   </header>
 {/if}
 
@@ -74,17 +77,37 @@
     height: 3rem;
     background: var(--card);
     border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     z-index: 1000;
     box-shadow: var(--shadow);
+    padding: 0 1rem;
+  }
+
+  .side {
+    font-size: 0.95rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .left {
+    text-align: left;
+    color: var(--text);
+  }
+
+  .right {
+    text-align: right;
+    color: var(--success);
   }
 
   .countdown {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     color: var(--brand);
+    text-align: center;
   }
 </style>

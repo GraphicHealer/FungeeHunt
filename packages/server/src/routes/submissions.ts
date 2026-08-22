@@ -55,8 +55,8 @@ router.patch('/:submissionId', async (req, res) => {
 
     const updateData: any = { status };
     if (status === 'INCOMPLETE') {
-      updateData.reason = reason ?? '';
-      updateData.proofUrl = null;
+      updateData.reason = reason ? reason.trim() : null;
+      updateData.proofUrl = '';
       updateData.reviewedAt = null;
       if (current.proofUrl) {
         const filename = current.proofUrl.replace('/uploads/', '');

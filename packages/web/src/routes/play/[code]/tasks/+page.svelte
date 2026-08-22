@@ -8,7 +8,9 @@
 
   let state: any = null;
   let error = '';
-  let selected: Record<string, FileList | null> = {};
+  let selected: Record<string, File | null> = {};
+  let uploading: Record<string, boolean> = {};
+  let uploadProgress: Record<string, number> = {};
   let expanded = '';
   let socket: any;
 
@@ -26,8 +28,27 @@
     return 'image/*,video/*';
   }
 
+  function capture(task: any) {
+    if (task.proofType === 'PHOTO' || task.proofType === 'VIDEO') return 'environment';
+    return undefined;
+  }
+
+  function proofLabel(task: any) {
+    if (task.proofType === 'PHOTO') return 'Take Photo...';
+    if (task.proofType === 'VIDEO') return 'Take Video...';
+    return 'Take Photo/Video...';
+  }
+
+  function statusLabel(status: string) {
+    if (status === 'INCOMPLETE') return 'REJECTED';
+    if (status === 'SUBMITTED') return 'PENDING';
+    if (status === 'UNDER_REVIEW') return 'UNDER REVIEW';
+    return status;
+  }
+
   function handleFile(taskId: string, e: Event) {
-    selected[taskId] = (e.currentTarget as HTMLInputElement).files;
+    const files = (e.currentTarget as HTMLInputElement).files;
+    selected = { ...selected, [taskId]: files?.[0] ?? null };
   }
 
   async function load() {
@@ -41,23 +62,52 @@
     }
   }
 
-  async function submitTask(taskId: string) {
-    const file = selected[taskId]?.[0];
+  function submitTask(taskId: string) {
+    const file = selected[taskId];
     if (!file) return;
+
+    uploading = { ...uploading, [taskId]: true };
+    uploadProgress = { ...uploadProgress, [taskId]: 0 };
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `/api/play/${code}/tasks/${taskId}/submit`, true);
+    xhr.setRequestHeader('Authorization', `Bearer ${token()}`);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = (e.loaded / e.total) * 100;
+        uploadProgress = { ...uploadProgress, [taskId]: percent };
+      }
+    };
+
+    xhr.onload = async () => {
+      uploading = { ...uploading, [taskId]: false };
+      if (xhr.status === 201) {
+        selected = { ...selected, [taskId]: null };
+        await load();
+      } else {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          error = data.error ?? 'Submit failed';
+        } catch {
+          error = 'Submit failed';
+        }
+      }
+    };
+
+    xhr.onerror = () => {
+      uploading = { ...uploading, [taskId]: false };
+      error = 'Submit failed';
+    };
+
+    xhr.ontimeout = () => {
+      uploading = { ...uploading, [taskId]: false };
+      error = 'Submit timed out';
+    };
+
     const form = new FormData();
     form.append('proof', file);
-    const res = await fetch(`/api/play/${code}/tasks/${taskId}/submit`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token()}` },
-      body: form,
-    });
-    if (res.ok) {
-      selected[taskId] = null;
-      await load();
-    } else {
-      const data = await res.json();
-      error = data.error ?? 'Submit failed';
-    }
+    xhr.send(form);
   }
 
   onMount(() => {
@@ -77,7 +127,9 @@
       {#if state.game.status === 'NOT_STARTED'}
         <div class="fungee-pending" style="text-align: center;">
           <h1 class="fungee-title">GAME PENDING</h1>
-          <p class="fungee-subtitle">Your team is <strong>{state.team?.name ?? 'Unnamed team'}</strong>.</p>
+          <p class="fungee-subtitle">
+            {#if state.team}Your team is <strong>{state.team.name ?? 'Unnamed team'}</strong>{:else}No team yet{/if}
+          </p>
           <p>Waiting for the Game Master to start the game…</p>
         </div>
       {:else}
@@ -96,13 +148,13 @@
 
         <ul class="fungee-list">
           {#each state.tasks as task (task.id)}
-            <li class="fungee-accordion">
+            <li class="fungee-accordion" class:incomplete={task.submission?.status === 'INCOMPLETE'}>
               <button class="fungee-accordion-header" on:click={() => (expanded = expanded === task.id ? '' : task.id)}>
                 <span class="fungee-section-title" style="margin: 0;">{task.title}</span>
                 <span style="display: flex; align-items: center; gap: 0.75rem;">
                   <span>+{formatPoints(task.points)}</span>
                   {#if task.submission}
-                    <span class="fungee-status {task.submission.status.toLowerCase()}">{task.submission.status}</span>
+                    <span class="fungee-status {task.submission.status.toLowerCase()}">{statusLabel(task.submission.status)}</span>
                   {:else}
                     <span class="fungee-status">Available</span>
                   {/if}
@@ -119,16 +171,26 @@
                   {/if}
 
                   {#if isManager() && state.game.status === 'LIVE' && (!task.submission || task.submission.status === 'INCOMPLETE')}
-                    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <div class="submit-row">
                       <input
-                        class="fungee-input"
+                        id="proof-{task.id}"
+                        class="file-input"
                         type="file"
                         accept={accept(task)}
-                        capture={task.proofType === 'PHOTO' ? 'environment' : undefined}
+                        capture={capture(task)}
                         on:change={(e) => handleFile(task.id, e)}
-                        style="flex: 1; min-width: 14rem; margin: 0;"
+                        disabled={uploading[task.id]}
                       />
-                      <button class="fungee-btn" style="margin: 0; width: auto;" on:click={() => submitTask(task.id)}>SUBMIT PROOF</button>
+                      {#if !uploading[task.id]}
+                        <label for="proof-{task.id}" class="fungee-btn take-btn" class:ready={selected[task.id]}>
+                          {selected[task.id]?.name ?? proofLabel(task)}
+                        </label>
+                        <button class="fungee-btn" style="margin: 0; width: auto;" on:click={() => submitTask(task.id)} disabled={!selected[task.id]}>Submit</button>
+                      {:else}
+                        <div class="fungee-btn take-btn uploading" style="--progress: {uploadProgress[task.id] ?? 0}%">
+                          <span class="uploading-text">Uploading... {Math.round(uploadProgress[task.id] ?? 0)}%</span>
+                        </div>
+                      {/if}
                     </div>
                   {/if}
                 </div>
@@ -140,7 +202,7 @@
         {#if state.game.foodDriveEnabled}
           <div class="fungee-list-item" style="margin-top: 1.5rem;">
             <h2 class="fungee-section-title">FOOD DRIVE</h2>
-            <p style="margin: 0.25rem 0;">{state.game.foodDrivePointsPerItem} points per eligible item</p>
+            <p style="margin: 0.25rem 0;">{formatPoints(state.game.foodDrivePointsPerItem)} points per eligible item</p>
             {#if state.game.foodDrivePermissible}
               <p style="margin: 0.25rem 0; color: var(--muted);"><strong>Permissible:</strong> {state.game.foodDrivePermissible}</p>
             {/if}
@@ -157,3 +219,51 @@
     {/if}
   </div>
 </main>
+
+<style>
+  .fungee-accordion.incomplete {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 1px var(--danger);
+  }
+
+  .submit-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .file-input {
+    display: none;
+  }
+
+  .take-btn {
+    margin: 0;
+    width: auto;
+    flex: 1;
+    min-width: 10rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .take-btn.ready {
+    background: var(--success);
+  }
+
+  .take-btn.uploading {
+    background: linear-gradient(90deg, var(--success) var(--progress), var(--brand) var(--progress));
+    color: #fff;
+    text-align: center;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+  }
+
+  .uploading-text {
+    position: relative;
+    z-index: 1;
+  }
+</style>

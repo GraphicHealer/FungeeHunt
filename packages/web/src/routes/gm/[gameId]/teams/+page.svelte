@@ -84,7 +84,7 @@
 <div class="page">
   <header class="page-header">
     <h2>Teams</h2>
-    <button on:click={openNew}>+ ADD TEAM</button>
+    <button class="fungee-btn" on:click={openNew} style="width: auto; margin: 0;">+ ADD TEAM</button>
   </header>
 
   {#if error && !showModal}<p class="error">{error}</p>{/if}
@@ -105,35 +105,37 @@
 {#if showModal}
   <div class="modal-backdrop" on:click={close}>
     <div class="modal" on:click|stopPropagation>
-      <h3>{editId ? 'Edit Team' : 'Add Team'}</h3>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Team' : 'Add Team'}</h3>
 
-      <label for="team-name">Team Name</label>
-      <input id="team-name" type="text" bind:value={name} placeholder="Optional" />
+        <label for="team-name">Team Name</label>
+        <input id="team-name" type="text" bind:value={name} placeholder="Optional" />
 
-      <label for="manager">Manager</label>
-      <select id="manager" bind:value={managerId}>
-        <option value="">Select manager…</option>
-        {#each players.filter((p) => p.type === 'APP') as player (player.id)}
-          <option value={player.id}>{player.displayName}</option>
-        {/each}
-      </select>
+        <label for="manager">Manager</label>
+        <select id="manager" bind:value={managerId}>
+          <option value="">Select manager…</option>
+          {#each players.filter((p) => p.type === 'APP') as player (player.id)}
+            <option value={player.id}>{player.displayName}</option>
+          {/each}
+        </select>
 
-      <p class="label">Members</p>
-      <div class="members">
-        {#each players as player (player.id)}
-          <label>
-            <input type="checkbox" value={player.id} bind:group={selectedMembers} />
-            {player.displayName} ({player.type})
-          </label>
-        {/each}
-      </div>
+        <p class="label">Members</p>
+        <div class="members">
+          {#each players as player (player.id)}
+            <label>
+              <input type="checkbox" value={player.id} bind:group={selectedMembers} />
+              {player.displayName} ({player.type})
+            </label>
+          {/each}
+        </div>
 
-      {#if error}<p class="error">{error}</p>{/if}
+        {#if error}<p class="error">{error}</p>{/if}
 
-      <div class="actions">
-        <button on:click={close}>Cancel</button>
-        <button on:click={save} disabled={!managerId}>Save</button>
-      </div>
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="submit" disabled={!managerId}>Save</button>
+        </div>
+      </form>
     </div>
   </div>
 {/if}
@@ -243,6 +245,12 @@
     gap: 0.5rem;
     padding: 0.25rem 0;
     cursor: pointer;
+  }
+
+  .members input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
   }
 
   .actions {

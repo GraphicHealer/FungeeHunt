@@ -5,8 +5,6 @@
   const gameId = $page.params.gameId;
 
   let game: any = null;
-  let teams: any[] = [];
-  let foodDrive: Record<string, number> = {};
   let modal: 'return' | 'food' | null = null;
   let saving = false;
   let error = '';
@@ -35,17 +33,8 @@
   }
 
   async function load() {
-    const [gRes, tRes] = await Promise.all([
-      fetch(`/api/gm/games/${gameId}`, { headers: { Authorization: `Bearer ${token()}` } }),
-      fetch(`/api/gm/games/${gameId}/teams`, { headers: { Authorization: `Bearer ${token()}` } }),
-    ]);
-    if (gRes.ok) game = await gRes.json();
-    if (tRes.ok) {
-      teams = await tRes.json();
-      for (const t of teams) {
-        foodDrive[t.id] = t.foodDriveItems ?? 0;
-      }
-    }
+    const res = await fetch(`/api/gm/games/${gameId}`, { headers: { Authorization: `Bearer ${token()}` } });
+    if (res.ok) game = await res.json();
   }
 
   function openReturn() {
@@ -127,29 +116,6 @@
     }
   }
 
-  async function markReturn(teamId: string) {
-    const res = await fetch(`/api/gm/games/${gameId}/bonuses/return/${teamId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token()}`,
-      },
-    });
-    if (res.ok) await load();
-  }
-
-  async function saveFoodDrive(teamId: string) {
-    const res = await fetch(`/api/gm/games/${gameId}/bonuses/food-drive/${teamId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token()}`,
-      },
-      body: JSON.stringify({ items: foodDrive[teamId] }),
-    });
-    if (res.ok) await load();
-  }
-
   onMount(load);
 </script>
 
@@ -179,63 +145,33 @@
       {/if}
       <p class="hint">Click to edit</p>
     </button>
-
-    <section class="card" style="margin-top: 1.5rem;">
-      <h3>Return Time Bonus Tracking</h3>
-      <ul>
-        {#each teams as team (team.id)}
-          <li>
-            <span class="team-name">{team.name ?? 'Unnamed team'}</span>
-            {#if team.returnBonusAwarded}
-              <span class="awarded"><span class="mdi mdi-check"></span> Returned at {fmtTime(team.returnedAt)}</span>
-            {:else}
-              <button class="fungee-btn" style="width: auto; margin: 0;" on:click={() => markReturn(team.id)}>MARK RETURNED</button>
-            {/if}
-          </li>
-        {/each}
-      </ul>
-    </section>
-
-    <section class="card">
-      <h3>Food Drive Tracking</h3>
-      <ul>
-        {#each teams as team (team.id)}
-          <li>
-            <span class="team-name">{team.name ?? 'Unnamed team'}</span>
-            <input class="fungee-input" type="number" bind:value={foodDrive[team.id]} min="0" style="width: 5rem;" />
-            <button class="fungee-btn" style="width: auto; margin: 0;" on:click={() => saveFoodDrive(team.id)}>SAVE</button>
-            {#if team.foodDriveBonusAwarded}
-              <span class="awarded"><span class="mdi mdi-check"></span></span>
-            {/if}
-          </li>
-        {/each}
-      </ul>
-    </section>
   {/if}
 </div>
 
 {#if modal === 'return'}
   <div class="modal-backdrop" on:click={close}>
     <div class="modal fungee-card" on:click|stopPropagation>
-      <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Return Time Bonus</h3>
-      <label class="fungee-check">
-        <input type="checkbox" bind:checked={retEnabled} />
-        Enable return bonus
-      </label>
+      <form on:submit|preventDefault={saveReturn}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Return Time Bonus</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={retEnabled} />
+          Enable return bonus
+        </label>
 
-      {#if retEnabled}
-        <label class="fungee-label" for="rw">Window Length (minutes)</label>
-        <input class="fungee-input" id="rw" type="number" bind:value={retWindow} min="1" />
-        <label class="fungee-label" for="rp">Points</label>
-        <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={retPoints} min="0" />
-      {/if}
+        {#if retEnabled}
+          <label class="fungee-label" for="rw">Window Length (minutes)</label>
+          <input class="fungee-input" id="rw" type="number" bind:value={retWindow} min="1" />
+          <label class="fungee-label" for="rp">Points</label>
+          <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={retPoints} min="0" />
+        {/if}
 
-      {#if error}<p class="fungee-error">{error}</p>{/if}
+        {#if error}<p class="fungee-error">{error}</p>{/if}
 
-      <div class="fungee-btn-row" style="margin-top: 1rem;">
-        <button class="fungee-btn secondary" on:click={close} disabled={saving}>CANCEL</button>
-        <button class="fungee-btn" on:click={saveReturn} disabled={saving}>SAVE</button>
-      </div>
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
     </div>
   </div>
 {/if}
@@ -243,27 +179,29 @@
 {#if modal === 'food'}
   <div class="modal-backdrop" on:click={close}>
     <div class="modal fungee-card" on:click|stopPropagation>
-      <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Food Drive</h3>
-      <label class="fungee-check">
-        <input type="checkbox" bind:checked={fdEnabled} />
-        Enable food drive
-      </label>
+      <form on:submit|preventDefault={saveFood}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Food Drive</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={fdEnabled} />
+          Enable food drive
+        </label>
 
-      {#if fdEnabled}
-        <label class="fungee-label" for="fdpp">Points Per Item</label>
-        <input class="fungee-input" id="fdpp" type="number" step="0.1" bind:value={fdPoints} min="0" />
-        <label class="fungee-label" for="fdperm">Permissible Items</label>
-        <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc."></textarea>
-        <label class="fungee-label" for="fdsug">Suggested Items</label>
-        <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc."></textarea>
-      {/if}
+        {#if fdEnabled}
+          <label class="fungee-label" for="fdpp">Points Per Item</label>
+          <input class="fungee-input" id="fdpp" type="number" step="0.1" bind:value={fdPoints} min="0" />
+          <label class="fungee-label" for="fdperm">Permissible Items</label>
+          <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc."></textarea>
+          <label class="fungee-label" for="fdsug">Suggested Items</label>
+          <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc."></textarea>
+        {/if}
 
-      {#if error}<p class="fungee-error">{error}</p>{/if}
+        {#if error}<p class="fungee-error">{error}</p>{/if}
 
-      <div class="fungee-btn-row" style="margin-top: 1rem;">
-        <button class="fungee-btn secondary" on:click={close} disabled={saving}>CANCEL</button>
-        <button class="fungee-btn" on:click={saveFood} disabled={saving}>SAVE</button>
-      </div>
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
     </div>
   </div>
 {/if}
@@ -312,46 +250,6 @@
     margin: 0;
     font-size: 0.8rem;
     color: var(--brand);
-  }
-
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .card h3 {
-    margin-top: 0;
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  li {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 0.25rem;
-    flex-wrap: wrap;
-  }
-
-  .team-name {
-    flex: 1;
-    font-weight: bold;
-  }
-
-  .awarded {
-    color: var(--success);
-    font-weight: bold;
   }
 
   .modal-backdrop {

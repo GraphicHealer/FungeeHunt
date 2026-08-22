@@ -24,7 +24,7 @@
 </script>
 
 <main class="fungee-page">
-  <div class="fungee-card">
+  <form class="fungee-card" on:submit|preventDefault={join}>
     <h1 class="fungee-title">JOIN FUNGEE-HUNT</h1>
     <p class="fungee-subtitle">Enter your name to get started.</p>
     <p class="fungee-code">{code}</p>
@@ -34,6 +34,6 @@
 
     {#if error}<p class="fungee-error">{error}</p>{/if}
 
-    <button class="fungee-btn" on:click={join} disabled={!displayName}>CONTINUE</button>
-  </div>
+    <button class="fungee-btn" type="submit" disabled={!displayName}>CONTINUE</button>
+  </form>
 </main>

@@ -66,43 +66,45 @@
   {#if loading}
     <p>Loading…</p>
   {:else if settings}
-    <section class="card">
-      <h2>Return Time Bonus Defaults</h2>
-      <label class="fungee-check">
-        <input type="checkbox" bind:checked={settings.returnBonusEnabled} />
-        Enabled by default
-      </label>
-      <label for="rbw">Default window length (minutes)</label>
-      <input id="rbw" type="number" bind:value={settings.returnBonusWindowMinutes} min="1" />
-      <label for="rbp">Default points</label>
-      <input id="rbp" type="number" step="0.1" bind:value={settings.returnBonusPoints} min="0" />
-    </section>
+    <form on:submit|preventDefault={save}>
+      <section class="card">
+        <h2>Return Time Bonus Defaults</h2>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={settings.returnBonusEnabled} />
+          Enabled by default
+        </label>
+        <label for="rbw">Default window length (minutes)</label>
+        <input id="rbw" type="number" bind:value={settings.returnBonusWindowMinutes} min="1" />
+        <label for="rbp">Default points</label>
+        <input id="rbp" type="number" step="0.1" bind:value={settings.returnBonusPoints} min="0" />
+      </section>
 
-    <section class="card">
-      <h2>Food Drive Defaults</h2>
-      <label class="fungee-check">
-        <input type="checkbox" bind:checked={settings.foodDriveEnabled} />
-        Enabled by default
-      </label>
-      <label for="fdpp">Default points per item</label>
-      <input id="fdpp" type="number" step="0.1" bind:value={settings.foodDrivePointsPerItem} min="0" />
-      <label for="fdperm">Default permissible items</label>
-      <textarea id="fdperm" bind:value={settings.foodDrivePermissible} />
-      <label for="fdsug">Default suggested items</label>
-      <textarea id="fdsug" bind:value={settings.foodDriveSuggested} />
-    </section>
+      <section class="card">
+        <h2>Food Drive Defaults</h2>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={settings.foodDriveEnabled} />
+          Enabled by default
+        </label>
+        <label for="fdpp">Default points per item</label>
+        <input id="fdpp" type="number" step="0.1" bind:value={settings.foodDrivePointsPerItem} min="0" />
+        <label for="fdperm">Default permissible items</label>
+        <textarea id="fdperm" bind:value={settings.foodDrivePermissible} />
+        <label for="fdsug">Default suggested items</label>
+        <textarea id="fdsug" bind:value={settings.foodDriveSuggested} />
+      </section>
 
-    <section class="card">
-      <h2>Default Rules (JSON)</h2>
-      <textarea class="json" bind:value={defaultRulesStr} />
-    </section>
+      <section class="card">
+        <h2>Default Rules (JSON)</h2>
+        <textarea class="json" bind:value={defaultRulesStr} />
+      </section>
 
-    <section class="card">
-      <h2>Default Tasks (JSON)</h2>
-      <textarea class="json" bind:value={defaultTasksStr} />
-    </section>
+      <section class="card">
+        <h2>Default Tasks (JSON)</h2>
+        <textarea class="json" bind:value={defaultTasksStr} />
+      </section>
 
-    <button on:click={save}>SAVE SETTINGS</button>
+      <button type="submit">SAVE SETTINGS</button>
+    </form>
   {/if}
 </main>
 

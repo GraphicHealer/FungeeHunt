@@ -11,6 +11,10 @@
     return new Date(v);
   }
 
+  function focus(node: HTMLInputElement) {
+    node.focus();
+  }
+
   let step = 1;
 
   let name = 'Fungee-Hunt';
@@ -112,68 +116,74 @@
 
     <div class="wizard">
       {#if step === 1}
-        <h2 class="fungee-section-title">1. Basics</h2>
-        <label class="fungee-label" for="name">Game Name</label>
-        <input class="fungee-input" id="name" type="text" bind:value={name} />
+        <form on:submit|preventDefault={() => step = 2}>
+          <h2 class="fungee-section-title">1. Basics</h2>
+          <label class="fungee-label" for="name">Game Name</label>
+          <input class="fungee-input" id="name" type="text" bind:value={name} use:focus />
 
-        <label class="fungee-label" for="date">Date</label>
-        <input class="fungee-input" id="date" type="date" bind:value={date} />
+          <label class="fungee-label" for="date">Date</label>
+          <input class="fungee-input" id="date" type="date" bind:value={date} />
 
-        <label class="fungee-label" for="start">Start Time</label>
-        <input class="fungee-input" id="start" type="time" bind:value={startTime} />
+          <label class="fungee-label" for="start">Start Time</label>
+          <input class="fungee-input" id="start" type="time" bind:value={startTime} />
 
-        <label class="fungee-label" for="end">End Time</label>
-        <input class="fungee-input" id="end" type="time" bind:value={endTime} />
+          <label class="fungee-label" for="end">End Time</label>
+          <input class="fungee-input" id="end" type="time" bind:value={endTime} />
 
-        <label class="fungee-label" for="mode">Submission Review</label>
-        <select class="fungee-select" id="mode" bind:value={submissionMode}>
-          <option value="AUTOMATIC">Automatic Approval</option>
-          <option value="MANUAL">Game Master Approval</option>
-        </select>
+          <label class="fungee-label" for="mode">Submission Review</label>
+          <select class="fungee-select" id="mode" bind:value={submissionMode}>
+            <option value="AUTOMATIC">Automatic Approval</option>
+            <option value="MANUAL">Game Master Approval</option>
+          </select>
 
-        <button class="fungee-btn" on:click={() => step = 2} disabled={!name || !date || !startTime || !endTime}>NEXT</button>
+          <button class="fungee-btn" type="submit" disabled={!name || !date || !startTime || !endTime}>NEXT</button>
+        </form>
       {:else if step === 2}
-        <h2 class="fungee-section-title">2. Return Bonus</h2>
-        <label class="fungee-check">
-          <input type="checkbox" bind:checked={returnBonusEnabled} />
-          Enable return bonus
-        </label>
-        {#if returnBonusEnabled}
-          <label class="fungee-label" for="rbw">Window Length (minutes)</label>
-          <input class="fungee-input" id="rbw" type="number" bind:value={returnBonusWindowMinutes} min="1" />
-          <label class="fungee-label" for="rs">Window Start Time</label>
-          <input class="fungee-input" id="rs" type="time" bind:value={returnStartTime} />
-          <label class="fungee-label" for="re">Window End Time</label>
-          <input class="fungee-input" id="re" type="time" bind:value={returnEndTime} />
-          <label class="fungee-label" for="rp">Points</label>
-          <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={returnPoints} />
-        {/if}
+        <form on:submit|preventDefault={() => step = 3}>
+          <h2 class="fungee-section-title">2. Return Bonus</h2>
+          <label class="fungee-check">
+            <input type="checkbox" bind:checked={returnBonusEnabled} />
+            Enable return bonus
+          </label>
+          {#if returnBonusEnabled}
+            <label class="fungee-label" for="rbw">Window Length (minutes)</label>
+            <input class="fungee-input" id="rbw" type="number" bind:value={returnBonusWindowMinutes} min="1" use:focus />
+            <label class="fungee-label" for="rs">Window Start Time</label>
+            <input class="fungee-input" id="rs" type="time" bind:value={returnStartTime} />
+            <label class="fungee-label" for="re">Window End Time</label>
+            <input class="fungee-input" id="re" type="time" bind:value={returnEndTime} />
+            <label class="fungee-label" for="rp">Points</label>
+            <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={returnPoints} />
+          {/if}
 
-        <div class="fungee-btn-row">
-          <button class="fungee-btn secondary" on:click={() => step = 1}>BACK</button>
-          <button class="fungee-btn" on:click={() => step = 3}>NEXT</button>
-        </div>
+          <div class="fungee-btn-row">
+            <button class="fungee-btn secondary" type="button" on:click={() => step = 1}>BACK</button>
+            <button class="fungee-btn" type="submit">NEXT</button>
+          </div>
+        </form>
       {:else if step === 3}
-        <h2 class="fungee-section-title">3. Food Drive</h2>
-        <label class="fungee-check">
-          <input type="checkbox" bind:checked={foodDriveEnabled} />
-          Enable food drive bonus
-        </label>
-        {#if foodDriveEnabled}
-          <label class="fungee-label" for="fdpp">Points Per Item</label>
-          <input class="fungee-input" id="fdpp" type="number" bind:value={foodDrivePointsPerItem} />
-          <label class="fungee-label" for="fdperm">Permissible Items</label>
-          <textarea class="fungee-textarea" id="fdperm" bind:value={foodDrivePermissible} placeholder="Cans, boxes, etc."></textarea>
-          <label class="fungee-label" for="fdsug">Suggested Items</label>
-          <textarea class="fungee-textarea" id="fdsug" bind:value={foodDriveSuggested} placeholder="Peanut butter, soup, etc."></textarea>
-        {/if}
+        <form on:submit|preventDefault={createGame}>
+          <h2 class="fungee-section-title">3. Food Drive</h2>
+          <label class="fungee-check">
+            <input type="checkbox" bind:checked={foodDriveEnabled} />
+            Enable food drive bonus
+          </label>
+          {#if foodDriveEnabled}
+            <label class="fungee-label" for="fdpp">Points Per Item</label>
+            <input class="fungee-input" id="fdpp" type="number" bind:value={foodDrivePointsPerItem} use:focus />
+            <label class="fungee-label" for="fdperm">Permissible Items</label>
+            <textarea class="fungee-textarea" id="fdperm" bind:value={foodDrivePermissible} placeholder="Cans, boxes, etc."></textarea>
+            <label class="fungee-label" for="fdsug">Suggested Items</label>
+            <textarea class="fungee-textarea" id="fdsug" bind:value={foodDriveSuggested} placeholder="Peanut butter, soup, etc."></textarea>
+          {/if}
 
-        {#if error}<p class="fungee-error">{error}</p>{/if}
+          {#if error}<p class="fungee-error">{error}</p>{/if}
 
-        <div class="fungee-btn-row">
-          <button class="fungee-btn secondary" on:click={() => step = 2}>BACK</button>
-          <button class="fungee-btn" on:click={createGame}>CREATE GAME</button>
-        </div>
+          <div class="fungee-btn-row">
+            <button class="fungee-btn secondary" type="button" on:click={() => step = 2}>BACK</button>
+            <button class="fungee-btn" type="submit">CREATE GAME</button>
+          </div>
+        </form>
       {/if}
     </div>
   </div>

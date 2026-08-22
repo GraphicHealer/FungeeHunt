@@ -113,36 +113,38 @@
 {#if showModal}
   <div class="modal-backdrop" on:click={close}>
     <div class="modal" on:click|stopPropagation>
-      <h3>{editId ? 'Edit Task' : 'Add Task'}</h3>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Task' : 'Add Task'}</h3>
 
-      <label for="title">Title</label>
-      <input id="title" type="text" bind:value={title} placeholder="Title" />
+        <label for="title">Title</label>
+        <input id="title" type="text" bind:value={title} placeholder="Title" />
 
-      <label for="description">Description</label>
-      <textarea id="description" bind:value={description} placeholder="Description" />
+        <label for="description">Description</label>
+        <textarea id="description" bind:value={description} placeholder="Description" />
 
-      <label for="points">Points</label>
-      <input id="points" type="number" step="0.1" bind:value={points} />
+        <label for="points">Points</label>
+        <input id="points" type="number" step="0.1" bind:value={points} />
 
-      <label for="proofType">Proof Type</label>
-      <select id="proofType" bind:value={proofType}>
-        <option value="PHOTO">Photo</option>
-        <option value="VIDEO">Video</option>
-        <option value="EITHER">Photo or Video</option>
-      </select>
+        <label for="proofType">Proof Type</label>
+        <select id="proofType" bind:value={proofType}>
+          <option value="PHOTO">Photo</option>
+          <option value="VIDEO">Video</option>
+          <option value="EITHER">Photo or Video</option>
+        </select>
 
-      <label for="order">Order</label>
-      <input id="order" type="number" bind:value={order} />
+        <label for="order">Order</label>
+        <input id="order" type="number" bind:value={order} />
 
-      {#if error}<p class="error">{error}</p>{/if}
+        {#if error}<p class="error">{error}</p>{/if}
 
-      <div class="actions">
-        <button class="fungee-btn secondary" on:click={close}>Cancel</button>
-        {#if editId}
-          <button class="fungee-btn danger" on:click={() => remove(editId)}>Delete</button>
-        {/if}
-        <button class="fungee-btn" on:click={save} disabled={!title}>Save</button>
-      </div>
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={() => remove(editId)}>Delete</button>
+          {/if}
+          <button type="submit" disabled={!title}>Save</button>
+        </div>
+      </form>
     </div>
   </div>
 {/if}

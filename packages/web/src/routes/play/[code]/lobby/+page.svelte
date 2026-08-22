@@ -76,18 +76,20 @@
 
     {#if state}
       {#if !state.team}
-        <p class="fungee-subtitle">You're in, but you don't have a team yet.</p>
+        <p class="fungee-subtitle">No team yet</p>
         <p>{status}</p>
       {:else}
         <div class="team-name">
           {#if editing}
-            <input class="fungee-input" type="text" bind:value={newName} placeholder="Team name" style="flex: 1; margin: 0;" />
-            <button class="fungee-btn" style="width: auto; margin: 0;" on:click={rename}>
-              <span class="mdi mdi-check"></span>
-            </button>
-            <button class="fungee-btn secondary" style="width: auto; margin: 0;" on:click={() => { editing = false; newName = state.team?.name ?? ''; }}>
-              <span class="mdi mdi-close"></span>
-            </button>
+            <form class="team-name" on:submit|preventDefault={rename}>
+              <input class="fungee-input" type="text" bind:value={newName} placeholder="Team name" style="flex: 1; margin: 0;" />
+              <button class="fungee-btn" style="width: auto; margin: 0;" type="submit">
+                <span class="mdi mdi-check"></span>
+              </button>
+              <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={() => { editing = false; newName = state.team?.name ?? ''; }}>
+                <span class="mdi mdi-close"></span>
+              </button>
+            </form>
           {:else}
             <h2 class="fungee-section-title" style="margin: 0;">{state.team.name ?? 'Unnamed team'}</h2>
             {#if isManager()}
@@ -110,7 +112,7 @@
                 {#if member.id === state.team?.managerId}
                   <span class="mdi mdi-star" style="color: var(--warning);"></span>
                 {/if}
-                {member.displayName}
+                {member.displayName}{#if member.id === state.player.id}<span style="color: var(--muted);"> (You)</span>{/if}
               </span>
             </li>
           {/each}

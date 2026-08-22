@@ -8,7 +8,7 @@
   const dispatch = createEventDispatcher();
 
   let reason = '';
-  let denying = false;
+  let rejecting = false;
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -16,7 +16,7 @@
 
   async function review(status: string) {
     if (status === 'INCOMPLETE' && !reason.trim()) {
-      toast.add('A reason is required when denying a submission', 'error');
+      toast.add('A reason is required when rejecting a submission', 'error');
       return;
     }
 
@@ -30,7 +30,8 @@
     });
     if (res.ok) {
       dispatch('review');
-      toast.add(status === 'COMPLETED' ? 'Submission approved' : 'Submission denied', 'success');
+      toast.add(status === 'COMPLETED' ? 'Submission approved' : 'Submission rejected', 'success');
+      close();
     } else {
       const data = await res.json();
       toast.add(data.error ?? 'Could not update submission', 'error');
@@ -62,20 +63,23 @@
       </div>
     {/if}
 
-    {#if denying}
-      <label class="fungee-label" for="reason">Reason for denying (required)</label>
-      <textarea class="fungee-textarea" id="reason" bind:value={reason} placeholder="Explain why this submission is denied…"></textarea>
+    {#if rejecting}
+      <form on:submit|preventDefault={() => review('INCOMPLETE')}>
+        <label class="fungee-label" for="reason">Reason for rejecting (required)</label>
+        <textarea class="fungee-textarea" id="reason" bind:value={reason} placeholder="Explain why this submission is rejected…"></textarea>
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn danger" type="submit">REJECT</button>
+          <button class="fungee-btn" type="button" on:click={() => { rejecting = false; reason = ''; }}>CANCEL</button>
+        </div>
+      </form>
     {/if}
 
     <div class="fungee-btn-row" style="margin-top: 1rem;">
       <button class="fungee-btn secondary" on:click={close}>CLOSE</button>
+      {#if !rejecting}
+        <button class="fungee-btn danger" on:click={() => (rejecting = true)}>REJECT</button>
+      {/if}
       {#if sub.status !== 'COMPLETED'}
-        {#if denying}
-          <button class="fungee-btn danger" on:click={() => review('INCOMPLETE')}>CONFIRM DENY</button>
-          <button class="fungee-btn" on:click={() => { denying = false; reason = ''; }}>CANCEL</button>
-        {:else}
-          <button class="fungee-btn danger" on:click={() => (denying = true)}>DENY</button>
-        {/if}
         <button class="fungee-btn" on:click={() => review('COMPLETED')}>APPROVE</button>
       {/if}
     </div>

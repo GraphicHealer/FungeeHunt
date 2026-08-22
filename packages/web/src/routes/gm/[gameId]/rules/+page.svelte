@@ -128,16 +128,18 @@
 {#if editIndex >= 0}
   <div class="modal-backdrop" on:click={closeModal}>
     <div class="modal fungee-card" on:click|stopPropagation>
-      <h3>Edit Section</h3>
-      <label class="fungee-label" for="title">Title</label>
-      <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" />
-      <label class="fungee-label" for="body">Body</label>
-      <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" />
-      <div class="fungee-btn-row">
-        <button class="fungee-btn secondary" on:click={closeModal}>CANCEL</button>
-        <button class="fungee-btn danger" on:click={remove}>REMOVE</button>
-        <button class="fungee-btn" on:click={applyEdit}>SAVE SECTION</button>
-      </div>
+      <form on:submit|preventDefault={applyEdit}>
+        <h3>Edit Section</h3>
+        <label class="fungee-label" for="title">Title</label>
+        <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" />
+        <label class="fungee-label" for="body">Body</label>
+        <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" />
+        <div class="fungee-btn-row">
+          <button class="fungee-btn secondary" type="button" on:click={closeModal}>CANCEL</button>
+          <button class="fungee-btn danger" type="button" on:click={remove}>REMOVE</button>
+          <button class="fungee-btn" type="submit">SAVE SECTION</button>
+        </div>
+      </form>
     </div>
   </div>
 {/if}

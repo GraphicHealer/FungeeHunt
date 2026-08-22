@@ -95,17 +95,19 @@
 {#if showModal}
   <div class="modal-backdrop" on:click={close}>
     <div class="modal" on:click|stopPropagation>
-      <h3>Add Offline Player</h3>
+      <form on:submit|preventDefault={addOffline}>
+        <h3>Add Offline Player</h3>
 
-      <label for="displayName">Display Name</label>
-      <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" />
+        <label for="displayName">Display Name</label>
+        <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" />
 
-      {#if error}<p class="error">{error}</p>{/if}
+        {#if error}<p class="error">{error}</p>{/if}
 
-      <div class="actions">
-        <button on:click={close}>Cancel</button>
-        <button on:click={addOffline} disabled={!displayName}>Add</button>
-      </div>
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="submit" disabled={!displayName}>Add</button>
+        </div>
+      </form>
     </div>
   </div>
 {/if}

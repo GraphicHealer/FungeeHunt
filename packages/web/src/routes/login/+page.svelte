@@ -5,6 +5,10 @@
   let passphrase = '';
   let error = '';
 
+  function focus(node: HTMLInputElement) {
+    node.focus();
+  }
+
   async function login() {
     error = '';
     const res = await fetch('/api/auth/gm', {
@@ -24,15 +28,15 @@
 
 <main class="fungee-page">
   <ThemeToggle />
-  <div class="fungee-card">
+  <form class="fungee-card" on:submit|preventDefault={login}>
     <h1 class="fungee-title">Game Master Log In</h1>
     <p class="fungee-subtitle">Enter the passphrase to access the Game Master board.</p>
 
     <label class="fungee-label" for="passphrase">Passphrase</label>
-    <input class="fungee-input" id="passphrase" type="password" bind:value={passphrase} />
+    <input class="fungee-input" id="passphrase" type="password" bind:value={passphrase} use:focus />
 
     {#if error}<p class="fungee-error">{error}</p>{/if}
 
-    <button class="fungee-btn" on:click={login} disabled={!passphrase}>LOG IN</button>
-  </div>
+    <button class="fungee-btn" type="submit" disabled={!passphrase}>LOG IN</button>
+  </form>
 </main>

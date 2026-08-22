@@ -71,6 +71,9 @@ router.post('/', async (req, res) => {
       return created;
     });
 
+    const io = req.app.get('io') as any;
+    io.emit(`game:${game.code}`, { type: 'team' });
+
     res.status(201).json(team);
   } catch (err) {
     console.error('create team failed', err);

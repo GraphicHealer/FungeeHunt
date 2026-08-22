@@ -68,11 +68,11 @@
 
   <ul class="submissions">
     {#each submissions as sub (sub.id)}
-      <li on:click={() => openModal(sub)}>
+      <li class:incomplete={sub.status === 'INCOMPLETE'} on:click={() => openModal(sub)}>
         <div class="meta">
           <span class="team">{sub.team?.name ?? 'Unknown team'}</span>
           <span class="task">{sub.task?.title ?? ''}</span>
-          <span class="status">{sub.status}</span>
+          <span class="status">{sub.status === 'INCOMPLETE' ? 'REJECTED' : sub.status}</span>
         </div>
       </li>
     {/each}
@@ -142,5 +142,10 @@
 
   .status {
     font-weight: bold;
+  }
+
+  .submissions li.incomplete {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 1px var(--danger);
   }
 </style>

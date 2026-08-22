@@ -43,7 +43,7 @@ router.get('/', async (req, res) => {
 
     res.json({
       player,
-      team: { ...team, score: completedScore + returnBonus + foodDriveBonus },
+      team: team ? { ...team, score: completedScore + returnBonus + foodDriveBonus } : null,
       game: {
         id: game.id,
         name: game.name,
