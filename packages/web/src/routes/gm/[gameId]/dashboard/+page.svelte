@@ -17,8 +17,26 @@
   let socket: any;
   let interval: ReturnType<typeof setInterval>;
 
+  let settingsModal = false;
+  let settingsStartAt = '';
+  let settingsEndAt = '';
+  let settingsSubmissionMode = 'AUTOMATIC';
+  let settingsReturnStart = '';
+  let settingsReturnEnd = '';
+  let returnOffsetStart = 0;
+  let returnOffsetEnd = 0;
+
   function token() {
     return localStorage.getItem('gmToken') ?? '';
+  }
+
+  function toInputValue(d: Date) {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function fromInputValue(v: string) {
+    return new Date(v);
   }
 
   async function load() {
@@ -120,6 +138,54 @@
     }
   }
 
+  function openSettings() {
+    if (!game) return;
+    settingsStartAt = toInputValue(new Date(game.startAt));
+    settingsEndAt = toInputValue(new Date(game.endAt));
+    settingsSubmissionMode = game.submissionMode;
+    returnOffsetStart = game.returnStart ? new Date(game.endAt).getTime() - new Date(game.returnStart).getTime() : 0;
+    returnOffsetEnd = game.returnEnd ? new Date(game.endAt).getTime() - new Date(game.returnEnd).getTime() : 0;
+    settingsModal = true;
+  }
+
+  function closeSettings() {
+    settingsModal = false;
+  }
+
+  $: if (settingsEndAt && returnOffsetStart !== 0) {
+    const end = fromInputValue(settingsEndAt);
+    settingsReturnStart = toInputValue(new Date(end.getTime() - returnOffsetStart));
+    settingsReturnEnd = toInputValue(new Date(end.getTime() - returnOffsetEnd));
+  }
+
+  async function saveSettings() {
+    const body: any = {
+      startAt: settingsStartAt,
+      endAt: settingsEndAt,
+      submissionMode: settingsSubmissionMode,
+    };
+    if (game?.returnBonusEnabled) {
+      body.returnStart = settingsReturnStart;
+      body.returnEnd = settingsReturnEnd;
+    }
+    const res = await fetch(`/api/gm/games/${gameId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      closeSettings();
+      await load();
+      toast.add('Game settings saved', 'success');
+    } else {
+      const data = await res.json();
+      toast.add(data.error ?? 'Could not save game settings', 'error');
+    }
+  }
+
   function remaining() {
     if (!game || game.status !== 'LIVE' || !game.endAt) return null;
     const ms = Math.max(0, new Date(game.endAt).getTime() - Date.now());
@@ -216,6 +282,15 @@
         </div>
       </section>
 
+      <section class="side-card">
+        <h3 class="fungee-section-title" style="font-size: 1rem; margin: 0;">Game Settings</h3>
+        <p class="window">
+          Start: {game.startAt ? new Date(game.startAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'}<br />
+          End: {game.endAt ? new Date(game.endAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'}
+        </p>
+        <button class="fungee-btn" style="width: auto; margin: 0;" on:click={openSettings}>EDIT</button>
+      </section>
+
       {#if game.returnBonusEnabled}
         <section class="side-card">
           <h3 class="fungee-section-title" style="font-size: 1rem; margin: 0;">Return Bonus</h3>
@@ -265,6 +340,29 @@
 
 {#if reviewing}
   <SubmissionReview {gameId} sub={reviewing} on:close={() => (reviewing = null)} on:review={loadSubmissions} />
+{/if}
+
+{#if settingsModal}
+  <div class="modal-backdrop" on:click={closeSettings}>
+    <div class="modal fungee-card" on:click|stopPropagation>
+      <form on:submit|preventDefault={saveSettings}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Game Settings</h3>
+        <label class="fungee-label" for="startAt">Start Time</label>
+        <input class="fungee-input" id="startAt" type="datetime-local" bind:value={settingsStartAt} />
+        <label class="fungee-label" for="endAt">End Time</label>
+        <input class="fungee-input" id="endAt" type="datetime-local" bind:value={settingsEndAt} />
+        <label class="fungee-label" for="subMode">Submission Review</label>
+        <select class="fungee-select" id="subMode" bind:value={settingsSubmissionMode}>
+          <option value="AUTOMATIC">Automatic Approval</option>
+          <option value="MANUAL">Game Master Approval</option>
+        </select>
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={closeSettings}>CANCEL</button>
+          <button class="fungee-btn" type="submit">SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
 {/if}
 
 <style>
@@ -429,5 +527,24 @@
 
   .error {
     color: var(--danger);
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 40rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 </style>

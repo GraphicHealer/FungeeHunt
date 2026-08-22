@@ -41,11 +41,10 @@
   $: returnStart = date && returnStartTime ? `${date}T${returnStartTime}` : '';
   $: returnEnd = date && returnEndTime ? `${date}T${returnEndTime}` : '';
 
-  $: if (date && startTime && endTime) {
-    const end = fromInputValue(endAt);
-    const retStart = new Date(end.getTime() - returnBonusWindowMinutes * 60 * 1000);
-    returnStartTime = toInputValue(retStart).slice(11, 16);
-    returnEndTime = endTime;
+  $: if (date && returnStartTime && returnBonusWindowMinutes) {
+    const start = fromInputValue(returnStart);
+    const end = new Date(start.getTime() + returnBonusWindowMinutes * 60 * 1000);
+    returnEndTime = toInputValue(end).slice(11, 16);
   }
 
   onMount(async () => {
@@ -72,10 +71,27 @@
       foodDrivePermissible = s.foodDrivePermissible ?? '';
       foodDriveSuggested = s.foodDriveSuggested ?? '';
     }
+
+    if (date && endTime) {
+      const end = fromInputValue(endAt);
+      const retStart = new Date(end.getTime() - returnBonusWindowMinutes * 60 * 1000);
+      returnStartTime = toInputValue(retStart).slice(11, 16);
+    }
   });
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
+  }
+
+  function randomizeReturn() {
+    const end = fromInputValue(endAt);
+    const windowMinutes = 5 + Math.floor(Math.random() * 11);
+    const maxStartOffset = 15;
+    const minStartOffset = windowMinutes;
+    const startOffset = minStartOffset + Math.floor(Math.random() * (maxStartOffset - minStartOffset + 1));
+    const retStart = new Date(end.getTime() - startOffset * 60 * 1000);
+    returnStartTime = toInputValue(retStart).slice(11, 16);
+    returnBonusWindowMinutes = windowMinutes;
   }
 
   async function createGame() {
@@ -146,12 +162,14 @@
             Enable return bonus
           </label>
           {#if returnBonusEnabled}
-            <label class="fungee-label" for="rbw">Window Length (minutes)</label>
-            <input class="fungee-input" id="rbw" type="number" bind:value={returnBonusWindowMinutes} min="1" use:focus />
             <label class="fungee-label" for="rs">Window Start Time</label>
-            <input class="fungee-input" id="rs" type="time" bind:value={returnStartTime} />
-            <label class="fungee-label" for="re">Window End Time</label>
-            <input class="fungee-input" id="re" type="time" bind:value={returnEndTime} />
+            <input class="fungee-input" id="rs" type="time" bind:value={returnStartTime} use:focus />
+
+            <label class="fungee-label" for="rbw">Window Length (minutes)</label>
+            <input class="fungee-input" id="rbw" type="number" bind:value={returnBonusWindowMinutes} min="1" />
+
+            <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
+
             <label class="fungee-label" for="rp">Points</label>
             <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={returnPoints} />
           {/if}
