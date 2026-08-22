@@ -85,13 +85,24 @@
 
   function randomizeReturn() {
     const end = fromInputValue(endAt);
-    const windowMinutes = 5 + Math.floor(Math.random() * 11);
-    const maxStartOffset = 15;
-    const minStartOffset = windowMinutes;
-    const startOffset = minStartOffset + Math.floor(Math.random() * (maxStartOffset - minStartOffset + 1));
-    const retStart = new Date(end.getTime() - startOffset * 60 * 1000);
+    if (!end) return;
+    const possibleMinutes = [5, 6, 7, 8, 9, 11, 12, 13, 14, 15];
+    for (let i = 0; i < 50; i++) {
+      const windowMinutes = possibleMinutes[Math.floor(Math.random() * possibleMinutes.length)];
+      const endOffset = possibleMinutes[Math.floor(Math.random() * possibleMinutes.length)];
+      const retEnd = new Date(end.getTime() - endOffset * 60 * 1000);
+      const retStart = new Date(retEnd.getTime() - windowMinutes * 60 * 1000);
+      if (retEnd.getMinutes() % 10 !== 0 && retStart.getMinutes() % 10 !== 0) {
+        returnStartTime = toInputValue(retStart).slice(11, 16);
+        returnBonusWindowMinutes = windowMinutes;
+        return;
+      }
+    }
+    const fallbackWindow = 13;
+    const retEnd = new Date(end.getTime() - 6 * 60 * 1000);
+    const retStart = new Date(retEnd.getTime() - fallbackWindow * 60 * 1000);
     returnStartTime = toInputValue(retStart).slice(11, 16);
-    returnBonusWindowMinutes = windowMinutes;
+    returnBonusWindowMinutes = fallbackWindow;
   }
 
   async function createGame() {
