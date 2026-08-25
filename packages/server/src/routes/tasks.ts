@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
         title: (title ?? 'New task').trim(),
         description: description ?? '',
         points: Number(points) || 0,
-        proofType: ['PHOTO', 'VIDEO', 'EITHER'].includes(proofType) ? proofType : 'PHOTO',
+        proofType: ['PHOTO', 'VIDEO'].includes(proofType) ? proofType : 'PHOTO',
         category: category ?? undefined,
         order: Number(order) || 0,
       },
@@ -82,7 +82,7 @@ router.post('/batch', async (req, res) => {
             title: (t.title ?? 'Task').trim(),
             description: t.description ?? '',
             points: Number(t.points) || 0,
-            proofType: ['PHOTO', 'VIDEO', 'EITHER'].includes(t.proofType) ? t.proofType : 'PHOTO',
+            proofType: ['PHOTO', 'VIDEO'].includes(t.proofType) ? t.proofType : 'PHOTO',
             category: t.category ?? undefined,
             order: maxOrder + i + 1,
           },
@@ -105,7 +105,7 @@ router.patch('/:taskId', async (req, res) => {
     if (title !== undefined) data.title = title.trim();
     if (description !== undefined) data.description = description;
     if (points !== undefined) data.points = Number(points);
-    if (proofType !== undefined && ['PHOTO', 'VIDEO', 'EITHER'].includes(proofType)) {
+    if (proofType !== undefined && ['PHOTO', 'VIDEO'].includes(proofType)) {
       data.proofType = proofType;
     }
     if (order !== undefined) data.order = Number(order);

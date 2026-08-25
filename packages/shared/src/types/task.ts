@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const ProofType = z.enum(['PHOTO', 'VIDEO', 'EITHER']);
+export const ProofType = z.enum(['PHOTO', 'VIDEO']);
 export type ProofType = z.infer<typeof ProofType>;
 
 export const taskSchema = z.object({

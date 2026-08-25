@@ -196,7 +196,7 @@ async function removeSection(gameId: string, title: string) {
   if (existing) await db.ruleSection.delete({ where: { id: existing.id } });
 }
 
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res: any) => {
   try {
     const settings = await getSystemSettings();
     const defaults = {
@@ -230,7 +230,7 @@ router.post('/', async (req, res) => {
           title: t.title ?? 'Task',
           description: t.description ?? '',
           points: Number(t.points) || 0,
-          proofType: ['PHOTO', 'VIDEO', 'EITHER'].includes(t.proofType) ? t.proofType : 'PHOTO',
+          proofType: ['PHOTO', 'VIDEO'].includes(t.proofType) ? t.proofType : 'PHOTO',
           category: t.category ?? 'General',
           order: t.order ?? i + 1,
         })),
@@ -256,17 +256,17 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', async (req: any, res: any) => {
   try {
     const games = await db.game.findMany({ orderBy: { startAt: 'asc' } });
-    res.json(games.map((game) => withJoinUrl(getBaseUrl(req), game)));
+    res.json(games.map((game: any) => withJoinUrl(getBaseUrl(req), game)));
   } catch (err) {
     console.error('list games failed', err);
     res.status(500).json({ error: 'Could not list games' });
   }
 });
 
-router.get('/:gameId', async (req, res) => {
+router.get('/:gameId', async (req: any, res: any) => {
   try {
     const game = await db.game.findUnique({ where: { id: req.params.gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -277,13 +277,13 @@ router.get('/:gameId', async (req, res) => {
   }
 });
 
-router.delete('/:gameId', async (req, res) => {
+router.delete('/:gameId', async (req: any, res: any) => {
   try {
     const { gameId } = req.params;
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
 
-    await db.$transaction(async (tx) => {
+    await db.$transaction(async (tx: any) => {
       await tx.submission.deleteMany({ where: { task: { gameId } } });
       await tx.task.deleteMany({ where: { gameId } });
       await tx.ruleSection.deleteMany({ where: { gameId } });
@@ -299,7 +299,7 @@ router.delete('/:gameId', async (req, res) => {
   }
 });
 
-router.patch('/:gameId', async (req, res) => {
+router.patch('/:gameId', async (req: any, res: any) => {
   try {
     const { gameId } = req.params;
     const updates = buildGameData(req.body ?? {}, true);

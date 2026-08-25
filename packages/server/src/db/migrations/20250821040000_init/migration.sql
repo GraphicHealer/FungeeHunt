@@ -5,7 +5,7 @@ CREATE TYPE "GameStatus" AS ENUM ('NOT_STARTED', 'LIVE', 'COMPLETED');
 CREATE TYPE "PlayerType" AS ENUM ('APP', 'OFFLINE');
 
 -- CreateEnum
-CREATE TYPE "ProofType" AS ENUM ('PHOTO', 'VIDEO', 'EITHER');
+CREATE TYPE "ProofType" AS ENUM ('PHOTO', 'VIDEO');
 
 -- CreateEnum
 CREATE TYPE "SubmissionMode" AS ENUM ('AUTOMATIC', 'MANUAL');

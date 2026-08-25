@@ -27,8 +27,8 @@ router.post('/', playerAuth, upload.single('proof'), async (req, res) => {
     const mimetype = req.file.mimetype;
     const isPhoto = mimetype.startsWith('image/');
     const isVideo = mimetype.startsWith('video/');
-    const acceptsPhoto = task.proofType === 'PHOTO' || task.proofType === 'EITHER';
-    const acceptsVideo = task.proofType === 'VIDEO' || task.proofType === 'EITHER';
+    const acceptsPhoto = task.proofType === 'PHOTO';
+    const acceptsVideo = task.proofType === 'VIDEO';
 
     if ((isPhoto && !acceptsPhoto) || (isVideo && !acceptsVideo)) {
       return res.status(400).json({ error: 'This task does not accept that proof type' });

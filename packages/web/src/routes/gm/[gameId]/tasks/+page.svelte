@@ -213,7 +213,6 @@
         <select id="proofType" bind:value={proofType}>
           <option value="PHOTO">Photo</option>
           <option value="VIDEO">Video</option>
-          <option value="EITHER">Photo or Video</option>
         </select>
 
         <label for="order">Order</label>
