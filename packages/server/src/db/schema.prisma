@@ -66,6 +66,7 @@ model Task {
   description String
   points      Float
   proofType   ProofType
+  category    String?
   order       Int
   game        Game         @relation(fields: [gameId], references: [id])
   submissions Submission[]
@@ -109,6 +110,7 @@ model SystemSettings {
   tourDone                 Boolean @default(false)
   defaultRules             String?
   defaultTasks             String?
+  taskCategories           String?
 }
 
 enum GameStatus {

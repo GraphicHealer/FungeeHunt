@@ -7,6 +7,7 @@ const defaultTasks = [
     description: 'Take a photo with something shaped like a mushroom.',
     points: 100,
     proofType: 'PHOTO',
+    category: 'General',
     order: 1,
   },
   {
@@ -14,6 +15,7 @@ const defaultTasks = [
     description: 'Find a local landmark and record a short video about it.',
     points: 150,
     proofType: 'VIDEO',
+    category: 'General',
     order: 2,
   },
   {
@@ -21,6 +23,7 @@ const defaultTasks = [
     description: 'Photo of the whole team in matching colors.',
     points: 75,
     proofType: 'PHOTO',
+    category: 'Team Photo',
     order: 3,
   },
 ];
@@ -58,6 +61,7 @@ export const defaultSystemSettings = {
   tourDone: false,
   defaultRules: JSON.stringify(defaultRules),
   defaultTasks: JSON.stringify(defaultTasks),
+  taskCategories: JSON.stringify(['General', 'Team Photo']),
 };
 
 export async function seedSystemSettings() {

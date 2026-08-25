@@ -6,6 +6,7 @@
   let settings: any = null;
   let defaultRulesStr = '';
   let defaultTasksStr = '';
+  let taskCategoriesStr = '';
   let loading = true;
 
   function token() {
@@ -20,6 +21,7 @@
       settings = await res.json();
       defaultRulesStr = JSON.stringify(settings.defaultRules ?? [], null, 2);
       defaultTasksStr = JSON.stringify(settings.defaultTasks ?? [], null, 2);
+      taskCategoriesStr = JSON.stringify(settings.taskCategories ?? [], null, 2);
     } else {
       toast.add('Could not load settings', 'error');
     }
@@ -60,6 +62,7 @@
         randomizeReturnBonus: settings.randomizeReturnBonus,
         defaultRules: defaultRulesStr,
         defaultTasks: defaultTasksStr,
+        taskCategories: taskCategoriesStr,
       }),
     });
     if (res.ok) {
@@ -122,6 +125,11 @@
       <section class="card">
         <h2>Default Tasks (JSON)</h2>
         <textarea class="json" bind:value={defaultTasksStr} />
+      </section>
+
+      <section class="card">
+        <h2>Default Task Categories (JSON)</h2>
+        <textarea class="json" bind:value={taskCategoriesStr} />
       </section>
 
       <button type="submit">SAVE SETTINGS</button>

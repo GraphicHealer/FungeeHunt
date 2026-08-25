@@ -162,7 +162,7 @@
           {#each state.tasks as task (task.id)}
             <li class="fungee-accordion" class:incomplete={task.submission?.status === 'INCOMPLETE'}>
               <button class="fungee-accordion-header" on:click={() => (expanded = expanded === task.id ? '' : task.id)}>
-                <span class="fungee-section-title" style="margin: 0;">{task.title}</span>
+                <span class="fungee-section-title" style="margin: 0;">{task.order}. {task.title}</span>
                 <span style="display: flex; align-items: center; gap: 0.75rem;">
                   <span>+{formatPoints(task.points)}</span>
                   {#if task.submission}

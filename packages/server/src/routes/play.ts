@@ -25,7 +25,12 @@ router.get('/', async (req, res) => {
 
     const byTask = new Map(submissions.map((s: any) => [s.taskId, s]));
     const tasksWithStatus = tasks.map((task: any) => ({
-      ...task,
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      points: task.points,
+      proofType: task.proofType,
+      order: task.order,
       submission: byTask.get(task.id) ?? null,
     }));
 

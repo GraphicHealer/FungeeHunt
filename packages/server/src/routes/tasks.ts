@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const { gameId } = req.params;
-  const { title, description, points, proofType, order } = req.body ?? {};
+  const { title, description, points, proofType, order, category } = req.body ?? {};
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -39,6 +39,7 @@ router.post('/', async (req, res) => {
         description: description ?? '',
         points: Number(points) || 0,
         proofType: ['PHOTO', 'VIDEO', 'EITHER'].includes(proofType) ? proofType : 'PHOTO',
+        category: category ?? undefined,
         order: Number(order) || 0,
       },
     });
@@ -46,6 +47,53 @@ router.post('/', async (req, res) => {
   } catch (err) {
     console.error('create task failed', err);
     res.status(500).json({ error: 'Could not create task' });
+  }
+});
+
+router.post('/batch', async (req, res) => {
+  const { gameId } = req.params;
+  const { tasks: items } = req.body ?? {};
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'No tasks provided' });
+  }
+
+  try {
+    const game = await db.game.findUnique({ where: { id: gameId } });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+
+    const existing = await db.task.findMany({
+      where: { gameId },
+      select: { title: true, order: true },
+    });
+    const existingTitles = new Set(existing.map((t: any) => t.title.toLowerCase()));
+    const maxOrder = Math.max(0, ...existing.map((t: any) => t.order));
+
+    const unique = items.filter((t: any) => !existingTitles.has((t.title ?? '').toLowerCase().trim()));
+    if (unique.length === 0) {
+      return res.status(400).json({ error: 'All selected tasks already exist' });
+    }
+
+    await db.$transaction(async (tx) => {
+      for (let i = 0; i < unique.length; i++) {
+        const t = unique[i];
+        await tx.task.create({
+          data: {
+            gameId,
+            title: (t.title ?? 'Task').trim(),
+            description: t.description ?? '',
+            points: Number(t.points) || 0,
+            proofType: ['PHOTO', 'VIDEO', 'EITHER'].includes(t.proofType) ? t.proofType : 'PHOTO',
+            category: t.category ?? undefined,
+            order: maxOrder + i + 1,
+          },
+        });
+      }
+    });
+
+    res.status(201).json({ count: unique.length });
+  } catch (err) {
+    console.error('batch create tasks failed', err);
+    res.status(500).json({ error: 'Could not add tasks' });
   }
 });
 

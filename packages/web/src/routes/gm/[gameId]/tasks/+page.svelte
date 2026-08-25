@@ -15,6 +15,12 @@
   let proofType = 'PHOTO';
   let order = 0;
 
+  let showAddMenu = false;
+  let showSelectModal = false;
+  let defaultTasks: any[] = [];
+  let selectedDefaults: any[] = [];
+  let expandedDefault: string | null = null;
+
   function token() {
     return localStorage.getItem('gmToken') ?? '';
   }
@@ -39,6 +45,76 @@
   function openNew() {
     resetForm();
     showModal = true;
+  }
+
+  async function loadDefaults() {
+    const res = await fetch('/api/gm/settings', {
+      headers: { Authorization: `Bearer ${token()}` },
+    });
+    if (res.ok) {
+      const s = await res.json();
+      defaultTasks = s.defaultTasks ?? [];
+    }
+  }
+
+  function toggleAddMenu() {
+    showAddMenu = !showAddMenu;
+  }
+
+  function openCustom() {
+    showAddMenu = false;
+    resetForm();
+    showModal = true;
+  }
+
+  async function openSelect() {
+    showAddMenu = false;
+    selectedDefaults = [];
+    expandedDefault = null;
+    await loadDefaults();
+    showSelectModal = true;
+  }
+
+  function closeSelect() {
+    showSelectModal = false;
+    selectedDefaults = [];
+    expandedDefault = null;
+  }
+
+  function isSelected(task: any) {
+    return selectedDefaults.some((t) => t.title.toLowerCase() === task.title.toLowerCase());
+  }
+
+  function toggleDefault(task: any) {
+    if (isSelected(task)) {
+      selectedDefaults = selectedDefaults.filter((t) => t.title.toLowerCase() !== task.title.toLowerCase());
+    } else {
+      selectedDefaults = [...selectedDefaults, task];
+    }
+  }
+
+  function toggleDefaultExpand(task: any) {
+    expandedDefault = expandedDefault === task.title ? null : task.title;
+  }
+
+  async function addSelected() {
+    if (selectedDefaults.length === 0) return;
+    const res = await fetch(`/api/gm/games/${gameId}/tasks/batch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ tasks: selectedDefaults }),
+    });
+    if (res.ok) {
+      showSelectModal = false;
+      selectedDefaults = [];
+      await load();
+    } else {
+      const data = await res.json();
+      error = data.error ?? 'Could not add tasks';
+    }
   }
 
   function openEdit(task: any) {
@@ -94,7 +170,15 @@
 <div class="page">
   <header class="page-header">
     <h2>Tasks</h2>
-    <button class="fungee-btn" on:click={openNew} style="width: auto; margin: 0;">+ ADD TASK</button>
+    <div class="add-menu-wrap">
+      <button class="fungee-btn" on:click={toggleAddMenu} style="width: auto; margin: 0;">+ ADD TASK</button>
+      {#if showAddMenu}
+        <div class="add-menu">
+          <button type="button" on:click={openSelect}>Select task</button>
+          <button type="button" on:click={openCustom}>Custom task</button>
+        </div>
+      {/if}
+    </div>
   </header>
 
   <ul class="task-list">
@@ -145,6 +229,51 @@
           <button type="submit" disabled={!title}>Save</button>
         </div>
       </form>
+    </div>
+  </div>
+{/if}
+
+{#if showSelectModal}
+  <div class="modal-backdrop" on:click={closeSelect}>
+    <div class="modal select-modal" on:click|stopPropagation>
+      <h3>Select Tasks</h3>
+
+      {#if defaultTasks.length === 0}
+        <p>Loading default tasks…</p>
+      {:else}
+        {@const available = defaultTasks.filter((d) => !tasks.some((t) => t.title.toLowerCase() === d.title.toLowerCase()))}
+        {#if available.length === 0}
+          <p>All available default tasks are already in this game.</p>
+        {:else}
+          <ul class="select-list">
+            {#each available as task (task.title)}
+              <li class="select-item" class:expanded={expandedDefault === task.title} on:click={() => toggleDefaultExpand(task)}>
+                <div class="select-row">
+                  <input
+                    type="checkbox"
+                    checked={isSelected(task)}
+                    on:click|stopPropagation={() => toggleDefault(task)}
+                  />
+                  <span class="select-title">{task.title}</span>
+                  <span class="select-meta">+{formatPoints(task.points)} · {task.proofType}</span>
+                </div>
+                {#if expandedDefault === task.title}
+                  <p class="select-description">{task.description}</p>
+                {/if}
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      {/if}
+
+      {#if error}<p class="error">{error}</p>{/if}
+
+      <div class="actions">
+        <button type="button" on:click={closeSelect}>Cancel</button>
+        <button type="button" on:click={addSelected} disabled={selectedDefaults.length === 0}>
+          Add {selectedDefaults.length ? `(${selectedDefaults.length})` : ''}
+        </button>
+      </div>
     </div>
   </div>
 {/if}
@@ -287,5 +416,86 @@
 
   .error {
     color: var(--danger);
+  }
+
+  .add-menu-wrap {
+    position: relative;
+  }
+
+  .add-menu {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    right: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    min-width: 10rem;
+    z-index: 100;
+  }
+
+  .add-menu button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: var(--text);
+  }
+
+  .add-menu button:hover {
+    background: var(--bg);
+  }
+
+  .select-modal .select-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .select-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    cursor: pointer;
+  }
+
+  .select-item:hover {
+    box-shadow: var(--shadow);
+  }
+
+  .select-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .select-row input {
+    width: auto;
+    margin: 0;
+  }
+
+  .select-title {
+    flex: 1;
+    font-weight: bold;
+  }
+
+  .select-meta {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .select-description {
+    margin: 0.75rem 0 0 1.75rem;
+    color: var(--muted);
   }
 </style>

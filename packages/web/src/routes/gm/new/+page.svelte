@@ -29,6 +29,10 @@
   let returnPoints = 100;
   let returnBonusWindowMinutes = 10;
 
+  let taskCount = 20;
+  let availableTasks: any[] = [];
+  let taskCategories: string[] = [];
+
   let foodDriveEnabled = false;
   let foodDrivePointsPerItem = 1;
   let foodDrivePermissible = '';
@@ -70,6 +74,10 @@
       foodDrivePointsPerItem = s.foodDrivePointsPerItem ?? 1;
       foodDrivePermissible = s.foodDrivePermissible ?? '';
       foodDriveSuggested = s.foodDriveSuggested ?? '';
+      availableTasks = s.defaultTasks ?? [];
+      taskCategories = (s.taskCategories ?? []).map((c: string) => c.toLowerCase());
+      taskCount = Math.min(20, availableTasks.length || 20);
+      if (taskCount < 1) taskCount = 1;
 
       if (date && endTime && returnBonusEnabled && s.randomizeReturnBonus) {
         randomizeReturn();
@@ -124,6 +132,7 @@
         returnStart,
         returnEnd,
         returnPoints,
+        taskCount,
         foodDriveEnabled,
         foodDrivePointsPerItem,
         foodDrivePermissible,
@@ -136,7 +145,7 @@
         await fetch('/api/config', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tourStep: 6 }),
+          body: JSON.stringify({ tourStep: 7 }),
         });
       } catch {
         // ignore
@@ -202,8 +211,32 @@
           </div>
         </form>
       {:else if step === 3}
+        <form on:submit|preventDefault={() => step = 4}>
+          <h2 class="fungee-section-title">3. Tasks</h2>
+
+          {#if availableTasks.length === 0}
+            <p class="fungee-error">No default tasks are configured. Add tasks in System Settings.</p>
+          {:else}
+            <p style="margin: 0 0 1rem; color: var(--muted);">
+              {availableTasks.length} default tasks available in {taskCategories.length} categories.
+            </p>
+
+            <label class="fungee-label" for="task-count">How many tasks for this game?</label>
+            <input class="fungee-input" id="task-count" type="number" min="1" max={availableTasks.length} bind:value={taskCount} />
+
+            <p style="margin: 0.5rem 0 0; color: var(--muted); font-size: 0.9rem;">
+              A random mix will be pulled from categories, and one Team Photo task will always be task #1.
+            </p>
+          {/if}
+
+          <div class="fungee-btn-row">
+            <button class="fungee-btn secondary" type="button" on:click={() => step = 2}>BACK</button>
+            <button class="fungee-btn" type="submit" data-tour="step3-next" disabled={availableTasks.length === 0}>NEXT</button>
+          </div>
+        </form>
+      {:else if step === 4}
         <form on:submit|preventDefault={createGame}>
-          <h2 class="fungee-section-title">3. Food Drive</h2>
+          <h2 class="fungee-section-title">4. Food Drive</h2>
           <label class="fungee-check">
             <input type="checkbox" bind:checked={foodDriveEnabled} />
             Enable food drive bonus
@@ -220,7 +253,7 @@
           {#if error}<p class="fungee-error">{error}</p>{/if}
 
           <div class="fungee-btn-row">
-            <button class="fungee-btn secondary" type="button" on:click={() => step = 2}>BACK</button>
+            <button class="fungee-btn secondary" type="button" on:click={() => step = 3}>BACK</button>
             <button class="fungee-btn" type="submit" data-tour="create-game">CREATE GAME</button>
           </div>
         </form>

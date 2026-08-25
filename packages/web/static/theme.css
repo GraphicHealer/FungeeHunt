@@ -147,6 +147,7 @@ body {
   cursor: pointer;
   transition: background 0.15s, transform 0.05s;
   width: 100%;
+  box-sizing: border-box;
   margin-top: 1.25rem;
 }
 
@@ -176,6 +177,14 @@ body {
 
 .fungee-btn.danger:hover {
   background: #c0392b;
+}
+
+.fungee-btn.success {
+  background: var(--success);
+}
+
+.fungee-btn.success:hover {
+  background: #2f8b45;
 }
 
 .fungee-btn-row {

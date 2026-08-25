@@ -11,6 +11,7 @@ router.get('/', async (_req, res) => {
       ...settings,
       defaultRules: settings.defaultRules ? JSON.parse(settings.defaultRules) : [],
       defaultTasks: settings.defaultTasks ? JSON.parse(settings.defaultTasks) : [],
+      taskCategories: settings.taskCategories ? JSON.parse(settings.taskCategories) : [],
     });
   } catch (err) {
     console.error('get settings failed', err);
@@ -30,6 +31,7 @@ router.patch('/', async (req, res) => {
     randomizeReturnBonus,
     defaultRules,
     defaultTasks,
+    taskCategories,
   } = req.body ?? {};
 
   try {
@@ -47,6 +49,7 @@ router.patch('/', async (req, res) => {
     if (randomizeReturnBonus !== undefined) data.randomizeReturnBonus = randomizeReturnBonus === true || randomizeReturnBonus === 'true' || randomizeReturnBonus === 'on' || randomizeReturnBonus === '1';
     if (defaultRules !== undefined) data.defaultRules = typeof defaultRules === 'string' ? defaultRules : JSON.stringify(defaultRules);
     if (defaultTasks !== undefined) data.defaultTasks = typeof defaultTasks === 'string' ? defaultTasks : JSON.stringify(defaultTasks);
+    if (taskCategories !== undefined) data.taskCategories = typeof taskCategories === 'string' ? taskCategories : JSON.stringify(taskCategories);
 
     const updated = await db.systemSettings.update({
       where: { id: settings.id },
@@ -57,6 +60,7 @@ router.patch('/', async (req, res) => {
       ...updated,
       defaultRules: updated.defaultRules ? JSON.parse(updated.defaultRules) : [],
       defaultTasks: updated.defaultTasks ? JSON.parse(updated.defaultTasks) : [],
+      taskCategories: updated.taskCategories ? JSON.parse(updated.taskCategories) : [],
     });
   } catch (err) {
     console.error('update settings failed', err);

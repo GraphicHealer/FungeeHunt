@@ -69,6 +69,73 @@ function buildGameData(body: any, partial = false) {
   return data;
 }
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function selectTasks(defaultTasks: any[], count: number) {
+  if (!defaultTasks.length) return [];
+  count = Math.max(1, Math.min(count, defaultTasks.length));
+
+  const normalized = defaultTasks.map((t: any) => ({ ...t, category: t.category ?? 'General' }));
+  const teamPhotoTasks = normalized.filter((t: any) => t.category.toLowerCase() === 'team photo');
+  const nonTeamTasks = normalized.filter((t: any) => t.category.toLowerCase() !== 'team photo');
+
+  const selected = [];
+  if (teamPhotoTasks.length) {
+    const pick = teamPhotoTasks[Math.floor(Math.random() * teamPhotoTasks.length)];
+    selected.push({ ...pick, order: 1 });
+  } else {
+    selected.push({
+      title: 'Team Photo',
+      description: 'Take a photo of the whole team together.',
+      points: 50,
+      proofType: 'PHOTO',
+      category: 'Team Photo',
+      order: 1,
+    });
+  }
+
+  const remaining = Math.max(0, count - 1);
+  const groups: Record<string, any[]> = {};
+  for (const t of shuffle(nonTeamTasks)) {
+    const c = t.category || 'General';
+    (groups[c] ||= []).push(t);
+  }
+
+  const others = [];
+  const categories = Object.keys(groups);
+  let round = 0;
+  while (others.length < remaining) {
+    let added = false;
+    for (const cat of categories) {
+      if (groups[cat].length === 0) continue;
+      const pick = groups[cat].shift();
+      others.push(pick);
+      added = true;
+      if (others.length >= remaining) break;
+    }
+    if (!added) break;
+  }
+
+  // If we exhausted the round-robin, fall back to any remaining shuffled tasks.
+  for (const cat of categories) {
+    while (others.length < remaining && groups[cat].length > 0) {
+      const pick = groups[cat].shift();
+      others.push(pick);
+    }
+  }
+
+  const shuffledOthers = shuffle(others);
+  selected.push(...shuffledOthers.map((t: any, i: number) => ({ ...t, order: i + 2 })));
+  return selected;
+}
+
 function withJoinUrl(baseUrl: string, game: any) {
   return {
     ...game,
@@ -153,15 +220,19 @@ router.post('/', async (req, res) => {
     const defaultTasks = settings.defaultTasks ? JSON.parse(settings.defaultTasks) : [];
     const defaultRules = settings.defaultRules ? JSON.parse(settings.defaultRules) : [];
 
-    if (defaultTasks.length) {
+    const taskCount = Math.min(asInt(body.taskCount) || 20, defaultTasks.length || 20);
+
+    const selectedTasks = selectTasks(defaultTasks, taskCount);
+    if (selectedTasks.length) {
       await db.task.createMany({
-        data: defaultTasks.map((t: any) => ({
+        data: selectedTasks.map((t: any, i: number) => ({
           gameId: game.id,
           title: t.title ?? 'Task',
           description: t.description ?? '',
           points: Number(t.points) || 0,
           proofType: ['PHOTO', 'VIDEO', 'EITHER'].includes(t.proofType) ? t.proofType : 'PHOTO',
-          order: Number(t.order) || 0,
+          category: t.category ?? 'General',
+          order: t.order ?? i + 1,
         })),
       });
     }
