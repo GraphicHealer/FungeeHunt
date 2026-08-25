@@ -69,7 +69,7 @@
 </script>
 
 <div class="layout">
-  <aside class="sidebar">
+  <aside class="sidebar" data-tour="game-nav">
     <a class="home" href="/gm">← Game Board</a>
     <nav>
       {#each nav as item (item.path)}
@@ -99,7 +99,7 @@
               <span>{fmtTime(game.startAt)} – {fmtTime(game.endAt)}</span>
             {/if}
           </div>
-          <a class="spectator" href={game.viewUrl} target="_blank" rel="noreferrer" title="Open spectator screen">
+          <a class="spectator" href={game.viewUrl} data-tour="view-link" target="_blank" rel="noreferrer" title="Open spectator screen">
             <span class="mdi mdi-open-in-new"></span>
             <span class="label">SPECTATOR</span>
           </a>

@@ -37,6 +37,6 @@
 
     {#if error}<p class="fungee-error">{error}</p>{/if}
 
-    <button class="fungee-btn" type="submit" disabled={!passphrase}>LOG IN</button>
+    <button class="fungee-btn" data-tour="login-button" type="submit" disabled={!passphrase}>LOG IN</button>
   </form>
 </main>

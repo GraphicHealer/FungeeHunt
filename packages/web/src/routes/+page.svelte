@@ -15,7 +15,7 @@
     <span class="mdi mdi-trophy"></span>
     <span class="logo-text">FUNGEE-HUNT</span>
   </div>
-  <button class="login" on:click={() => goto('/login')}>LOG IN</button>
+  <button class="login" data-tour="login" on:click={() => goto('/login')}>LOG IN</button>
 </header>
 
 <main class="fungee-page" style="padding-top: 5rem;">

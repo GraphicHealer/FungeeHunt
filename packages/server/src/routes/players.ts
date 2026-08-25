@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 
 router.post('/offline', async (req, res) => {
   const { gameId } = req.params;
-  const { displayName } = req.body ?? {};
+  const { displayName, hasCar } = req.body ?? {};
   const trimmed = displayName ? displayName.trim() : '';
   if (!trimmed) return res.status(400).json({ error: 'Display name is required' });
 
@@ -40,6 +40,7 @@ router.post('/offline', async (req, res) => {
         gameId,
         displayName: trimmed,
         type: 'OFFLINE',
+        hasCar: !!hasCar,
       },
     });
     res.status(201).json(player);

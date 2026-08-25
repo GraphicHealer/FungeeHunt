@@ -20,7 +20,7 @@
   onMount(load);
 </script>
 
-<main class="fungee-page" style="padding-top: 3rem; padding-bottom: 7rem;">
+<main class="fungee-page" style="padding-top: 3rem; padding-bottom: 8rem;">
   <div class="fungee-card wide">
     <h1 class="fungee-title">RULES</h1>
 

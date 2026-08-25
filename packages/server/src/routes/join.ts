@@ -5,7 +5,7 @@ import { createPlayerToken } from '../lib/auth';
 const router = Router();
 
 router.post('/', async (req, res) => {
-  const { code, displayName } = req.body ?? {};
+  const { code, displayName, hasCar } = req.body ?? {};
   const trimmed = displayName ? displayName.trim() : '';
   if (!code || !trimmed) {
     return res.status(400).json({ error: 'Game code and display name are required' });
@@ -28,6 +28,7 @@ router.post('/', async (req, res) => {
           gameId: game.id,
           displayName: trimmed,
           type: 'APP',
+          hasCar: !!hasCar,
         },
       });
     }

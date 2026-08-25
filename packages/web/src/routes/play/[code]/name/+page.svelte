@@ -4,6 +4,7 @@
 
   const code = $page.params.code;
   let displayName = '';
+  let hasCar = false;
   let error = '';
 
   async function join() {
@@ -11,7 +12,7 @@
     const res = await fetch('/api/join', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, displayName }),
+      body: JSON.stringify({ code, displayName, hasCar }),
     });
     const data = await res.json();
     if (res.ok) {
@@ -31,6 +32,11 @@
 
     <label class="fungee-label" for="name">What's your name?</label>
     <input class="fungee-input" id="name" type="text" bind:value={displayName} />
+
+    <label class="fungee-check" style="display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0; cursor: pointer;">
+      <input type="checkbox" bind:checked={hasCar} />
+      <span>Will you have a car available to drive?</span>
+    </label>
 
     {#if error}<p class="fungee-error">{error}</p>{/if}
 

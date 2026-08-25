@@ -198,7 +198,7 @@
     </div>
 
     <aside class="side">
-      <section class="side-card controls-card">
+      <section class="side-card controls-card" data-tour="game-controls">
         <h3 class="fungee-section-title" style="font-size: 1rem; margin: 0;">Game Controls</h3>
         <p class="status" style="margin: 0.25rem 0 0;">● {game.status}</p>
         {#if remainingStr}<p class="timer" style="margin: 0 0 0.5rem;">{remainingStr}</p>{/if}
@@ -207,8 +207,8 @@
           <a href={game.joinUrl} target="_blank" rel="noreferrer">{game.joinUrl}</a>
         </p>
         <div class="controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <button class="fungee-btn" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
-          <button class="fungee-btn" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('LIVE')} disabled={game.status !== 'NOT_STARTED'}>START</button>
+          <button class="fungee-btn" data-tour="copy-link" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
+          <button class="fungee-btn" data-tour="start-game" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('LIVE')} disabled={game.status !== 'NOT_STARTED'}>START</button>
           <button class="fungee-btn danger" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('COMPLETED')} disabled={game.status !== 'LIVE'}>END</button>
           {#if game.status === 'COMPLETED'}
             <a class="fungee-btn secondary" style="width: auto; flex: 1; min-width: 6rem; text-align: center;" href="/view/{game.code}/results">RESULTS</a>

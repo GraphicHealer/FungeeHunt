@@ -8,6 +8,10 @@ CREATE TABLE "SystemSettings" (
     "returnBonusEnabled" BOOLEAN NOT NULL DEFAULT true,
     "returnBonusWindowMinutes" INTEGER NOT NULL DEFAULT 10,
     "returnBonusPoints" INTEGER NOT NULL DEFAULT 100,
+    "randomizeReturnBonus" BOOLEAN NOT NULL DEFAULT false,
+    "welcomeShown" BOOLEAN NOT NULL DEFAULT false,
+    "tourStep" INTEGER NOT NULL DEFAULT 0,
+    "tourDone" BOOLEAN NOT NULL DEFAULT false,
     "defaultRules" TEXT,
     "defaultTasks" TEXT,
 

@@ -7,6 +7,7 @@
   let players: any[] = [];
   let showModal = false;
   let displayName = '';
+  let hasCar = false;
   let error = '';
 
   function token() {
@@ -22,6 +23,7 @@
 
   function openNew() {
     displayName = '';
+    hasCar = false;
     error = '';
     showModal = true;
   }
@@ -38,7 +40,7 @@
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token()}`,
       },
-      body: JSON.stringify({ displayName }),
+      body: JSON.stringify({ displayName, hasCar }),
     });
     const data = await res.json();
     if (res.ok) {
@@ -66,7 +68,7 @@
   onMount(load);
 </script>
 
-<div class="page">
+<div class="page" data-tour="players-page">
   <header class="page-header">
     <h2>Players</h2>
     <button class="fungee-btn" on:click={openNew} style="width: auto; margin: 0;">+ ADD OFFLINE PLAYER</button>
@@ -78,6 +80,7 @@
         <div class="player-main">
           <span class="name">{player.displayName}</span>
           <span class="type">{player.type}</span>
+          {#if player.hasCar}<span class="mdi mdi-car" title="Has a car" style="color: var(--brand);"></span>{/if}
           {#if player.team}<span class="team">{player.team.name}</span>{/if}
         </div>
         <div class="actions">
@@ -100,6 +103,11 @@
 
         <label for="displayName">Display Name</label>
         <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" />
+
+        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; cursor: pointer;">
+          <input type="checkbox" bind:checked={hasCar} />
+          <span>Has a car available to drive</span>
+        </label>
 
         {#if error}<p class="error">{error}</p>{/if}
 

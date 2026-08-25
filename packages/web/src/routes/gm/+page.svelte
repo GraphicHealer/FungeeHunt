@@ -43,7 +43,7 @@
     <h1>Game Master Board</h1>
     <div class="actions">
       <button on:click={() => goto('/gm/settings')}>SYSTEM SETTINGS</button>
-      <button on:click={() => goto('/gm/new')}>NEW GAME</button>
+      <button data-tour="new-game" on:click={() => goto('/gm/new')}>NEW GAME</button>
     </div>
   </header>
 
@@ -58,6 +58,12 @@
         <button class="delete" on:click={() => remove(game)} title="Delete game">
           <span class="mdi mdi-trash-can-outline"></span>
         </button>
+      </div>
+    {:else}
+      <div class="empty-card">
+        <h2>No games yet</h2>
+        <p>Would you like to create one now?</p>
+        <button class="fungee-btn" data-tour="no-games-create" style="width: auto; margin: 0;" on:click={() => goto('/gm/new')}>CREATE GAME</button>
       </div>
     {/each}
   </section>
@@ -141,5 +147,23 @@
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
     cursor: pointer;
+  }
+
+  .empty-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    grid-column: 1 / -1;
+  }
+
+  .empty-card h2 {
+    margin: 0 0 0.5rem;
+  }
+
+  .empty-card p {
+    color: var(--muted);
+    margin: 0 0 1.5rem;
   }
 </style>

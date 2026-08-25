@@ -9,6 +9,7 @@
   let state: any = null;
   let newName = '';
   let error = '';
+  let showManagerInfo = false;
   let socket: any;
 
   function token() {
@@ -19,6 +20,16 @@
     return state && state.team && state.player.id === state.team.managerId;
   }
 
+  function maybeShowManagerInfo() {
+    if (state && isManager() && state.game?.status === 'LIVE') {
+      const key = `managerInfo:${code}`;
+      if (!localStorage.getItem(key)) {
+        showManagerInfo = true;
+        localStorage.setItem(key, 'true');
+      }
+    }
+  }
+
   async function load() {
     const res = await fetch(`/api/play/${code}`, {
       headers: { Authorization: `Bearer ${token()}` },
@@ -26,6 +37,7 @@
     if (res.ok) {
       state = await res.json();
       newName = state.team?.name ?? '';
+      maybeShowManagerInfo();
     } else {
       error = 'Could not load team';
     }
@@ -60,7 +72,7 @@
   });
 </script>
 
-<main class="fungee-page" style="padding-top: 3rem; padding-bottom: 7rem;">
+<main class="fungee-page" style="padding-top: 3rem; padding-bottom: 8rem;">
   <div class="fungee-card wide">
     {#if state}
       <h1 class="fungee-title">{state.team?.name ?? 'Unnamed team'}</h1>
@@ -101,3 +113,45 @@
     {/if}
   </div>
 </main>
+
+{#if showManagerInfo}
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)}>
+    <div class="modal" on:click|stopPropagation>
+      <h3>You are the Team Manager</h3>
+      <p>
+        As manager, your device is the one the team uses to submit photos/videos for tasks. You can also rename the team and add offline players from the game master menu if needed.
+      </p>
+      <p>
+        Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <button class="fungee-btn" style="width: 100%; margin-top: 1rem;" on:click={() => (showManagerInfo = false)}>GOT IT</button>
+    </div>
+  </div>
+{/if}
+
+<style>
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    padding: 1rem;
+  }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    max-width: 22rem;
+    width: 100%;
+    box-shadow: var(--shadow);
+  }
+
+  .modal h3 {
+    margin-top: 0;
+  }
+</style>

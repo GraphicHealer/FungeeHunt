@@ -28,12 +28,12 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 4rem;
+    height: 4.5rem;
     background: var(--card);
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: space-around;
-    align-items: center;
+    align-items: flex-end;
     z-index: 1000;
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
   }
@@ -42,13 +42,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     color: var(--muted);
     text-decoration: none;
     font-size: 0.75rem;
     gap: 0.25rem;
     flex: 1;
     height: 100%;
+    padding-bottom: 0.25rem;
   }
 
   .nav-item .mdi {
@@ -62,9 +63,9 @@
 
   .nav-item.tasks {
     position: relative;
-    top: -1.25rem;
-    width: 5rem;
-    height: 5rem;
+    top: -1rem;
+    width: 4.5rem;
+    height: 4.5rem;
     border-radius: 50%;
     background: var(--brand);
     color: #fff;

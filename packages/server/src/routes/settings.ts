@@ -27,6 +27,7 @@ router.patch('/', async (req, res) => {
     returnBonusEnabled,
     returnBonusWindowMinutes,
     returnBonusPoints,
+    randomizeReturnBonus,
     defaultRules,
     defaultTasks,
   } = req.body ?? {};
@@ -43,6 +44,7 @@ router.patch('/', async (req, res) => {
     if (returnBonusEnabled !== undefined) data.returnBonusEnabled = returnBonusEnabled === true || returnBonusEnabled === 'true' || returnBonusEnabled === 'on' || returnBonusEnabled === '1';
     if (returnBonusWindowMinutes !== undefined) data.returnBonusWindowMinutes = Number(returnBonusWindowMinutes) || 0;
     if (returnBonusPoints !== undefined) data.returnBonusPoints = Number(returnBonusPoints) || 0;
+    if (randomizeReturnBonus !== undefined) data.randomizeReturnBonus = randomizeReturnBonus === true || randomizeReturnBonus === 'true' || randomizeReturnBonus === 'on' || randomizeReturnBonus === '1';
     if (defaultRules !== undefined) data.defaultRules = typeof defaultRules === 'string' ? defaultRules : JSON.stringify(defaultRules);
     if (defaultTasks !== undefined) data.defaultTasks = typeof defaultTasks === 'string' ? defaultTasks : JSON.stringify(defaultTasks);
 

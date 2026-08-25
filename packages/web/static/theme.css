@@ -73,6 +73,7 @@ body {
   padding: 2rem;
   width: 100%;
   max-width: 28rem;
+  box-sizing: border-box;
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 

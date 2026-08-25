@@ -70,12 +70,14 @@
       foodDrivePointsPerItem = s.foodDrivePointsPerItem ?? 1;
       foodDrivePermissible = s.foodDrivePermissible ?? '';
       foodDriveSuggested = s.foodDriveSuggested ?? '';
-    }
 
-    if (date && endTime) {
-      const end = fromInputValue(endAt);
-      const retStart = new Date(end.getTime() - returnBonusWindowMinutes * 60 * 1000);
-      returnStartTime = toInputValue(retStart).slice(11, 16);
+      if (date && endTime && returnBonusEnabled && s.randomizeReturnBonus) {
+        randomizeReturn();
+      } else if (date && endTime && returnBonusEnabled) {
+        const end = fromInputValue(endAt);
+        const retStart = new Date(end.getTime() - returnBonusWindowMinutes * 60 * 1000);
+        returnStartTime = toInputValue(retStart).slice(11, 16);
+      }
     }
   });
 
@@ -130,6 +132,15 @@
     });
     const data = await res.json();
     if (res.ok) {
+      try {
+        await fetch('/api/config', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tourStep: 6 }),
+        });
+      } catch {
+        // ignore
+      }
       goto(`/gm/${data.id}/dashboard`);
     } else {
       error = data.error ?? 'Could not create game';
@@ -138,7 +149,7 @@
 </script>
 
 <main class="fungee-page">
-  <div class="fungee-card wide">
+  <div class="fungee-card wide" data-tour="wizard-form">
     <h1 class="fungee-title">NEW GAME</h1>
 
     <div class="wizard">
@@ -163,7 +174,7 @@
             <option value="MANUAL">Game Master Approval</option>
           </select>
 
-          <button class="fungee-btn" type="submit" disabled={!name || !date || !startTime || !endTime}>NEXT</button>
+          <button class="fungee-btn" type="submit" data-tour="step1-next" disabled={!name || !date || !startTime || !endTime}>NEXT</button>
         </form>
       {:else if step === 2}
         <form on:submit|preventDefault={() => step = 3}>
@@ -177,7 +188,7 @@
             <input class="fungee-input" id="rs" type="time" bind:value={returnStartTime} use:focus />
 
             <label class="fungee-label" for="rbw">Window Length (minutes)</label>
-            <input class="fungee-input" id="rbw" type="number" bind:value={returnBonusWindowMinutes} min="1" />
+            <input class="fungee-input" id="rbw" type="number" style="margin-bottom: 0.75rem;" bind:value={returnBonusWindowMinutes} min="1" />
 
             <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
 
@@ -187,7 +198,7 @@
 
           <div class="fungee-btn-row">
             <button class="fungee-btn secondary" type="button" on:click={() => step = 1}>BACK</button>
-            <button class="fungee-btn" type="submit">NEXT</button>
+            <button class="fungee-btn" type="submit" data-tour="step2-next">NEXT</button>
           </div>
         </form>
       {:else if step === 3}
@@ -210,7 +221,7 @@
 
           <div class="fungee-btn-row">
             <button class="fungee-btn secondary" type="button" on:click={() => step = 2}>BACK</button>
-            <button class="fungee-btn" type="submit">CREATE GAME</button>
+            <button class="fungee-btn" type="submit" data-tour="create-game">CREATE GAME</button>
           </div>
         </form>
       {/if}

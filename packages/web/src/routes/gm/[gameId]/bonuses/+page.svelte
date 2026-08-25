@@ -10,6 +10,7 @@
   let error = '';
 
   let retEnabled = false;
+  let retStartTime = '';
   let retWindow = 10;
   let retPoints = 100;
   let fdEnabled = false;
@@ -24,6 +25,15 @@
   function toInputValue(d: Date) {
     const pad = (n: number) => n.toString().padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function fromInputValue(v: string) {
+    return new Date(v);
+  }
+
+  function gameDate() {
+    if (!game?.endAt) return '';
+    return toInputValue(new Date(game.endAt)).slice(0, 10);
   }
 
   function fmtTime(iso?: string) {
@@ -41,10 +51,16 @@
     if (!game) return;
     modal = 'return';
     retEnabled = game.returnBonusEnabled ?? false;
-    const start = game.returnStart ? new Date(game.returnStart).getTime() : new Date(game.endAt).getTime() - 10 * 60 * 1000;
-    const end = game.returnEnd ? new Date(game.returnEnd).getTime() : new Date(game.endAt).getTime();
-    retWindow = Math.max(1, Math.round((end - start) / 60000));
     retPoints = game.returnPoints ?? 100;
+    const end = fromInputValue(`${gameDate()}T${toInputValue(new Date(game.endAt)).slice(11, 16)}`);
+    if (game.returnStart && game.returnEnd) {
+      retStartTime = toInputValue(new Date(game.returnStart)).slice(11, 16);
+      retWindow = Math.max(1, Math.round((new Date(game.returnEnd).getTime() - new Date(game.returnStart).getTime()) / 60000));
+    } else {
+      retWindow = 10;
+      const start = new Date(end.getTime() - retWindow * 60 * 1000);
+      retStartTime = toInputValue(start).slice(11, 16);
+    }
   }
 
   function openFood() {
@@ -61,12 +77,35 @@
     error = '';
   }
 
+  function randomizeReturn() {
+    if (!game?.endAt) return;
+    const end = fromInputValue(`${gameDate()}T${toInputValue(new Date(game.endAt)).slice(11, 16)}`);
+    const possibleMinutes = [5, 6, 7, 8, 9, 11, 12, 13, 14, 15];
+    for (let i = 0; i < 50; i++) {
+      const windowMinutes = possibleMinutes[Math.floor(Math.random() * possibleMinutes.length)];
+      const endOffset = possibleMinutes[Math.floor(Math.random() * possibleMinutes.length)];
+      const retEnd = new Date(end.getTime() - endOffset * 60 * 1000);
+      const retStart = new Date(retEnd.getTime() - windowMinutes * 60 * 1000);
+      if (retEnd.getMinutes() % 10 !== 0 && retStart.getMinutes() % 10 !== 0) {
+        retStartTime = toInputValue(retStart).slice(11, 16);
+        retWindow = windowMinutes;
+        return;
+      }
+    }
+    const fallbackWindow = 13;
+    const retEnd = new Date(end.getTime() - 6 * 60 * 1000);
+    const retStart = new Date(retEnd.getTime() - fallbackWindow * 60 * 1000);
+    retStartTime = toInputValue(retStart).slice(11, 16);
+    retWindow = fallbackWindow;
+  }
+
   async function saveReturn() {
     if (!game?.endAt) return;
     saving = true;
     error = '';
-    const end = new Date(game.endAt);
-    const start = new Date(end.getTime() - retWindow * 60 * 1000);
+    const date = gameDate();
+    const start = fromInputValue(`${date}T${retStartTime}`);
+    const end = new Date(start.getTime() + retWindow * 60 * 1000);
     const res = await fetch(`/api/gm/games/${gameId}`, {
       method: 'PATCH',
       headers: {
@@ -159,8 +198,14 @@
         </label>
 
         {#if retEnabled}
+          <label class="fungee-label" for="rs">Window Start Time</label>
+          <input class="fungee-input" id="rs" type="time" bind:value={retStartTime} />
+
           <label class="fungee-label" for="rw">Window Length (minutes)</label>
-          <input class="fungee-input" id="rw" type="number" bind:value={retWindow} min="1" />
+          <input class="fungee-input" id="rw" type="number" style="margin-bottom: 0.75rem;" bind:value={retWindow} min="1" />
+
+          <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
+
           <label class="fungee-label" for="rp">Points</label>
           <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={retPoints} min="0" />
         {/if}

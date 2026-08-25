@@ -35,6 +35,7 @@ model Player {
   gameId       String
   displayName  String
   type         PlayerType
+  hasCar       Boolean    @default(false)
   sessionToken String?    @unique
   joinedAt     DateTime   @default(now())
   game         Game       @relation(fields: [gameId], references: [id])
@@ -102,6 +103,10 @@ model SystemSettings {
   returnBonusEnabled       Boolean @default(true)
   returnBonusWindowMinutes Int     @default(10)
   returnBonusPoints        Float   @default(100)
+  randomizeReturnBonus     Boolean @default(false)
+  welcomeShown             Boolean @default(false)
+  tourStep                 Int     @default(0)
+  tourDone                 Boolean @default(false)
   defaultRules             String?
   defaultTasks             String?
 }

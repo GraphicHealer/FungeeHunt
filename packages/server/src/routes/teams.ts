@@ -157,4 +157,94 @@ router.patch('/:teamId', async (req, res) => {
   }
 });
 
+router.post('/auto', async (req, res) => {
+  const { gameId } = req.params;
+  const { teamCount } = req.body ?? {};
+  const count = Number(teamCount);
+  if (!count || count < 1 || !Number.isInteger(count)) {
+    return res.status(400).json({ error: 'A positive number of teams is required' });
+  }
+
+  try {
+    const game = await db.game.findUnique({ where: { id: gameId } });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+
+    const players = await db.player.findMany({
+      where: { gameId, teamId: null },
+    });
+
+    if (players.length < count) {
+      return res.status(400).json({ error: 'Not enough unassigned players for that many teams' });
+    }
+
+    const apps = players.filter((p: any) => p.type === 'APP');
+    const drivers = players.filter((p: any) => p.hasCar);
+
+    if (apps.length < count) {
+      return res.status(400).json({ error: 'Not enough app players to be managers for every team' });
+    }
+    if (drivers.length < count) {
+      return res.status(400).json({ error: 'Not enough drivers for every team to have one' });
+    }
+
+    // Seed with one app player as manager per team, preferring drivers.
+    const sortedApps = [...apps].sort((a: any, b: any) => Number(b.hasCar) - Number(a.hasCar));
+    const teamSeeds = sortedApps.slice(0, count);
+    const remainingPlayers = players.filter((p: any) => !teamSeeds.some((s: any) => s.id === p.id));
+
+    // Each team needs at least one driver; if the manager is not a driver, add one.
+    const teamsToCreate: { managerId: string; memberIds: string[] }[] = teamSeeds.map((manager: any) => {
+      const memberIds = [manager.id];
+      if (!manager.hasCar) {
+        const driverIndex = remainingPlayers.findIndex((p: any) => p.hasCar);
+        if (driverIndex !== -1) {
+          const driver = remainingPlayers.splice(driverIndex, 1)[0];
+          memberIds.push(driver.id);
+        }
+      }
+      return { managerId: manager.id, memberIds };
+    });
+
+    // Assign remaining players round-robin to balance team sizes.
+    let teamIndex = 0;
+    for (const player of shuffle(remainingPlayers)) {
+      teamsToCreate[teamIndex].memberIds.push(player.id);
+      teamIndex = (teamIndex + 1) % count;
+    }
+
+    await db.$transaction(async (tx) => {
+      const existingCount = await tx.team.count({ where: { gameId } });
+      for (let i = 0; i < teamsToCreate.length; i++) {
+        const seed = teamsToCreate[i];
+        const name = `Team ${existingCount + i + 1}`;
+        await tx.team.create({
+          data: {
+            game: { connect: { id: gameId } },
+            name,
+            manager: { connect: { id: seed.managerId } },
+            members: { connect: seed.memberIds.map((id: string) => ({ id })) },
+          },
+        });
+      }
+    });
+
+    const io = req.app.get('io') as any;
+    io.emit(`game:${game.code}`, { type: 'team' });
+
+    res.status(201).json({ count: teamsToCreate.length });
+  } catch (err) {
+    console.error('auto create teams failed', err);
+    res.status(500).json({ error: 'Could not auto-create teams' });
+  }
+});
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export default router;

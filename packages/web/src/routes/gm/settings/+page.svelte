@@ -26,6 +26,22 @@
     loading = false;
   }
 
+  async function reEnableTutorial() {
+    const res = await fetch('/api/config', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ welcomeShown: false, tourStep: 0, tourDone: false }),
+    });
+    if (res.ok) {
+      toast.add('Tutorial will reappear on the main screen', 'success');
+    } else {
+      toast.add('Could not re-enable tutorial', 'error');
+    }
+  }
+
   async function save() {
     const res = await fetch('/api/gm/settings', {
       method: 'PATCH',
@@ -41,6 +57,7 @@
         returnBonusEnabled: settings.returnBonusEnabled,
         returnBonusWindowMinutes: Number(settings.returnBonusWindowMinutes),
         returnBonusPoints: Number(settings.returnBonusPoints),
+        randomizeReturnBonus: settings.randomizeReturnBonus,
         defaultRules: defaultRulesStr,
         defaultTasks: defaultTasksStr,
       }),
@@ -73,6 +90,10 @@
           <input type="checkbox" bind:checked={settings.returnBonusEnabled} />
           Enabled by default
         </label>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={settings.randomizeReturnBonus} />
+          Randomize return bonus start when opening new game wizard
+        </label>
         <label for="rbw">Default window length (minutes)</label>
         <input id="rbw" type="number" bind:value={settings.returnBonusWindowMinutes} min="1" />
         <label for="rbp">Default points</label>
@@ -104,6 +125,12 @@
       </section>
 
       <button type="submit">SAVE SETTINGS</button>
+
+      <section class="card" style="margin-top: 1rem;">
+        <h2>Tutorial</h2>
+        <p style="margin: 0 0 1rem; color: var(--muted);">Make the welcome and guided tour appear again the next time the main page is opened.</p>
+        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={reEnableTutorial}>RE-ENABLE TUTORIAL</button>
+      </section>
     </form>
   {/if}
 </main>

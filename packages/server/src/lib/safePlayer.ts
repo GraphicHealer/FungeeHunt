@@ -3,6 +3,7 @@ export function toSafePlayer(player: any) {
     id: player.id,
     displayName: player.displayName,
     type: player.type,
+    hasCar: player.hasCar,
     teamId: player.teamId,
   };
 }

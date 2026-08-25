@@ -10,6 +10,8 @@
   let loading = true;
 
   let showModal = false;
+  let showAutoModal = false;
+  let autoCount = '';
   let editId = '';
   let name = '';
   let managerId = '';
@@ -55,6 +57,43 @@
     showModal = false;
   }
 
+  function suggestedTeamCount(total: number) {
+    if (total <= 0) return 0;
+    if (total <= 5) return 1;
+    return Math.floor((total + 5) / 5);
+  }
+
+  function openAuto() {
+    const total = players.length;
+    const suggested = suggestedTeamCount(total);
+    autoCount = suggested ? String(suggested) : '';
+    error = '';
+    showAutoModal = true;
+  }
+
+  function closeAuto() {
+    showAutoModal = false;
+  }
+
+  async function autoCreate() {
+    error = '';
+    const res = await fetch(`/api/gm/games/${gameId}/teams/auto`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ teamCount: Number(autoCount) }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showAutoModal = false;
+      await load();
+    } else {
+      error = data.error ?? 'Could not auto-create teams';
+    }
+  }
+
   async function save() {
     error = '';
     const url = editId
@@ -81,14 +120,25 @@
   onMount(load);
 </script>
 
-<div class="page">
+<div class="page" data-tour="teams-page">
   <header class="page-header">
-    <h2>Teams</h2>
-    <button class="fungee-btn" on:click={openNew} style="width: auto; margin: 0;">+ ADD TEAM</button>
+    <h2 data-tour="teams-title">Teams</h2>
+    <div style="display: flex; gap: 0.5rem;">
+      <button class="fungee-btn secondary" on:click={openAuto} style="width: auto; margin: 0;">AUTO-CREATE</button>
+      <button class="fungee-btn" data-tour="add-team" on:click={openNew} style="width: auto; margin: 0;">+ ADD TEAM</button>
+    </div>
   </header>
 
   {#if error && !showModal}<p class="error">{error}</p>{/if}
   {#if loading}<p>Loading…</p>{/if}
+
+  {#if !loading && teams.length === 0}
+    <div class="empty-card">
+      <h2>No teams yet</h2>
+      <p>Would you like to auto-create teams from your players?</p>
+      <button class="fungee-btn" on:click={openAuto} style="width: auto; margin: 0;">AUTO-CREATE TEAMS</button>
+    </div>
+  {/if}
 
   <ul class="team-list">
     {#each teams as team (team.id)}
@@ -134,6 +184,39 @@
         <div class="actions">
           <button type="button" on:click={close}>Cancel</button>
           <button type="submit" disabled={!managerId}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+{#if showAutoModal}
+  <div class="modal-backdrop" on:click={closeAuto}>
+    <div class="modal" on:click|stopPropagation>
+      <form on:submit|preventDefault={autoCreate}>
+        <h3>Auto-Create Teams</h3>
+
+        <p style="margin: 0 0 0.75rem; color: var(--muted);">
+          Each team will get one app player as manager, at least one driver, and the rest will be distributed.
+        </p>
+
+        {#if players.length > 0}
+          <p style="margin: 0 0 0.75rem;">
+            <strong>{players.length} players</strong> — we recommend <strong>{suggestedTeamCount(players.length)} teams</strong>
+            ({players.length > 0 && suggestedTeamCount(players.length) > 0
+              ? `about ${Math.round(players.length / suggestedTeamCount(players.length))} per team`
+              : ''})
+          </p>
+        {/if}
+
+        <label for="auto-count">Number of teams</label>
+        <input id="auto-count" type="number" min="1" bind:value={autoCount} placeholder="How many teams?" />
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeAuto}>Cancel</button>
+          <button type="submit" disabled={!autoCount || Number(autoCount) < 1}>Create</button>
         </div>
       </form>
     </div>
@@ -277,6 +360,24 @@
   .actions button:disabled {
     background: var(--border);
     cursor: not-allowed;
+  }
+
+  .empty-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .empty-card h2 {
+    margin: 0 0 0.5rem;
+  }
+
+  .empty-card p {
+    color: var(--muted);
+    margin: 0 0 1.5rem;
   }
 
   .error {
