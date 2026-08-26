@@ -28,14 +28,14 @@ router.post('/', async (req, res) => {
       where: { id: managerId, gameId, type: 'APP' },
     });
     if (!manager) {
-      return res.status(400).json({ error: 'Manager must be an App player in this game' });
+      return res.status(400).json({ error: 'Team Captain must be an App player in this game' });
     }
 
     const existingManager = await db.team.findFirst({
       where: { managerId, gameId },
     });
     if (existingManager) {
-      return res.status(400).json({ error: 'Player is already manager of another team' });
+      return res.status(400).json({ error: 'Player is already Team Captain of another team' });
     }
 
     let trimmedName = name ? name.trim() : '';
@@ -118,13 +118,13 @@ router.patch('/:teamId', async (req, res) => {
         where: { id: managerId, gameId, type: 'APP' },
       });
       if (!manager) {
-        return res.status(400).json({ error: 'Manager must be an App player in this game' });
+        return res.status(400).json({ error: 'Team Captain must be an App player in this game' });
       }
       const existingManager = await db.team.findFirst({
         where: { managerId, gameId, id: { not: teamId } },
       });
       if (existingManager) {
-        return res.status(400).json({ error: 'Player is already manager of another team' });
+        return res.status(400).json({ error: 'Player is already Team Captain of another team' });
       }
       updateData.manager = { connect: { id: managerId } };
     }
@@ -181,7 +181,7 @@ router.post('/auto', async (req, res) => {
     const drivers = players.filter((p: any) => p.hasCar);
 
     if (apps.length < count) {
-      return res.status(400).json({ error: 'Not enough app players to be managers for every team' });
+      return res.status(400).json({ error: 'Not enough app players to be Team Captains for every team' });
     }
     if (drivers.length < count) {
       return res.status(400).json({ error: 'Not enough drivers for every team to have one' });

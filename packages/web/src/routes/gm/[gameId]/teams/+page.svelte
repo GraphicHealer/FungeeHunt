@@ -145,7 +145,7 @@
       <li on:click={() => openEdit(team)}>
         <div class="team-name">{team.name ?? 'Unnamed team'}</div>
         <div class="team-meta">
-          Manager: {team.manager?.displayName ?? '—'} · {team.members?.length ?? 0} members
+          Team Captain: {team.manager?.displayName ?? '—'} · {team.members?.length ?? 0} members
         </div>
       </li>
     {/each}
@@ -161,9 +161,9 @@
         <label for="team-name">Team Name</label>
         <input id="team-name" type="text" bind:value={name} placeholder="Optional" />
 
-        <label for="manager">Manager</label>
+        <label for="manager">Team Captain</label>
         <select id="manager" bind:value={managerId}>
-          <option value="">Select manager…</option>
+          <option value="">Select Team Captain…</option>
           {#each players.filter((p) => p.type === 'APP') as player (player.id)}
             <option value={player.id}>{player.displayName}</option>
           {/each}
@@ -197,7 +197,7 @@
         <h3>Auto-Create Teams</h3>
 
         <p style="margin: 0 0 0.75rem; color: var(--muted);">
-          Each team will get one app player as manager, at least one driver, and the rest will be distributed.
+          Each team will get one app player as Team Captain, at least one driver, and the rest will be distributed.
         </p>
 
         {#if players.length > 0}

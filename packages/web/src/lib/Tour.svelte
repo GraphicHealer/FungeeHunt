@@ -124,7 +124,7 @@
     },
     {
       title: 'Teams',
-      body: 'Create teams here once enough players have joined. Each team needs at least one manager.',
+      body: 'Create teams here once enough players have joined. Each team needs at least one Team Captain.',
       route: /^\/gm\/[^/]+\/teams$/,
       nextPath: '/gm/{{gameId}}/dashboard',
       target: '[data-tour="teams-title"]',

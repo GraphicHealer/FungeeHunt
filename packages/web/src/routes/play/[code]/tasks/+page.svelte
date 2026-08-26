@@ -249,9 +249,9 @@
 {#if showManagerInfo}
   <div class="modal-backdrop" on:click={() => (showManagerInfo = false)}>
     <div class="modal" on:click|stopPropagation>
-      <h3>You are the Team Manager</h3>
+      <h3>You are the Team Captain</h3>
       <p>
-        As manager, your device is the one the team uses to submit photos/videos for tasks. You can also rename the team and add offline players from the game master menu if needed.
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks. You can also rename the team and add offline players from the game master menu if needed.
       </p>
       <p>
         Make sure your phone is charged and ready once the game starts. Good luck!

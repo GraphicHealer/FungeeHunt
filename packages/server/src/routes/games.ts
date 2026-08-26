@@ -314,12 +314,12 @@ router.patch('/:gameId', async (req: any, res: any) => {
       for (const team of teams) {
         if (!team.manager) {
           return res.status(400).json({
-            error: `Team "${team.name ?? 'Unnamed'}" is missing a manager.`,
+            error: `Team "${team.name ?? 'Unnamed'}" is missing a Team Captain.`,
           });
         }
         if (team.manager.type !== 'APP') {
           return res.status(400).json({
-            error: `Manager for team "${team.name ?? 'Unnamed'}" must be an online player.`,
+            error: `Team Captain for team "${team.name ?? 'Unnamed'}" must be an online player.`,
           });
         }
       }

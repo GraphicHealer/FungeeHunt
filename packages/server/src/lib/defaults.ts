@@ -543,7 +543,7 @@ const defaultTasks = [
 const defaultRules = [
   {
     title: 'HOW TO PLAY',
-    body: 'Work together as a team to complete as many challenges as possible before time expires. Each challenge must include the required photo or video proof, and the team manager is responsible for submitting it through the Hunt app.',
+    body: 'Work together as a team to complete as many challenges as possible before time expires. Each challenge must include the required photo or video proof, and the Team Captain is responsible for submitting it through the Hunt app.',
   },
   {
     title: 'SCORING',

@@ -26,7 +26,7 @@
     },
     {
       title: 'Players & Teams',
-      body: 'Use PLAYERS to see everyone who joined. TEAMS lets you rename teams and assign or move players. Every team needs one online manager.',
+      body: 'Use PLAYERS to see everyone who joined. TEAMS lets you rename teams and assign or move players. Every team needs one online Team Captain.',
     },
     {
       title: 'Tasks & Submissions',

@@ -192,6 +192,7 @@
           <span class="title">{task.title}</span>
           <span class="meta">+{formatPoints(task.points)} · {task.proofType}</span>
         </div>
+        <p class="description">{task.description}</p>
       </li>
     {/each}
   </ul>
@@ -316,8 +317,9 @@
     border-radius: 0.5rem;
     padding: 1rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
     cursor: pointer;
     transition: box-shadow 0.15s;
   }
@@ -344,6 +346,13 @@
 
   .meta {
     color: var(--muted);
+  }
+
+  .description {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.4;
   }
 
   .danger {

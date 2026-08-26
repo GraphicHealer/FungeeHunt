@@ -16,7 +16,7 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
   }
 
   if (!player.teamId || !player.team || player.team.managerId !== player.id) {
-    return res.status(403).json({ error: 'Only the team manager can submit proof' });
+    return res.status(403).json({ error: 'Only the Team Captain can submit proof' });
   }
 
   try {

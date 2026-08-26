@@ -90,7 +90,7 @@ router.patch('/team', async (req, res) => {
       return res.status(400).json({ error: 'Not assigned to a team' });
     }
     if (player.team?.managerId !== player.id) {
-      return res.status(403).json({ error: 'Only the manager can rename the team' });
+      return res.status(403).json({ error: 'Only the Team Captain can rename the team' });
     }
     const team = await db.team.update({
       where: { id: player.teamId },

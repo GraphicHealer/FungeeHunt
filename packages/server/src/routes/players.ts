@@ -85,7 +85,7 @@ router.delete('/:playerId', async (req, res) => {
     });
     if (!player) return res.status(404).json({ error: 'Player not found' });
     if (player.team && player.team.managerId === playerId) {
-      return res.status(400).json({ error: 'Cannot delete a team manager' });
+      return res.status(400).json({ error: 'Cannot delete the Team Captain' });
     }
     await db.player.delete({ where: { id: playerId } });
     res.status(204).end();

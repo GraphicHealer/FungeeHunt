@@ -1,12 +1,12 @@
 # Fungee-Hunt
 
-A self-hosted, mobile-first scavenger-hunt platform built for Game Masters, team managers, players, and public spectators. Run it on a server or a local machine with Docker.
+A self-hosted, mobile-first scavenger-hunt platform built for Game Masters, team captains, players, and public spectators. Run it on a server or a local machine with Docker.
 
 ## What it does
 
 - **Game Master** creates a game, sets the rules, builds a task list, manages players/teams, reviews submissions, and starts the clock.
 - **Players** join on their phones with a game code, see their tasks, and submit photo or video proof.
-- **Managers** are app players assigned to lead a team. The GM can auto-create balanced teams that each include at least one manager and one driver.
+- **Captains** are app players assigned to lead a team. The GM can auto-create balanced teams that each include at least one captain and one driver.
 - **Spectators** watch a live scoreboard and photo feed on a TV or projector.
 
 ## Features
@@ -14,7 +14,7 @@ A self-hosted, mobile-first scavenger-hunt platform built for Game Masters, team
 - Real-time updates via Socket.io (scores, submissions, game status, viewer feed)
 - Task categories and random, category-balanced task selection when a game is created
 - A guaranteed `Team Photo` task that is always task #1
-- Car/driver tracking for players and auto-team creation with driver/manager constraints
+- Car/driver tracking for players and auto-team creation with driver/captain constraints
 - Photo/video proof submissions (one proof type per task)
 - GM printout page for offline players who are not using phones
 - Public viewer / scoreboard screen
@@ -101,8 +101,8 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api` and `/soc
 3. Create a game through the wizard. You can choose how many tasks to include; the app randomly balances categories and always places one `Team Photo` task as #1.
 4. Copy the join link/code from the dashboard.
 5. In another browser or incognito window, open `/play/{CODE}` and enter a player name. The onboarding asks whether the player has a car they can drive.
-6. Back in the GM dashboard, open **Teams** and click **AUTO-CREATE TEAMS** (or build them manually). Every team gets one manager and one driver.
-7. As the manager, the app will show a popup when the game starts explaining their role.
+6. Back in the GM dashboard, open **Teams** and click **AUTO-CREATE TEAMS** (or build them manually). Every team gets one captain and one driver.
+7. As the captain, the app will show a popup when the game starts explaining their role.
 8. Submit photo or video proof for tasks; the GM reviews submissions unless the game is in automatic approval mode.
 9. Open `/view/{CODE}` for the public scoreboard and photo feed.
 
