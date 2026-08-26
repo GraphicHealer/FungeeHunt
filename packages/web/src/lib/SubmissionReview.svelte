@@ -53,13 +53,15 @@
       {#if sub.reason}<p class="reason"><strong>Reason:</strong> {sub.reason}</p>{/if}
     </div>
 
-    {#if sub.proofUrl}
-      <div class="proof">
-        {#if sub.task?.proofType === 'VIDEO'}
-          <video src={sub.proofUrl} controls></video>
-        {:else}
-          <img src={sub.proofUrl} alt="Proof" />
-        {/if}
+    {#if sub.proofUrls?.length || sub.proofUrl}
+      <div class="proof" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        {#each [...new Set([sub.proofUrl, ...(sub.proofUrls ?? [])])].filter(Boolean) as url (url)}
+          {#if sub.task?.proofType === 'VIDEO'}
+            <video src={url} controls></video>
+          {:else}
+            <img src={url} alt="Proof" />
+          {/if}
+        {/each}
       </div>
     {/if}
 
@@ -101,6 +103,8 @@
   .modal {
     width: 100%;
     max-width: 40rem;
+    max-height: 90vh;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;

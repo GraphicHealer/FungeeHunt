@@ -165,12 +165,6 @@ async function syncAutoRuleSections(game: any) {
       await removeSection(game.id, 'RETURN TIME BONUS');
     }
 
-    if (game.foodDriveEnabled) {
-      const body = `Each eligible food drive item turned in is worth ${game.foodDrivePointsPerItem} points.\n\nPermissible items: ${game.foodDrivePermissible || 'as announced by the Game Master'}.\nSuggested items: ${game.foodDriveSuggested || 'none specified'}.`;
-      await syncSection(game.id, 'FOOD DRIVE BONUS', body);
-    } else {
-      await removeSection(game.id, 'FOOD DRIVE BONUS');
-    }
   } catch (err) {
     console.error('sync rules failed', err);
   }
@@ -230,7 +224,8 @@ router.post('/', async (req: any, res: any) => {
           title: t.title ?? 'Task',
           description: t.description ?? '',
           points: Number(t.points) || 0,
-          proofType: ['PHOTO', 'VIDEO'].includes(t.proofType) ? t.proofType : 'PHOTO',
+          proofType: ['PHOTO', 'VIDEO', 'PHOTOS'].includes(t.proofType) ? t.proofType : 'PHOTO',
+          photoCount: t.photoCount ? Number(t.photoCount) : null,
           category: t.category ?? 'General',
           order: t.order ?? i + 1,
         })),

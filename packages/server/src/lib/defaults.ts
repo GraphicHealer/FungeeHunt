@@ -4,7 +4,7 @@ import { logger } from './logger';
 const defaultTasks = [
   {
     title: 'Team Landmark Photo',
-    description: 'Take a team photo with a recognizable local landmark in the background.',
+    description: 'Take a photo of your entire team together with a well-known local landmark clearly visible in the background.',
     points: 150,
     proofType: 'PHOTO',
     category: 'Team Photo',
@@ -12,7 +12,7 @@ const defaultTasks = [
   },
   {
     title: 'Fist Bump a Retiree',
-    description: 'Five team members must fist bump a retired public servant or transportation worker.',
+    description: 'Five team members must fist bump a retired public servant.',
     points: 100,
     proofType: 'PHOTO',
     category: 'People',
@@ -44,7 +44,7 @@ const defaultTasks = [
   },
   {
     title: 'Row, Row, Row Your Boat',
-    description: 'All team members must touch a boat and sing "Row, Row, Row Your Boat" for at least 32 seconds.',
+    description: 'All team members must touch a boat and sing "Row, Row, Row Your Boat" twice.',
     points: 100,
     proofType: 'VIDEO',
     category: 'Music',
@@ -52,7 +52,7 @@ const defaultTasks = [
   },
   {
     title: 'Silent Store Walk',
-    description: 'The entire team must enter a store, walk to the back wall, and exit the front door without speaking.',
+    description: 'The entire team must enter a store, walk to the back and touch the wall, then exit without speaking.',
     points: 100,
     proofType: 'VIDEO',
     category: 'Pranks',
@@ -76,14 +76,14 @@ const defaultTasks = [
   },
   {
     title: 'Signed Banana',
-    description: 'Have a grocery store clerk sign a banana.',
+    description: 'Have a grocery store clerk sign a banana. (You do not have to purchase said banana)',
     points: 100,
     proofType: 'PHOTO',
     category: 'Pranks',
     order: 10,
   },
   {
-    title: 'Star Spangled Banner',
+    title: 'Star Spangled Flagpole',
     description: 'As a whole team, stand around a flagpole and sing a lesser-known verse of The Star-Spangled Banner.',
     points: 150,
     proofType: 'VIDEO',
@@ -91,7 +91,7 @@ const defaultTasks = [
     order: 11,
   },
   {
-    title: 'Stranger Christmas Carol',
+    title: 'Reverse Christmas Carol',
     description: 'Ask a stranger to sing a Christmas carol to your team.',
     points: 150,
     proofType: 'VIDEO',
@@ -107,10 +107,10 @@ const defaultTasks = [
     order: 13,
   },
   {
-    title: 'Other Teams',
-    description: "One member must collect a photo of each of the other teams' vehicles or gathering spots.",
+    title: 'Team Paparazzi',
+    description: "Collect a photo of each of the other teams' vehicles or gathering spots.",
     points: 50,
-    proofType: 'PHOTO',
+    proofType: 'PHOTOS',
     category: 'Vehicles',
     order: 14,
   },
@@ -124,7 +124,7 @@ const defaultTasks = [
   },
   {
     title: 'Little Teapot',
-    description: 'Seven members must sing "I\'m a Little Teapot" (with motions) along with two firefighters or EMTs.',
+    description: 'At least 2 members must sing "I\'m a Little Teapot" (with motions) along with one or more firefighters or EMTs.',
     points: 200,
     proofType: 'VIDEO',
     category: 'Music',
@@ -132,7 +132,7 @@ const defaultTasks = [
   },
   {
     title: 'High Five Blitz',
-    description: 'A member of your team must get 15 high fives from 15 different people in less than 15 seconds.',
+    description: 'A member of your team must get 15 high fives from 15 different people in less than 30 seconds.',
     points: 125,
     proofType: 'VIDEO',
     category: 'Games',
@@ -147,7 +147,7 @@ const defaultTasks = [
     order: 18,
   },
   {
-    title: 'One Sesame Seed',
+    title: 'How to get a Sesame Seed',
     description: 'A team member must go into a restaurant and order one single sesame seed.',
     points: 125,
     proofType: 'PHOTO',
@@ -155,7 +155,7 @@ const defaultTasks = [
     order: 19,
   },
   {
-    title: 'Group Tree Hug',
+    title: 'Group Tree Huggers',
     description: 'As a team, group hug a tree.',
     points: 50,
     proofType: 'PHOTO',
@@ -172,7 +172,7 @@ const defaultTasks = [
   },
   {
     title: 'Employee Group Photo',
-    description: 'Take a group photo with a school or office employee.',
+    description: 'Take a photo of your entire team together with one employee of a school, office, or business you visit (nametag, uniform, or badge should confirm they work there).',
     points: 150,
     proofType: 'PHOTO',
     category: 'Team Photo',
@@ -180,7 +180,7 @@ const defaultTasks = [
   },
   {
     title: 'Statue Pose',
-    description: 'Your whole team must strike a pose mimicking a statue or monument, and the statue must be in the photo.',
+    description: "Find a statue or monument, then have your entire team strike the same pose the statue(s) are in. Both your team and the statue(s) must be visible in the same photo.",
     points: 150,
     proofType: 'PHOTO',
     category: 'Team Photo',
@@ -196,7 +196,7 @@ const defaultTasks = [
   },
   {
     title: 'Odometer Reading',
-    description: 'A team member must read a car\'s mileage aloud while standing next to that physical car.',
+    description: 'A team member must read a car\'s mileage aloud while standing next to that physical car. (Cannot be your team\'s car)',
     points: 75,
     proofType: 'PHOTO',
     category: 'Vehicles',
@@ -212,7 +212,7 @@ const defaultTasks = [
   },
   {
     title: 'Bulk Gerbil Discount',
-    description: "At a pet store, ask if they have a bulk discount on gerbils and whether there is much meat on one. You cannot explain until after they answer.",
+    description: 'At a pet store, ask \'Do you have a bulk discount on gerbils, and how much meat is on a gerbil anyway?\' You cannot explain until after they answer.',
     points: 175,
     proofType: 'VIDEO',
     category: 'Pranks',
@@ -220,9 +220,9 @@ const defaultTasks = [
   },
   {
     title: 'Elbow Portrait',
-    description: 'Ask a stranger to take a still picture of a team member\'s left elbow.',
+    description: 'Ask a stranger to take a picture of a team member\'s left elbow. You must record the process.',
     points: 75,
-    proofType: 'PHOTO',
+    proofType: 'VIDEO',
     category: 'Art',
     order: 28,
   },
@@ -244,7 +244,7 @@ const defaultTasks = [
   },
   {
     title: 'Elmo Interview',
-    description: 'In a large store, find an Elmo item. One member interviews Elmo about his early days while another does his voice-over.',
+    description: 'Find an Elmo item (toy, plush, or picture). One team member must interview "Elmo" about his early days, while a second team member plays the part of Elmo.',
     points: 175,
     proofType: 'VIDEO',
     category: 'Pranks',
@@ -403,8 +403,8 @@ const defaultTasks = [
     order: 50,
   },
   {
-    title: 'Hold Up a Building',
-    description: 'Discover a street with unique architecture and take a photo of your team pretending to hold up one of the buildings.',
+    title: 'Lifting a Building',
+    description: 'Discover a street with unique architecture and take a photo of your team pretending to lift one of the buildings.',
     points: 50,
     proofType: 'PHOTO',
     category: 'Art',
@@ -419,7 +419,7 @@ const defaultTasks = [
     order: 52,
   },
   {
-    title: 'Flash Mob',
+    title: 'Silent Flash Mob',
     description: 'Start a spontaneous flash mob with no music and dance in unison for at least 20 seconds.',
     points: 150,
     proofType: 'VIDEO',
@@ -453,7 +453,7 @@ const defaultTasks = [
   {
     title: 'Clean Up',
     description: 'Team must collect at least 20 pieces of trash or recycling from a public area and dispose of it properly.',
-    points: 50,
+    points: 150,
     proofType: 'PHOTO',
     category: 'People',
     order: 57,
@@ -475,20 +475,12 @@ const defaultTasks = [
     order: 59,
   },
   {
-    title: 'Grocery Obstacle Course',
-    description: 'Create an obstacle course in a grocery store aisle, then direct a blindfolded team member through it using only your voice.',
-    points: 125,
-    proofType: 'VIDEO',
-    category: 'Games',
-    order: 60,
-  },
-  {
     title: 'Shoe Circle Catch',
     description: 'Form a circle and toss one team member\'s left shoe around the full circle five times without dropping it.',
     points: 75,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 61,
+    order: 60,
   },
   {
     title: 'Run for Office',
@@ -496,31 +488,31 @@ const defaultTasks = [
     points: 175,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 62,
+    order: 61,
   },
   {
     title: 'Three Animal Friends',
     description: 'Find three different species of living, non-bug, non-bird, non-human animals and capture them clearly on camera.',
     points: 50,
-    proofType: 'PHOTO',
+    proofType: 'PHOTOS',
     category: 'Animals',
-    order: 63,
+    order: 62,
   },
   {
     title: 'Bird Blitz',
     description: 'Photograph as many different birds as possible in 5 minutes, using only one camera.',
     points: 75,
-    proofType: 'PHOTO',
+    proofType: 'PHOTOS',
     category: 'Animals',
-    order: 64,
+    order: 63,
   },
   {
     title: 'Coolest Car Team Photo',
-    description: 'Take a picture of your whole team with the coolest car you can find.',
+    description: "Find the car you think is the coolest one nearby (your call — sports car, classic car, wild paint job, etc.) and take a photo of your entire team standing next to it.",
     points: 150,
     proofType: 'PHOTO',
     category: 'Team Photo',
-    order: 65,
+    order: 64,
   },
   {
     title: 'Movie Quote Guess',
@@ -528,7 +520,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 66,
+    order: 65,
   },
   {
     title: 'Arm Wrestle a Senior',
@@ -536,34 +528,62 @@ const defaultTasks = [
     points: 100,
     proofType: 'PHOTO',
     category: 'People',
-    order: 67,
+    order: 66,
   },
   {
     title: 'Yodel Echo',
-    description: 'One team member must yodel at the base of a water tower while another plays the echo.',
+    description: 'Have one team member yodel at the base of a water tower, a second team member must play the part of the echo.',
     points: 100,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 68,
+    order: 67,
   },
 ];
 
 const defaultRules = [
   {
     title: 'HOW TO PLAY',
-    body: 'Work together as a team to complete as many challenges as possible before time expires.\n\nEvery completed challenge must include photo or video proof as required by the task.',
+    body: 'Work together as a team to complete as many challenges as possible before time expires. Each challenge must include the required photo or video proof, and the team manager is responsible for submitting it through the Hunt app.',
   },
   {
     title: 'SCORING',
     body: 'Each task is worth the number of points displayed on the task.',
   },
   {
-    title: 'RETURN TIME BONUS',
-    body: 'Teams that return to the finish during the return window will receive the return bonus points. The Game Master must confirm your return.',
+    title: 'Obey the Law',
+    body: 'All participants must obey all applicable federal, state, and local laws, regulations, and policies while participating in the Hunt. Do not trespass, break laws, damage property, harass people, or otherwise violate the rules of a location in order to complete a Challenge.',
   },
   {
-    title: 'FOOD DRIVE BONUS',
-    body: 'Each eligible food drive item turned in is worth points. Permissible and suggested items are listed in the game settings.',
+    title: 'Respect People and Places',
+    body: 'Respect other people, businesses, properties, and public spaces. If the way you are planning to complete a Challenge is likely to cause problems or unnecessary friction, find another way to complete it. When a Challenge involves another person, be respectful and obtain their permission when appropriate. Do not pressure someone into participating.',
+  },
+  {
+    title: 'Stay Safe',
+    body: 'Unless a Challenge specifically states otherwise, participants should not put themselves, other people, or property at unnecessary risk in an attempt to complete a Challenge.',
+  },
+  {
+    title: 'Teams',
+    body: 'No participant may change teams without permission from the Game Master. Teams may not sabotage another team, interfere with another team’s progress, or intentionally prevent another team from completing a Challenge. A team does not have to complete every Challenge, so think strategically about which Challenges are worth pursuing. Pay attention to the number of participants a Challenge requires and make sure the required participants are actually involved.',
+  },
+  {
+    title: 'No Purchases Required',
+    body: 'Challenges are intended to be completed without requiring participants to purchase anything. Think creatively and use what is available to you.',
+  },
+  {
+    title: 'Proof Requirements',
+    body: 'A Challenge is completed by fulfilling all of its listed requirements. Photo or video proof must clearly demonstrate that the Challenge was completed. The required type of proof is specified by each Challenge, and if a Challenge has specific requirements, all of those requirements must be met to receive its points.',
+  },
+  {
+    title: 'Game Master Authority',
+    body: 'The Game Master reviews submitted Challenges and has the final authority to accept or reject a submission. A submission may be rejected if the Challenge requirements were not met, the proof is insufficient, or the submission otherwise violates the rules. The Game Master has final authority to interpret the rules, resolve disputes, and make decisions when the rules or Challenge wording are unclear.',
+  },
+  {
+    title: 'Have Fun',
+    body: 'Most importantly: have fun, be creative, and see what ridiculous, clever, and unexpected things your team can accomplish!',
+  },
+  {
+    title: 'RETURN TIME BONUS',
+    body: 'Teams that return to the finish during the return window will receive the return bonus points. The Game Master must confirm your return.',
   },
 ];
 

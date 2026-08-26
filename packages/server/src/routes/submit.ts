@@ -5,12 +5,13 @@ import { upload } from '../lib/uploads';
 
 const router = Router({ mergeParams: true });
 
-router.post('/', playerAuth, upload.single('proof'), async (req, res) => {
+router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: any) => {
   const { taskId } = req.params;
   const player = (res.locals as any).player;
   const game = (res.locals as any).game;
+  const files = (req.files ?? []) as any[];
 
-  if (!req.file) {
+  if (files.length === 0) {
     return res.status(400).json({ error: 'Photo or video proof is required' });
   }
 
@@ -24,14 +25,21 @@ router.post('/', playerAuth, upload.single('proof'), async (req, res) => {
     });
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
-    const mimetype = req.file.mimetype;
-    const isPhoto = mimetype.startsWith('image/');
-    const isVideo = mimetype.startsWith('video/');
-    const acceptsPhoto = task.proofType === 'PHOTO';
-    const acceptsVideo = task.proofType === 'VIDEO';
+    const urls = files.map((f) => `/uploads/${f.filename}`);
+    const isPhoto = (f: any) => f.mimetype.startsWith('image/');
+    const isVideo = (f: any) => f.mimetype.startsWith('video/');
 
-    if ((isPhoto && !acceptsPhoto) || (isVideo && !acceptsVideo)) {
-      return res.status(400).json({ error: 'This task does not accept that proof type' });
+    const allPhotos = files.every(isPhoto);
+    const allVideos = files.every(isVideo);
+
+    if (task.proofType === 'PHOTO' && (files.length !== 1 || !allPhotos)) {
+      return res.status(400).json({ error: 'This task requires a single photo' });
+    }
+    if (task.proofType === 'VIDEO' && (files.length !== 1 || !allVideos)) {
+      return res.status(400).json({ error: 'This task requires a single video' });
+    }
+    if (task.proofType === 'PHOTOS' && !allPhotos) {
+      return res.status(400).json({ error: 'This task requires one or more photos' });
     }
 
     const existing = await db.submission.findUnique({
@@ -42,7 +50,7 @@ router.post('/', playerAuth, upload.single('proof'), async (req, res) => {
       return res.status(409).json({ error: 'A submission for this task is already in progress or approved' });
     }
 
-    const proofUrl = `/uploads/${req.file.filename}`;
+    const proofUrl = urls[0];
     const status = game.submissionMode === 'AUTOMATIC' ? 'COMPLETED' : 'SUBMITTED';
 
     let submission;
@@ -51,6 +59,7 @@ router.post('/', playerAuth, upload.single('proof'), async (req, res) => {
         where: { id: existing.id },
         data: {
           proofUrl,
+          proofUrls: urls,
           status,
           submittedAt: new Date(),
           reviewedAt: null,
@@ -63,6 +72,7 @@ router.post('/', playerAuth, upload.single('proof'), async (req, res) => {
           taskId,
           teamId: player.teamId,
           proofUrl,
+          proofUrls: urls,
           status,
         },
       });

@@ -5,7 +5,7 @@ CREATE TYPE "GameStatus" AS ENUM ('NOT_STARTED', 'LIVE', 'COMPLETED');
 CREATE TYPE "PlayerType" AS ENUM ('APP', 'OFFLINE');
 
 -- CreateEnum
-CREATE TYPE "ProofType" AS ENUM ('PHOTO', 'VIDEO');
+CREATE TYPE "ProofType" AS ENUM ('PHOTO', 'VIDEO', 'PHOTOS');
 
 -- CreateEnum
 CREATE TYPE "SubmissionMode" AS ENUM ('AUTOMATIC', 'MANUAL');
@@ -70,6 +70,7 @@ CREATE TABLE "Task" (
     "description" TEXT NOT NULL,
     "points" INTEGER NOT NULL,
     "proofType" "ProofType" NOT NULL,
+    "photoCount" INTEGER,
     "order" INTEGER NOT NULL,
 
     CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
@@ -81,6 +82,7 @@ CREATE TABLE "Submission" (
     "taskId" TEXT NOT NULL,
     "teamId" TEXT NOT NULL,
     "proofUrl" TEXT NOT NULL,
+    "proofUrls" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
     "status" "SubmissionStatus" NOT NULL,
     "reason" TEXT,
     "submittedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

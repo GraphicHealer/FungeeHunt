@@ -13,6 +13,7 @@
   let description = '';
   let points = 0;
   let proofType = 'PHOTO';
+  let photoCount: number | null = null;
   let order = 0;
 
   let showAddMenu = false;
@@ -38,6 +39,7 @@
     description = '';
     points = 0;
     proofType = 'PHOTO';
+    photoCount = null;
     order = tasks.length + 1;
     error = '';
   }
@@ -123,6 +125,7 @@
     description = task.description ?? '';
     points = task.points;
     proofType = task.proofType;
+    photoCount = task.photoCount ?? null;
     order = task.order;
     error = '';
     showModal = true;
@@ -144,7 +147,7 @@
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token()}`,
       },
-      body: JSON.stringify({ title, description, points, proofType, order }),
+      body: JSON.stringify({ title, description, points, proofType, photoCount: proofType === 'PHOTOS' ? photoCount : null, order }),
     });
     if (res.ok) {
       showModal = false;
@@ -213,7 +216,13 @@
         <select id="proofType" bind:value={proofType}>
           <option value="PHOTO">Photo</option>
           <option value="VIDEO">Video</option>
+          <option value="PHOTOS">Photos</option>
         </select>
+
+        {#if proofType === 'PHOTOS'}
+          <label for="photoCount">Number of Photos (optional)</label>
+          <input id="photoCount" type="number" min="1" bind:value={photoCount} placeholder="e.g., number of other teams" />
+        {/if}
 
         <label for="order">Order</label>
         <input id="order" type="number" bind:value={order} />

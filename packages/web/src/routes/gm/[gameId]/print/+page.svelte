@@ -91,11 +91,13 @@
 <style>
   .print-page {
     font-family: system-ui, sans-serif;
-    padding: 2rem;
+    padding: 1rem;
     background: #fff;
     color: #000;
     max-width: 8.5in;
     margin: 0 auto;
+    font-size: 10pt;
+    line-height: 1.3;
   }
 
   .actions {
@@ -110,7 +112,7 @@
   }
 
   .print-section {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
 
   .rules-section {
@@ -118,60 +120,66 @@
   }
 
   h1 {
-    margin-top: 0;
+    margin: 0 0 0.25rem;
+    font-size: 1.25rem;
   }
 
   .task-list {
     list-style: none;
     padding: 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.35rem;
   }
 
   .task-list li {
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 1rem;
+    border-bottom: 0.5pt solid #ccc;
+    padding-bottom: 0.35rem;
     break-inside: avoid;
   }
 
   .task-header {
     display: flex;
     align-items: baseline;
-    gap: 0.5rem;
+    gap: 0.35rem;
     flex-wrap: wrap;
   }
 
   .order {
     font-weight: bold;
+    font-size: 0.95rem;
   }
 
   .title {
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .meta {
     color: #555;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 
   .description {
-    margin: 0.25rem 0 0;
+    margin: 0.1rem 0 0;
+    font-size: 0.9rem;
   }
 
   .rules-list {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.75rem;
   }
 
   .rule h2 {
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.15rem;
+    font-size: 1rem;
   }
 
   .rule p {
     margin: 0;
+    font-size: 0.9rem;
   }
 
   .error {
@@ -186,6 +194,12 @@
     body {
       background: #fff;
       color: #000;
+    }
+
+    .print-page {
+      padding: 0.25in;
+      font-size: 9pt;
+      line-height: 1.2;
     }
 
     .rules-section {

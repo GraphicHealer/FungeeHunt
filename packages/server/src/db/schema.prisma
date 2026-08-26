@@ -66,6 +66,7 @@ model Task {
   description String
   points      Float
   proofType   ProofType
+  photoCount  Int?
   category    String?
   order       Int
   game        Game         @relation(fields: [gameId], references: [id])
@@ -77,6 +78,7 @@ model Submission {
   taskId      String
   teamId      String
   proofUrl    String
+  proofUrls   String[]         @default([])
   status      SubmissionStatus
   reason      String?
   submittedAt DateTime         @default(now())
@@ -127,6 +129,7 @@ enum PlayerType {
 enum ProofType {
   PHOTO
   VIDEO
+  PHOTOS
 }
 
 enum SubmissionMode {

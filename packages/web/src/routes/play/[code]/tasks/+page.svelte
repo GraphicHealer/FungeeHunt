@@ -8,7 +8,7 @@
 
   let state: any = null;
   let error = '';
-  let selected: Record<string, File | null> = {};
+  let selected: Record<string, FileList | null> = {};
   let uploading: Record<string, boolean> = {};
   let uploadProgress: Record<string, number> = {};
   let expanded = '';
@@ -34,7 +34,7 @@
   }
 
   function accept(task: any) {
-    if (task.proofType === 'PHOTO') return 'image/*';
+    if (task.proofType === 'PHOTO' || task.proofType === 'PHOTOS') return 'image/*';
     if (task.proofType === 'VIDEO') return 'video/*';
     return 'image/*,video/*';
   }
@@ -47,7 +47,14 @@
   function proofLabel(task: any) {
     if (task.proofType === 'PHOTO') return 'Take Photo...';
     if (task.proofType === 'VIDEO') return 'Take Video...';
+    if (task.proofType === 'PHOTOS') return 'Take Photos...';
     return 'Take Photo/Video...';
+  }
+
+  function photoHint(task: any) {
+    if (task.proofType !== 'PHOTOS') return '';
+    if (task.photoCount) return `Upload ${task.photoCount} photos`;
+    return 'Upload all required photos';
   }
 
   function statusLabel(status: string) {
@@ -59,7 +66,7 @@
 
   function handleFile(taskId: string, e: Event) {
     const files = (e.currentTarget as HTMLInputElement).files;
-    selected = { ...selected, [taskId]: files?.[0] ?? null };
+    selected = { ...selected, [taskId]: files };
   }
 
   async function load() {
@@ -75,8 +82,8 @@
   }
 
   function submitTask(taskId: string) {
-    const file = selected[taskId];
-    if (!file) return;
+    const files = selected[taskId];
+    if (!files || files.length === 0) return;
 
     uploading = { ...uploading, [taskId]: true };
     uploadProgress = { ...uploadProgress, [taskId]: 0 };
@@ -118,7 +125,9 @@
     };
 
     const form = new FormData();
-    form.append('proof', file);
+    for (const file of files) {
+      form.append('proof', file);
+    }
     xhr.send(form);
   }
 
@@ -176,7 +185,7 @@
               {#if expanded === task.id}
                 <div class="fungee-accordion-body">
                   <p style="margin: 0 0 0.5rem; white-space: pre-line;">{task.description || 'No description'}</p>
-                  <p style="margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem;">Proof: {task.proofType}</p>
+                  <p style="margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem;">Proof: {task.proofType}{#if photoHint(task)} — {photoHint(task)}{/if}</p>
 
                   {#if task.submission?.reason}
                     <p class="fungee-error" style="margin: 0 0 0.75rem;">Reason: {task.submission.reason}</p>
@@ -190,14 +199,19 @@
                         type="file"
                         accept={accept(task)}
                         capture={capture(task)}
+                        multiple={task.proofType === 'PHOTOS'}
                         on:change={(e) => handleFile(task.id, e)}
                         disabled={uploading[task.id]}
                       />
                       {#if !uploading[task.id]}
                         <label for="proof-{task.id}" class="fungee-btn take-btn" class:ready={selected[task.id]}>
-                          {selected[task.id]?.name ?? proofLabel(task)}
+                          {#if selected[task.id]?.length}
+                            {selected[task.id].length} photo{selected[task.id].length === 1 ? '' : 's'}
+                          {:else}
+                            {proofLabel(task)}
+                          {/if}
                         </label>
-                        <button class="fungee-btn" style="margin: 0; width: auto;" on:click={() => submitTask(task.id)} disabled={!selected[task.id]}>Submit</button>
+                        <button class="fungee-btn" style="margin: 0; width: auto;" on:click={() => submitTask(task.id)} disabled={!selected[task.id] || selected[task.id].length === 0}>Submit</button>
                       {:else}
                         <div class="fungee-btn take-btn uploading" style="--progress: {uploadProgress[task.id] ?? 0}%">
                           <span class="uploading-text">Uploading... {Math.round(uploadProgress[task.id] ?? 0)}%</span>

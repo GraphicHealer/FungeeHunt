@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { unlinkSync } from 'node:fs';
-import { join } from 'node:path';
+import { unlinkSync } from 'fs';
+import { join } from 'path';
 import { db } from '../db/client';
 import { config } from '../config';
 
 const router = Router({ mergeParams: true });
 
-router.get('/', async (req, res) => {
+router.get('/', async (req: any, res: any) => {
   const { gameId } = req.params;
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
@@ -14,11 +14,11 @@ router.get('/', async (req, res) => {
 
     const teams = await db.team.findMany({ where: { gameId } });
     const tasks = await db.task.findMany({ where: { gameId } });
-    const teamMap = new Map(teams.map((t) => [t.id, t]));
-    const taskMap = new Map(tasks.map((t) => [t.id, t]));
+    const teamMap = new Map(teams.map((t: any) => [t.id, t]));
+    const taskMap = new Map(tasks.map((t: any) => [t.id, t]));
 
     const submissions = await db.submission.findMany({
-      where: { teamId: { in: teams.map((t) => t.id) } },
+      where: { teamId: { in: teams.map((t: any) => t.id) } },
       orderBy: { submittedAt: 'desc' },
     });
 
@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.patch('/:submissionId', async (req, res) => {
+router.patch('/:submissionId', async (req: any, res: any) => {
   const { gameId, submissionId } = req.params;
   const { status, reason } = req.body ?? {};
 
@@ -57,13 +57,15 @@ router.patch('/:submissionId', async (req, res) => {
     if (status === 'INCOMPLETE') {
       updateData.reason = reason ? reason.trim() : null;
       updateData.proofUrl = '';
+      updateData.proofUrls = [];
       updateData.reviewedAt = null;
-      if (current.proofUrl) {
-        const filename = current.proofUrl.replace('/uploads/', '');
+      for (const url of new Set([current.proofUrl, ...(current.proofUrls ?? [])])) {
+        if (!url) continue;
+        const filename = url.replace('/uploads/', '');
         try {
           unlinkSync(join(config.UPLOAD_DIR, filename));
         } catch (e) {
-          console.warn('could not delete denied file', current.proofUrl, e);
+          console.warn('could not delete denied file', url, e);
         }
       }
     } else if (status === 'COMPLETED') {

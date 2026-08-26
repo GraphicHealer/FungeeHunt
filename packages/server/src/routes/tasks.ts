@@ -3,7 +3,7 @@ import { db } from '../db/client';
 
 const router = Router({ mergeParams: true });
 
-router.get('/', async (req, res) => {
+router.get('/', async (req: any, res: any) => {
   const { gameId } = req.params;
   try {
     const tasks = await db.task.findMany({
@@ -17,9 +17,9 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', async (req: any, res: any) => {
   const { gameId } = req.params;
-  const { title, description, points, proofType, order, category } = req.body ?? {};
+  const { title, description, points, proofType, photoCount, order, category } = req.body ?? {};
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -38,7 +38,8 @@ router.post('/', async (req, res) => {
         title: (title ?? 'New task').trim(),
         description: description ?? '',
         points: Number(points) || 0,
-        proofType: ['PHOTO', 'VIDEO'].includes(proofType) ? proofType : 'PHOTO',
+        proofType: ['PHOTO', 'VIDEO', 'PHOTOS'].includes(proofType) ? proofType : 'PHOTO',
+        photoCount: photoCount ? Number(photoCount) : null,
         category: category ?? undefined,
         order: Number(order) || 0,
       },
@@ -50,7 +51,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.post('/batch', async (req, res) => {
+router.post('/batch', async (req: any, res: any) => {
   const { gameId } = req.params;
   const { tasks: items } = req.body ?? {};
   if (!Array.isArray(items) || items.length === 0) {
@@ -73,7 +74,7 @@ router.post('/batch', async (req, res) => {
       return res.status(400).json({ error: 'All selected tasks already exist' });
     }
 
-    await db.$transaction(async (tx) => {
+    await db.$transaction(async (tx: any) => {
       for (let i = 0; i < unique.length; i++) {
         const t = unique[i];
         await tx.task.create({
@@ -82,7 +83,8 @@ router.post('/batch', async (req, res) => {
             title: (t.title ?? 'Task').trim(),
             description: t.description ?? '',
             points: Number(t.points) || 0,
-            proofType: ['PHOTO', 'VIDEO'].includes(t.proofType) ? t.proofType : 'PHOTO',
+            proofType: ['PHOTO', 'VIDEO', 'PHOTOS'].includes(t.proofType) ? t.proofType : 'PHOTO',
+            photoCount: t.photoCount ? Number(t.photoCount) : null,
             category: t.category ?? undefined,
             order: maxOrder + i + 1,
           },
@@ -97,18 +99,20 @@ router.post('/batch', async (req, res) => {
   }
 });
 
-router.patch('/:taskId', async (req, res) => {
+router.patch('/:taskId', async (req: any, res: any) => {
   const { gameId, taskId } = req.params;
-  const { title, description, points, proofType, order } = req.body ?? {};
+  const { title, description, points, proofType, photoCount, order, category } = req.body ?? {};
   try {
     const data: any = {};
     if (title !== undefined) data.title = title.trim();
     if (description !== undefined) data.description = description;
     if (points !== undefined) data.points = Number(points);
-    if (proofType !== undefined && ['PHOTO', 'VIDEO'].includes(proofType)) {
+    if (proofType !== undefined && ['PHOTO', 'VIDEO', 'PHOTOS'].includes(proofType)) {
       data.proofType = proofType;
     }
+    if (photoCount !== undefined) data.photoCount = photoCount ? Number(photoCount) : null;
     if (order !== undefined) data.order = Number(order);
+    if (category !== undefined) data.category = category ?? undefined;
 
     if (data.title) {
       const existing = await db.task.findFirst({
@@ -129,7 +133,7 @@ router.patch('/:taskId', async (req, res) => {
   }
 });
 
-router.delete('/:taskId', async (req, res) => {
+router.delete('/:taskId', async (req: any, res: any) => {
   const { taskId } = req.params;
   try {
     await db.task.delete({ where: { id: taskId } });
