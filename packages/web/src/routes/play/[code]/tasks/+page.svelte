@@ -251,7 +251,7 @@
     <div class="modal" on:click|stopPropagation>
       <h3>You are the Team Captain</h3>
       <p>
-        As Team Captain, your device is the one the team uses to submit photos/videos for tasks. You can also rename the team and add offline players from the game master menu if needed.
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
       </p>
       <p>
         Make sure your phone is charged and ready once the game starts. Good luck!

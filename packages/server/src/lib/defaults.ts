@@ -589,7 +589,7 @@ const defaultRules = [
 
 export const defaultSystemSettings = {
   foodDriveEnabled: true,
-  foodDrivePointsPerItem: 1,
+  foodDrivePointsPerItem: 25,
   foodDrivePermissible: 'canned goods, boxed pasta, rice, peanut butter',
   foodDriveSuggested: 'soup, canned vegetables, cereal, diapers',
   returnBonusEnabled: true,
