@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
   import { tourRefresh } from './tourStore';
 
   let visible = false;
@@ -40,8 +41,8 @@
 </script>
 
 {#if visible}
-  <div class="modal-backdrop" on:click={cancel}>
-    <div class="modal" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={cancel} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <h1>Welcome to Fungee-Hunt</h1>
       <p>
         Fungee-Hunt is a self-hosted scavenger-hunt game for groups. Players join with a code, complete photo or video challenges, and earn points.

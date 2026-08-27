@@ -76,6 +76,41 @@ router.post('/:playerId/reissue', async (req, res) => {
   }
 });
 
+router.patch('/:playerId', async (req: any, res: any) => {
+  const { gameId, playerId } = req.params;
+  const { displayName, hasCar } = req.body ?? {};
+  const trimmed = displayName ? displayName.trim() : '';
+
+  try {
+    const player = await db.player.findFirst({
+      where: { id: playerId, gameId },
+      include: { team: { select: { id: true, managerId: true } } },
+    });
+    if (!player) return res.status(404).json({ error: 'Player not found' });
+
+    const data: any = {};
+    if (displayName !== undefined) {
+      if (!trimmed) return res.status(400).json({ error: 'Display name is required' });
+      const existing = await db.player.findFirst({
+        where: {
+          gameId,
+          id: { not: playerId },
+          displayName: { equals: trimmed, mode: 'insensitive' },
+        },
+      });
+      if (existing) return res.status(400).json({ error: 'A player with that name already exists' });
+      data.displayName = trimmed;
+    }
+    if (hasCar !== undefined) data.hasCar = !!hasCar;
+
+    const updated = await db.player.update({ where: { id: playerId }, data });
+    res.json(updated);
+  } catch (err) {
+    console.error('update player failed', err);
+    res.status(500).json({ error: 'Could not update player' });
+  }
+});
+
 router.delete('/:playerId', async (req, res) => {
   const { gameId, playerId } = req.params;
   try {

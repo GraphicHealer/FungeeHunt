@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount, onDestroy } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
   import { formatPoints } from '$lib/format';
 
@@ -247,8 +248,8 @@
 </main>
 
 {#if showManagerInfo}
-  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)}>
-    <div class="modal" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <h3>You are the Team Captain</h3>
       <p>
         As Team Captain, your device is the one the team uses to submit photos/videos for tasks.

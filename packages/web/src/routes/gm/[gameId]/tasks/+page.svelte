@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
   import { formatPoints } from '$lib/format';
 
   const gameId = $page.params.gameId;
@@ -17,6 +18,14 @@
   let order = 0;
 
   let showAddMenu = false;
+  let bulkMode = false;
+  let selectedIds: string[] = [];
+  let lastSelectedId: string | null = null;
+  let bulkPoints = 150;
+  let showSetPoints = false;
+
+  let dragId: string | null = null;
+  let dragOverId: string | null = null;
   let showSelectModal = false;
   let defaultTasks: any[] = [];
   let selectedDefaults: any[] = [];
@@ -167,30 +176,261 @@
     if (res.ok) await load();
   }
 
+  function toggleBulkMode() {
+    bulkMode = !bulkMode;
+    if (!bulkMode) {
+      selectedIds = [];
+      lastSelectedId = null;
+    }
+  }
+
+  function clearSelection() {
+    selectedIds = [];
+    lastSelectedId = null;
+  }
+
+  function selectTo(task: any, e: MouseEvent) {
+    if (!lastSelectedId) {
+      toggleTask(task.id, e);
+      return;
+    }
+    const ids = tasks.map((t) => t.id);
+    const from = ids.indexOf(lastSelectedId);
+    const to = ids.indexOf(task.id);
+    const start = Math.min(from, to);
+    const end = Math.max(from, to);
+    const rangeIds = ids.slice(start, end + 1);
+    selectedIds = [...new Set([...selectedIds, ...rangeIds])];
+  }
+
+  function handleTaskClick(task: any, e: MouseEvent) {
+    if (!bulkMode) {
+      openEdit(task);
+      return;
+    }
+    if (e.shiftKey && lastSelectedId) {
+      selectTo(task, e);
+      lastSelectedId = task.id;
+      return;
+    }
+    toggleTask(task.id, e);
+    lastSelectedId = task.id;
+  }
+
+  function toggleTask(id: string, e?: MouseEvent) {
+    e?.stopPropagation();
+    selectedIds = selectedIds.includes(id) ? selectedIds.filter((x) => x !== id) : [...selectedIds, id];
+  }
+
+  function allSelected() {
+    return tasks.length > 0 && tasks.every((t) => selectedIds.includes(t.id));
+  }
+
+  function toggleAll() {
+    selectedIds = allSelected() ? [] : tasks.map((t) => t.id);
+  }
+
+  async function bulkDelete() {
+    if (!selectedIds.length || !confirm(`Delete ${selectedIds.length} tasks?`)) return;
+    const res = await fetch(`/api/gm/games/${gameId}/tasks/bulk`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ action: 'delete', ids: selectedIds }),
+    });
+    if (res.ok) {
+      selectedIds = [];
+      await load();
+    } else {
+      const data = await res.json();
+      error = data.error ?? 'Could not delete tasks';
+    }
+  }
+
+  function toggleSetPoints() {
+    showSetPoints = !showSetPoints;
+    if (showSetPoints) bulkPoints = 150;
+  }
+
+  async function bulkSetPoints() {
+    if (!selectedIds.length) return;
+    const res = await fetch(`/api/gm/games/${gameId}/tasks/bulk`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ action: 'setPoints', ids: selectedIds, points: bulkPoints }),
+    });
+    if (res.ok) {
+      selectedIds = [];
+      showSetPoints = false;
+      await load();
+    } else {
+      const data = await res.json();
+      error = data.error ?? 'Could not set points';
+    }
+  }
+
+  function handleDragStart(task: any, e: DragEvent) {
+    if (task.order === 1) {
+      e.preventDefault();
+      return;
+    }
+    dragId = task.id;
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', task.id);
+    }
+  }
+
+  function handleDragOver(task: any, e: DragEvent) {
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    if (task.id !== dragId && task.order !== 1) {
+      dragOverId = task.id;
+    }
+  }
+
+  function handleDragLeave() {
+    dragOverId = null;
+  }
+
+  function handleDrop(target: any, e: DragEvent) {
+    e.preventDefault();
+    dragOverId = null;
+    if (!dragId || dragId === target.id || target.order === 1) {
+      dragId = null;
+      return;
+    }
+    const from = tasks.findIndex((t) => t.id === dragId);
+    const to = tasks.findIndex((t) => t.id === target.id);
+    if (from < 0 || to < 0) {
+      dragId = null;
+      return;
+    }
+    let newIndex = to;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    if (e.clientY - rect.top > rect.height / 2) {
+      newIndex = to + 1;
+    }
+    const reordered = [...tasks];
+    const [moved] = reordered.splice(from, 1);
+    reordered.splice(newIndex, 0, moved);
+    tasks = reordered;
+    dragId = null;
+    saveOrder();
+  }
+
+  async function saveOrder() {
+    const res = await fetch(`/api/gm/games/${gameId}/tasks/reorder`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ taskIds: tasks.map((t) => t.id) }),
+    });
+    if (res.ok) await load();
+    else error = 'Could not save task order';
+  }
+
   onMount(load);
 </script>
 
 <div class="page">
   <header class="page-header">
     <h2>Tasks</h2>
-    <div class="add-menu-wrap">
-      <button class="fungee-btn" on:click={toggleAddMenu} style="width: auto; margin: 0;">+ ADD TASK</button>
-      {#if showAddMenu}
-        <div class="add-menu">
-          <button type="button" on:click={openSelect}>Select task</button>
-          <button type="button" on:click={openCustom}>Custom task</button>
-        </div>
-      {/if}
+    <div class="header-actions">
+      <button
+        class="fungee-btn icon-btn"
+        type="button"
+        title="Bulk actions"
+        on:click={toggleBulkMode}
+        style="width: auto; margin: 0;"
+        class:active={bulkMode}
+      >
+        <span class="mdi mdi-checkbox-multiple-blank-outline"></span>
+      </button>
+      <div class="add-menu-wrap">
+        <button class="fungee-btn" on:click={toggleAddMenu} style="width: auto; margin: 0;">+ ADD TASK</button>
+        {#if showAddMenu}
+          <div class="add-menu">
+            <button type="button" on:click={openSelect}>Select task</button>
+            <button type="button" on:click={openCustom}>Custom task</button>
+          </div>
+        {/if}
+      </div>
     </div>
   </header>
 
+  {#if bulkMode}
+    <div class="bulk-bar" transition:fade={{ duration: 180 }}>
+      <label class="bulk-check">
+        <input type="checkbox" checked={allSelected()} on:change={toggleAll} />
+        <span>{selectedIds.length} selected</span>
+      </label>
+      <div class="bulk-actions">
+        <div class="bulk-set-points-wrap">
+          <button class="fungee-btn" type="button" on:click={toggleSetPoints} disabled={selectedIds.length === 0}>
+            Set Points
+          </button>
+          {#if showSetPoints}
+            <div class="set-points-popover" transition:scale={{ duration: 180, start: 0.95 }}>
+              <input type="number" step="0.1" bind:value={bulkPoints} placeholder="Points" />
+              <button class="fungee-btn" type="button" on:click={bulkSetPoints}>
+                Apply
+              </button>
+            </div>
+          {/if}
+        </div>
+        <button class="fungee-btn danger" type="button" on:click={bulkDelete} disabled={selectedIds.length === 0}>
+          Delete
+        </button>
+        <button class="fungee-btn secondary" type="button" on:click={toggleBulkMode}>
+          Done
+        </button>
+      </div>
+    </div>
+  {/if}
+
+  {#if error}<p class="error">{error}</p>{/if}
+
   <ul class="task-list">
     {#each tasks as task (task.id)}
-      <li on:click={() => openEdit(task)}>
+      <li
+        class:selected={selectedIds.includes(task.id)}
+        class:drag-over={dragOverId === task.id}
+        on:click={(e) => handleTaskClick(task, e)}
+        on:dragover={(e) => handleDragOver(task, e)}
+        on:dragleave={handleDragLeave}
+        on:drop={(e) => handleDrop(task, e)}
+      >
         <div class="task-main">
+          {#if bulkMode}
+            <input
+              class="task-check"
+              type="checkbox"
+              checked={selectedIds.includes(task.id)}
+              on:click|stopPropagation={() => toggleTask(task.id)}
+            />
+          {/if}
           <span class="order">{task.order}</span>
           <span class="title">{task.title}</span>
           <span class="meta">+{formatPoints(task.points)} · {task.proofType}</span>
+          {#if task.order !== 1}
+            <span
+              class="drag-handle"
+              draggable={true}
+              on:dragstart={(e) => handleDragStart(task, e)}
+              on:click|stopPropagation
+              title="Drag to reorder"
+            >
+              <span class="mdi mdi-drag-horizontal"></span>
+            </span>
+          {/if}
         </div>
         <p class="description">{task.description}</p>
       </li>
@@ -199,8 +439,8 @@
 </div>
 
 {#if showModal}
-  <div class="modal-backdrop" on:click={close}>
-    <div class="modal" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <form on:submit|preventDefault={save}>
         <h3>{editId ? 'Edit Task' : 'Add Task'}</h3>
 
@@ -243,8 +483,8 @@
 {/if}
 
 {#if showSelectModal}
-  <div class="modal-backdrop" on:click={closeSelect}>
-    <div class="modal select-modal" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={closeSelect} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <h3>Select Tasks</h3>
 
       {#if defaultTasks.length === 0}
@@ -321,17 +561,138 @@
     align-items: flex-start;
     gap: 0.25rem;
     cursor: pointer;
-    transition: box-shadow 0.15s;
+    transition: box-shadow 0.15s, transform 0.15s;
   }
 
   .task-list li:hover {
-    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
   }
 
   .task-main {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    width: 100%;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .icon-btn.active {
+    background: var(--bg);
+    color: var(--brand);
+    border: 1px solid var(--brand);
+  }
+
+  .bulk-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .bulk-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  .bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .bulk-set-points-wrap {
+    position: relative;
+  }
+
+  .set-points-popover {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 10rem;
+    z-index: 100;
+  }
+
+  .set-points-popover input {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    box-sizing: border-box;
+  }
+
+  .bulk-points {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.95rem;
+  }
+
+  .bulk-points input {
+    width: 5rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.95rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+  }
+
+  .bulk-actions .fungee-btn {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    width: auto;
+  }
+
+  .task-list li.selected {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 2px var(--brand);
+  }
+
+  .task-list li.drag-over {
+    border-style: dashed;
+    border-color: var(--brand);
+  }
+
+  .task-check {
+    width: auto;
+    margin: 0;
+  }
+
+  .drag-handle {
+    margin-left: auto;
+    color: var(--muted);
+    cursor: grab;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .drag-handle:hover {
+    background: var(--bg);
+    color: var(--text);
   }
 
   .order {

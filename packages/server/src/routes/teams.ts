@@ -238,6 +238,19 @@ router.post('/auto', async (req, res) => {
   }
 });
 
+router.delete('/:teamId', async (req, res) => {
+  const { gameId, teamId } = req.params;
+  try {
+    const team = await db.team.findFirst({ where: { id: teamId, gameId } });
+    if (!team) return res.status(404).json({ error: 'Team not found' });
+    await db.team.delete({ where: { id: teamId } });
+    res.status(204).end();
+  } catch (err) {
+    console.error('delete team failed', err);
+    res.status(500).json({ error: 'Could not delete team' });
+  }
+});
+
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {

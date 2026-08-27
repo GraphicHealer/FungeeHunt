@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
 
   const gameId = $page.params.gameId;
 
@@ -188,8 +189,8 @@
 </div>
 
 {#if modal === 'return'}
-  <div class="modal-backdrop" on:click={close}>
-    <div class="modal fungee-card" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <form on:submit|preventDefault={saveReturn}>
         <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Return Time Bonus</h3>
         <label class="fungee-check">
@@ -222,8 +223,8 @@
 {/if}
 
 {#if modal === 'food'}
-  <div class="modal-backdrop" on:click={close}>
-    <div class="modal fungee-card" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <form on:submit|preventDefault={saveFood}>
         <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Food Drive</h3>
         <label class="fungee-check">

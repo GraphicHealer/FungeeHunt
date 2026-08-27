@@ -144,4 +144,55 @@ router.delete('/:taskId', async (req: any, res: any) => {
   }
 });
 
+router.post('/bulk', async (req: any, res: any) => {
+  const { gameId } = req.params;
+  const { action, ids, points } = req.body ?? {};
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'No tasks selected' });
+  }
+
+  try {
+    if (action === 'delete') {
+      await db.task.deleteMany({ where: { id: { in: ids }, gameId } });
+    } else if (action === 'setPoints') {
+      if (points === undefined || Number.isNaN(Number(points))) {
+        return res.status(400).json({ error: 'A numeric point value is required' });
+      }
+      await db.task.updateMany({
+        where: { id: { in: ids }, gameId },
+        data: { points: Number(points) },
+      });
+    } else {
+      return res.status(400).json({ error: 'Unknown bulk action' });
+    }
+    res.status(204).end();
+  } catch (err) {
+    console.error('bulk action failed', err);
+    res.status(500).json({ error: 'Could not apply bulk action' });
+  }
+});
+
+router.post('/reorder', async (req: any, res: any) => {
+  const { gameId } = req.params;
+  const { taskIds } = req.body ?? {};
+  if (!Array.isArray(taskIds) || taskIds.length === 0) {
+    return res.status(400).json({ error: 'No task order provided' });
+  }
+
+  try {
+    await db.$transaction(async (tx: any) => {
+      for (let i = 0; i < taskIds.length; i++) {
+        await tx.task.updateMany({
+          where: { id: taskIds[i], gameId },
+          data: { order: i + 1 },
+        });
+      }
+    });
+    res.status(204).end();
+  } catch (err) {
+    console.error('reorder tasks failed', err);
+    res.status(500).json({ error: 'Could not reorder tasks' });
+  }
+});
+
 export default router;

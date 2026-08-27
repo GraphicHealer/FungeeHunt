@@ -313,13 +313,14 @@
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    transition: box-shadow 0.15s;
+    transition: box-shadow 0.15s, transform 0.15s;
     flex-wrap: wrap;
     gap: 0.75rem;
   }
 
   .submissions li:hover {
-    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
   }
 
   .meta {

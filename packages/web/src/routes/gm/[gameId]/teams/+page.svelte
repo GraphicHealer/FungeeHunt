@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
 
   const gameId = $page.params.gameId;
 
@@ -117,6 +118,21 @@
     }
   }
 
+  async function removeTeam() {
+    if (!editId || !confirm('Delete this team?')) return;
+    const res = await fetch(`/api/gm/games/${gameId}/teams/${editId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token()}` },
+    });
+    if (res.ok) {
+      showModal = false;
+      await load();
+    } else {
+      const data = await res.json();
+      error = data.error ?? 'Could not delete team';
+    }
+  }
+
   onMount(load);
 </script>
 
@@ -153,8 +169,8 @@
 </div>
 
 {#if showModal}
-  <div class="modal-backdrop" on:click={close}>
-    <div class="modal" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <form on:submit|preventDefault={save}>
         <h3>{editId ? 'Edit Team' : 'Add Team'}</h3>
 
@@ -183,6 +199,9 @@
 
         <div class="actions">
           <button type="button" on:click={close}>Cancel</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={removeTeam}>Delete</button>
+          {/if}
           <button type="submit" disabled={!managerId}>Save</button>
         </div>
       </form>
@@ -191,8 +210,8 @@
 {/if}
 
 {#if showAutoModal}
-  <div class="modal-backdrop" on:click={closeAuto}>
-    <div class="modal" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={closeAuto} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <form on:submit|preventDefault={autoCreate}>
         <h3>Auto-Create Teams</h3>
 
@@ -253,11 +272,12 @@
     border-radius: 0.5rem;
     padding: 1rem;
     cursor: pointer;
-    transition: box-shadow 0.15s;
+    transition: box-shadow 0.15s, transform 0.15s;
   }
 
   .team-list li:hover {
-    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
   }
 
   .team-name {
@@ -355,6 +375,11 @@
   .actions button:first-child {
     background: var(--bg);
     color: var(--text);
+  }
+
+  .actions button.danger {
+    background: var(--danger);
+    color: #fff;
   }
 
   .actions button:disabled {

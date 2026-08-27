@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fly, scale } from 'svelte/transition';
   import { toast, type ToastMessage } from './toast';
 
   let messages: ToastMessage[] = [];
@@ -8,7 +9,7 @@
 {#if messages.length}
   <div class="toasts">
     {#each messages as m (m.id)}
-      <div class="toast {m.type}" role="alert" on:click={() => toast.remove(m.id)}>
+      <div class="toast {m.type}" role="alert" in:fly={{ x: 50, duration: 250 }} out:scale={{ duration: 200 }} on:click={() => toast.remove(m.id)}>
         {m.message}
       </div>
     {/each}

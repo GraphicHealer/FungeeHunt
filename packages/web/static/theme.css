@@ -358,3 +358,87 @@ body {
   height: 1.25rem !important;
   flex: 0 0 auto;
 }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(0.5rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.fungee-page {
+  animation: fadeInUp 0.35s ease both;
+}
+
+.fungee-card {
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.fungee-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
+}
+
+.fungee-list-item {
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.fungee-list-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
+}
+
+.fungee-btn {
+  transition: background 0.15s, transform 0.08s, box-shadow 0.15s;
+}
+
+.fungee-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(3, 102, 214, 0.25);
+}
+
+.fungee-btn:active {
+  transform: translateY(0);
+}
+
+.fungee-accordion {
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.fungee-accordion:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
+}
+
+.fungee-spin {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.fungee-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}

@@ -199,6 +199,10 @@
             <label class="fungee-label" for="rbw">Window Length (minutes)</label>
             <input class="fungee-input" id="rbw" type="number" style="margin-bottom: 0.75rem;" bind:value={returnBonusWindowMinutes} min="1" />
 
+            <p style="margin: 0.25rem 0 0.75rem; color: var(--muted); font-size: 0.9rem;">
+              Return window: <strong>{returnStartTime || '--:--'}</strong> to <strong>{returnEndTime || '--:--'}</strong>
+            </p>
+
             <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
 
             <label class="fungee-label" for="rp">Points</label>

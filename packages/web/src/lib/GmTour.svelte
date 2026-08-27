@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { createEventDispatcher } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
 
   const dispatch = createEventDispatcher();
 
@@ -85,8 +86,8 @@
 </script>
 
 {#if visible}
-  <div class="modal-backdrop" on:click={close}>
-    <div class="modal" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <h2>{steps[step].title}</h2>
       <p>{steps[step].body}</p>
 

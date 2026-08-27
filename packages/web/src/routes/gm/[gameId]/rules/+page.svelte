@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
 
   const gameId = $page.params.gameId;
 
@@ -126,8 +127,8 @@
 </div>
 
 {#if editIndex >= 0}
-  <div class="modal-backdrop" on:click={closeModal}>
-    <div class="modal fungee-card" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={closeModal} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <form on:submit|preventDefault={applyEdit}>
         <h3>Edit Section</h3>
         <label class="fungee-label" for="title">Title</label>

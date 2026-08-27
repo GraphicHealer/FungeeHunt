@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
   import { toast } from './toast';
 
   export let gameId: string;
@@ -43,8 +44,8 @@
   }
 </script>
 
-<div class="modal-backdrop" on:click={close}>
-  <div class="modal fungee-card" on:click|stopPropagation>
+<div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+  <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
     <h2>Review Submission</h2>
     <div class="details">
       <p><strong>Team:</strong> {sub.team?.name ?? 'Unknown'}</p>

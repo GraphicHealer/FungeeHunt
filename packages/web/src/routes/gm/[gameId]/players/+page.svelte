@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
 
   const gameId = $page.params.gameId;
 
@@ -9,6 +10,11 @@
   let displayName = '';
   let hasCar = false;
   let error = '';
+
+  let showEditModal = false;
+  let editId = '';
+  let editName = '';
+  let editHasCar = false;
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -30,6 +36,37 @@
 
   function close() {
     showModal = false;
+  }
+
+  function openEdit(player: any) {
+    editId = player.id;
+    editName = player.displayName;
+    editHasCar = !!player.hasCar;
+    error = '';
+    showEditModal = true;
+  }
+
+  function closeEdit() {
+    showEditModal = false;
+  }
+
+  async function saveEdit() {
+    error = '';
+    const res = await fetch(`/api/gm/games/${gameId}/players/${editId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ displayName: editName, hasCar: editHasCar }),
+    });
+    if (res.ok) {
+      showEditModal = false;
+      await load();
+    } else {
+      const data = await res.json();
+      error = data.error ?? 'Could not save player';
+    }
   }
 
   async function addOffline() {
@@ -84,6 +121,9 @@
           {#if player.team}<span class="team">{player.team.name}</span>{/if}
         </div>
         <div class="actions">
+          <button class="edit" on:click={() => openEdit(player)} title="Edit player">
+            <span class="mdi mdi-pencil"></span>
+          </button>
           {#if player.team?.managerId !== player.id}
             <button class="delete" on:click={() => remove(player)} title="Delete player">
               <span class="mdi mdi-trash-can-outline"></span>
@@ -96,8 +136,8 @@
 </div>
 
 {#if showModal}
-  <div class="modal-backdrop" on:click={close}>
-    <div class="modal" on:click|stopPropagation>
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <form on:submit|preventDefault={addOffline}>
         <h3>Add Offline Player</h3>
 
@@ -114,6 +154,31 @@
         <div class="actions">
           <button type="button" on:click={close}>Cancel</button>
           <button type="submit" disabled={!displayName}>Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+{#if showEditModal}
+  <div class="modal-backdrop" on:click={closeEdit} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveEdit}>
+        <h3>Edit Player</h3>
+
+        <label for="editName">Display Name</label>
+        <input id="editName" type="text" bind:value={editName} placeholder="Player name" />
+
+        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; cursor: pointer;">
+          <input type="checkbox" bind:checked={editHasCar} />
+          <span>Has a car available to drive</span>
+        </label>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeEdit}>Cancel</button>
+          <button type="submit" disabled={!editName}>Save</button>
         </div>
       </form>
     </div>
@@ -145,6 +210,7 @@
   }
 
   .player-list li {
+    transition: box-shadow 0.15s, transform 0.15s;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 0.5rem;
@@ -157,7 +223,8 @@
   }
 
   .player-list li:hover {
-    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
   }
 
   .player-main {
@@ -186,12 +253,20 @@
     gap: 0.5rem;
   }
 
+  .edit,
   .delete {
     background: none;
     border: none;
     font-size: 1.25rem;
-    color: var(--danger);
     cursor: pointer;
+  }
+
+  .edit {
+    color: var(--brand);
+  }
+
+  .delete {
+    color: var(--danger);
   }
 
   .modal-backdrop {
@@ -226,6 +301,11 @@
     width: 100%;
     box-sizing: border-box;
     margin-bottom: 0.75rem;
+  }
+
+  .modal input[type="checkbox"] {
+    width: auto;
+    margin: 0;
   }
 
   .actions {
