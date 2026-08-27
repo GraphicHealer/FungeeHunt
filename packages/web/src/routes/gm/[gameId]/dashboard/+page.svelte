@@ -151,6 +151,13 @@
     input.value = '';
   }
 
+  function thumbnailUrl(sub: any) {
+    const type = sub.task?.proofType;
+    if (type === 'PHOTOS' && sub.proofUrls?.length) return sub.proofUrls[0];
+    if (type === 'PHOTO') return sub.proofUrl ?? '';
+    return '';
+  }
+
   function remaining() {
     if (!game || game.status !== 'LIVE' || !game.endAt) return null;
     const ms = Math.max(0, new Date(game.endAt).getTime() - Date.now());
@@ -212,18 +219,32 @@
         {#if submissions.length === 0}
           <p class="empty">No submissions yet.</p>
         {:else}
-          <ul class="submissions">
+          <div class="submissions">
             {#each submissions.slice(0, 20) as sub (sub.id)}
-              <li class:incomplete={sub.status === 'INCOMPLETE'} on:click={() => (reviewing = sub)}>
-                <div class="meta">
+              <button
+                type="button"
+                class="submission-card"
+                class:incomplete={sub.status === 'INCOMPLETE'}
+                on:click={() => (reviewing = sub)}
+              >
+                <div class="thumb">
+                  {#if thumbnailUrl(sub)}
+                    <img src={thumbnailUrl(sub)} alt="" />
+                  {:else}
+                    <div class="thumb-placeholder">
+                      <span class="mdi mdi-video"></span>
+                    </div>
+                  {/if}
+                </div>
+                <div class="info">
                   <span class="team">{sub.team?.name ?? 'Unknown'}</span>
                   <span class="task">{sub.task?.title ?? ''}</span>
-                  <span class="status">{sub.status === 'INCOMPLETE' ? 'REJECTED' : sub.status}</span>
+                  <span class="points">+{formatPoints(sub.task?.points ?? 0)}</span>
                 </div>
-                <span class="hint">Review</span>
-              </li>
+                <span class="status-tag">{sub.status === 'INCOMPLETE' ? 'REJECTED' : sub.status}</span>
+              </button>
             {/each}
-          </ul>
+          </div>
         {/if}
       </section>
     </div>
@@ -353,31 +374,81 @@
   }
 
   .submissions {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
     gap: 0.75rem;
   }
 
-  .submissions li {
+  .submission-card {
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 0.5rem;
-    padding: 0.85rem;
+    padding: 0.5rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     cursor: pointer;
     transition: box-shadow 0.15s, transform 0.15s;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+    text-align: left;
+    overflow: hidden;
   }
 
-  .submissions li:hover {
+  .submission-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(31, 35, 40, 0.12);
+  }
+
+  .thumb {
+    aspect-ratio: 1;
+    background: var(--bg);
+    border-radius: 0.35rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumb-placeholder {
+    color: var(--muted);
+    font-size: 2rem;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.85rem;
+  }
+
+  .info .team {
+    font-weight: bold;
+    color: var(--text);
+  }
+
+  .info .task {
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .info .points {
+    color: var(--success);
+    font-weight: 600;
+  }
+
+  .status-tag {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted);
   }
 
   .meta {
@@ -482,7 +553,7 @@
     font-size: 1rem;
   }
 
-  .submissions li.incomplete {
+  .submission-card.incomplete {
     border-color: var(--danger);
     box-shadow: 0 0 0 1px var(--danger);
   }
