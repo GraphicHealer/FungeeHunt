@@ -27,8 +27,12 @@
     });
     if (res.ok) {
       state = await res.json();
-      if (state.game?.status === 'LIVE' || state.game?.status === 'COMPLETED') {
+      if (state.game?.status === 'LIVE') {
         goto(`/play/${code}/tasks`);
+        return;
+      }
+      if (state.game?.status === 'COMPLETED') {
+        goto(`/play/${code}`);
         return;
       }
       status = state.team ? 'Game not started yet' : 'Waiting for the Game Master to assign you to a team…';

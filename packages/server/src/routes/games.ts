@@ -1,8 +1,11 @@
 import { Router } from 'express';
+import fs from 'fs';
+import path from 'path';
 import { db } from '../db/client';
 import { generateGameCode } from '../lib/gameCode';
 import { getSystemSettings } from '../lib/defaults';
 import { getBaseUrl } from '../lib/urls';
+import { config } from '../config';
 
 const router = Router();
 
@@ -277,6 +280,27 @@ router.delete('/:gameId', async (req: any, res: any) => {
     const { gameId } = req.params;
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
+
+    const submissions = await db.submission.findMany({
+      where: { task: { gameId } },
+      select: { proofUrl: true, proofUrls: true },
+    });
+
+    const urls = new Set<string>();
+    for (const s of submissions) {
+      if (s.proofUrl) urls.add(s.proofUrl);
+      for (const u of s.proofUrls ?? []) urls.add(u);
+    }
+
+    for (const u of urls) {
+      const file = path.basename(u);
+      if (!file) continue;
+      try {
+        fs.rmSync(path.join(config.UPLOAD_DIR, file), { force: true });
+      } catch (err) {
+        console.error('could not remove upload', file, err);
+      }
+    }
 
     await db.$transaction(async (tx: any) => {
       await tx.submission.deleteMany({ where: { task: { gameId } } });

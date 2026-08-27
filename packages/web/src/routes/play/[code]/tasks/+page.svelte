@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   import { onMount, onDestroy } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
@@ -76,6 +77,10 @@
     });
     if (res.ok) {
       state = await res.json();
+      if (state.game?.status === 'COMPLETED') {
+        goto(`/play/${code}`);
+        return;
+      }
       maybeShowManagerInfo();
     } else {
       error = 'Could not load game state';
