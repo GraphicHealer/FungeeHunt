@@ -27,12 +27,27 @@ A self-hosted, mobile-first scavenger-hunt platform built for Game Masters, team
 All environment variables are in `docker-compose.yml`. Review/change defaults, then run:
 
 ```powershell
-docker-compose up --build
+docker compose up
+```
+
+Or run the image directly (you will need a separate Postgres database):
+
+```powershell
+docker run -p 3000:3000 \
+  -e GM_PASSPHRASE=changeme \
+  -e SESSION_SECRET=changeme \
+  -e DATABASE_URL=postgresql://fungeehunt:changeme@host.docker.internal:5432/fungeehunt \
+  -e WEB_UI=3000 \
+  -e UPLOAD_DIR=/data/uploads \
+  -e LOG_LEVEL=debug \
+  -e TZ=America/New_York \
+  -v uploads_data:/data/uploads \
+  ghcr.io/graphichealer/fungeehunt:latest
 ```
 
 The app will be available at `http://localhost:3000`.
 
-To log in as the Game Master, use the `GM_PASSPHRASE` value from `docker-compose.yml` (default is `changeme`).
+To log in as the Game Master, use the `GM_PASSPHRASE` value (default is `changeme`).
 
 ## Local development
 
