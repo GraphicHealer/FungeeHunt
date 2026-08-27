@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db/client';
+import { parseCsv, parseTaskRows } from '../lib/taskCsv';
 
 const router = Router({ mergeParams: true });
 
@@ -192,6 +193,60 @@ router.post('/reorder', async (req: any, res: any) => {
   } catch (err) {
     console.error('reorder tasks failed', err);
     res.status(500).json({ error: 'Could not reorder tasks' });
+  }
+});
+
+router.post('/import', async (req: any, res: any) => {
+  const { gameId } = req.params;
+  const { csv } = req.body ?? {};
+  if (!csv || typeof csv !== 'string') {
+    return res.status(400).json({ error: 'CSV content is required' });
+  }
+
+  try {
+    const game = await db.game.findUnique({ where: { id: gameId } });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+
+    const rows = parseCsv(csv);
+    const parsed = parseTaskRows(rows);
+    if (parsed.length === 0) {
+      return res.status(400).json({ error: 'No valid task rows found' });
+    }
+
+    const existing = await db.task.findMany({
+      where: { gameId },
+      select: { title: true, order: true },
+    });
+    const existingTitles = new Set(existing.map((t: any) => t.title.toLowerCase()));
+    const maxOrder = Math.max(0, ...existing.map((t: any) => t.order));
+
+    const unique = parsed.filter((t: any) => !existingTitles.has(t.title.toLowerCase()));
+    if (unique.length === 0) {
+      return res.status(400).json({ error: 'All tasks already exist in this game' });
+    }
+
+    await db.$transaction(async (tx: any) => {
+      for (let i = 0; i < unique.length; i++) {
+        const t = unique[i];
+        await tx.task.create({
+          data: {
+            gameId,
+            title: t.title,
+            description: t.description,
+            points: Number(t.points) || 0,
+            proofType: ['PHOTO', 'VIDEO', 'PHOTOS'].includes(t.proofType) ? t.proofType : 'PHOTO',
+            photoCount: t.photoCount ? Number(t.photoCount) : null,
+            category: t.category ?? undefined,
+            order: maxOrder + i + 1,
+          },
+        });
+      }
+    });
+
+    res.json({ count: unique.length });
+  } catch (err) {
+    console.error('import tasks failed', err);
+    res.status(500).json({ error: 'Could not import tasks' });
   }
 });
 

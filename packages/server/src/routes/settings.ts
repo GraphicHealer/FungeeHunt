@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db/client';
+import { parseCsv, parseTaskRows } from '../lib/taskCsv';
 
 const router = Router();
 
@@ -65,6 +66,31 @@ router.patch('/', async (req, res) => {
   } catch (err) {
     console.error('update settings failed', err);
     res.status(500).json({ error: 'Could not update settings' });
+  }
+});
+
+router.post('/tasks', async (req: any, res: any) => {
+  const { csv } = req.body ?? {};
+  if (!csv || typeof csv !== 'string') {
+    return res.status(400).json({ error: 'CSV content is required' });
+  }
+
+  try {
+    const rows = parseCsv(csv);
+    const tasks = parseTaskRows(rows);
+    if (tasks.length === 0) {
+      return res.status(400).json({ error: 'No valid task rows found' });
+    }
+    const settings = await db.systemSettings.findFirst();
+    if (!settings) return res.status(404).json({ error: 'Settings not found' });
+    await db.systemSettings.update({
+      where: { id: settings.id },
+      data: { defaultTasks: JSON.stringify(tasks) },
+    });
+    res.json({ count: tasks.length });
+  } catch (err) {
+    console.error('import default tasks failed', err);
+    res.status(500).json({ error: 'Could not import tasks' });
   }
 });
 

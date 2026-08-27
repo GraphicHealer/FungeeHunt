@@ -1,9 +1,11 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount, onDestroy } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
   import { toast } from '$lib/toast';
   import { io } from 'socket.io-client';
   import { formatPoints } from '$lib/format';
+  import { downloadTemplate } from '$lib/taskCsv';
   import SubmissionReview from '$lib/SubmissionReview.svelte';
 
   const gameId = $page.params.gameId;
@@ -16,6 +18,7 @@
   let error = '';
   let socket: any;
   let interval: ReturnType<typeof setInterval>;
+  let showImportModal = false;
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -120,6 +123,34 @@
     }
   }
 
+  function downloadGameTemplate() {
+    downloadTemplate('fungeehunt-tasks-template.csv', []);
+  }
+
+  async function importTasks(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const csv = await file.text();
+    const res = await fetch(`/api/gm/games/${gameId}/tasks/import`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ csv }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      toast.add(`${data.count} tasks imported`, 'success');
+      showImportModal = false;
+    } else {
+      const data = await res.json();
+      toast.add(data.error ?? 'Could not import tasks', 'error');
+    }
+    input.value = '';
+  }
+
   function remaining() {
     if (!game || game.status !== 'LIVE' || !game.endAt) return null;
     const ms = Math.max(0, new Date(game.endAt).getTime() - Date.now());
@@ -205,6 +236,9 @@
         <p class="status" style="margin: 0.25rem 0 0;">● {game.status}</p>
         {#if remainingStr}<p class="timer" style="margin: 0 0 0.5rem;">{remainingStr}</p>{/if}
         <p class="code" style="font-size: 1.1rem; letter-spacing: 0.15rem; margin: 0;">{game.code}</p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+          <button class="fungee-btn" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => (showImportModal = true)}>IMPORT TASKS</button>
+        </div>
         <div class="join" style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0 0.75rem; flex-wrap: wrap;">
           <a href={game.joinUrl} target="_blank" rel="noreferrer" style="font-size: 0.95rem; word-break: break-all;">{game.joinUrl}</a>
           <button class="fungee-btn" data-tour="copy-link" style="width: auto; padding: 0.4rem 0.75rem; font-size: 0.85rem;" on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
@@ -267,6 +301,29 @@
 
 {#if reviewing}
   <SubmissionReview {gameId} sub={reviewing} on:close={() => (reviewing = null)} on:review={loadSubmissions} />
+{/if}
+
+{#if showImportModal}
+  <div class="modal-backdrop" on:click={() => (showImportModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={() => (showImportModal = false)}>Close</button>
+      </div>
+    </div>
+  </div>
 {/if}
 
 <style>
@@ -432,5 +489,56 @@
 
   .error {
     color: var(--danger);
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    width: 90%;
+    max-width: 28rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+  }
+
+  .modal h3 {
+    margin-top: 0;
+  }
+
+  .csv-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .csv-actions input[type="file"] {
+    display: none;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .actions button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
   }
 </style>

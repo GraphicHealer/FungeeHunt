@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { toast } from '$lib/toast';
+  import { downloadTemplate } from '$lib/taskCsv';
 
   let settings: any = null;
   let defaultRulesStr = '';
@@ -61,7 +62,6 @@
         returnBonusPoints: Number(settings.returnBonusPoints),
         randomizeReturnBonus: settings.randomizeReturnBonus,
         defaultRules: defaultRulesStr,
-        defaultTasks: defaultTasksStr,
         taskCategories: taskCategoriesStr,
       }),
     });
@@ -72,6 +72,30 @@
       const data = await res.json();
       toast.add(data.error ?? 'Could not save settings', 'error');
     }
+  }
+
+  async function importDefaultTasks(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const csv = await file.text();
+    const res = await fetch('/api/gm/settings/tasks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ csv }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      toast.add(`${data.count} default tasks imported`, 'success');
+      await load();
+    } else {
+      const data = await res.json();
+      toast.add(data.error ?? 'Could not import tasks', 'error');
+    }
+    input.value = '';
   }
 
   onMount(load);
@@ -123,8 +147,19 @@
       </section>
 
       <section class="card">
-        <h2>Default Tasks (JSON)</h2>
-        <textarea class="json" bind:value={defaultTasksStr} />
+        <h2>Default Tasks (CSV)</h2>
+        <p style="margin: 0 0 1rem; color: var(--muted);">
+          Download the existing default task list, edit it in your spreadsheet, then upload the CSV. This replaces the current list.
+        </p>
+        <div class="csv-actions">
+          <button class="fungee-btn" type="button" on:click={() => downloadTemplate('fungeehunt-default-tasks.csv', settings?.defaultTasks ?? [])} style="width: auto; margin: 0;">
+            Download Existing Tasks
+          </button>
+          <label class="fungee-btn" for="default-tasks-csv" style="width: auto; margin: 0;">
+            Upload CSV
+          </label>
+          <input id="default-tasks-csv" type="file" accept=".csv,text/csv" on:change={importDefaultTasks} />
+        </div>
       </section>
 
       <section class="card">
@@ -193,6 +228,17 @@
   .json {
     font-family: monospace;
     min-height: 10rem;
+  }
+
+  .csv-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .csv-actions input[type="file"] {
+    display: none;
   }
 
   button {
