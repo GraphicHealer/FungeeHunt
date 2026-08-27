@@ -8,13 +8,13 @@
   let players: any[] = [];
   let showModal = false;
   let displayName = '';
-  let hasCar = false;
+  let carValue = '';
   let error = '';
 
   let showEditModal = false;
   let editId = '';
   let editName = '';
-  let editHasCar = false;
+  let editCarValue = '';
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -29,7 +29,7 @@
 
   function openNew() {
     displayName = '';
-    hasCar = false;
+    carValue = '';
     error = '';
     showModal = true;
   }
@@ -41,7 +41,7 @@
   function openEdit(player: any) {
     editId = player.id;
     editName = player.displayName;
-    editHasCar = !!player.hasCar;
+    editCarValue = player.hasCar ? 'true' : 'false';
     error = '';
     showEditModal = true;
   }
@@ -52,13 +52,17 @@
 
   async function saveEdit() {
     error = '';
+    if (!editCarValue) {
+      error = 'Please select whether the player has a car';
+      return;
+    }
     const res = await fetch(`/api/gm/games/${gameId}/players/${editId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token()}`,
       },
-      body: JSON.stringify({ displayName: editName, hasCar: editHasCar }),
+      body: JSON.stringify({ displayName: editName, hasCar: editCarValue === 'true' }),
     });
     if (res.ok) {
       showEditModal = false;
@@ -71,17 +75,22 @@
 
   async function addOffline() {
     error = '';
+    if (!carValue) {
+      error = 'Please select whether the player has a car';
+      return;
+    }
     const res = await fetch(`/api/gm/games/${gameId}/players/offline`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token()}`,
       },
-      body: JSON.stringify({ displayName, hasCar }),
+      body: JSON.stringify({ displayName, hasCar: carValue === 'true' }),
     });
     const data = await res.json();
     if (res.ok) {
       displayName = '';
+      carValue = '';
       showModal = false;
       await load();
     } else {
@@ -144,10 +153,12 @@
         <label for="displayName">Display Name</label>
         <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" />
 
-        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; cursor: pointer;">
-          <input type="checkbox" bind:checked={hasCar} />
-          <span>Has a car available to drive</span>
-        </label>
+        <label for="carValue">Has a car available to drive</label>
+        <select id="carValue" bind:value={carValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
 
         {#if error}<p class="error">{error}</p>{/if}
 
@@ -169,10 +180,12 @@
         <label for="editName">Display Name</label>
         <input id="editName" type="text" bind:value={editName} placeholder="Player name" />
 
-        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; cursor: pointer;">
-          <input type="checkbox" bind:checked={editHasCar} />
-          <span>Has a car available to drive</span>
-        </label>
+        <label for="editCarValue">Has a car available to drive</label>
+        <select id="editCarValue" bind:value={editCarValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
 
         {#if error}<p class="error">{error}</p>{/if}
 
