@@ -1,42 +1,51 @@
 # Fungee-Hunt
 
-A self-hosted, mobile-first scavenger-hunt platform built for Game Masters, Team Captains, players, and public spectators. Run it on a server or a local machine with Docker.
+A self-hosted scavenger-hunt platform for groups, built for phones, projectors, and everything in between. One Game Master runs the show; players join with a simple code, complete tasks, and prove it with photos or videos. A live viewer keeps everyone watching the action.
 
-## What it does
+## Who it is for
 
-- **Game Master** creates a game, sets the rules, builds a task list, manages players/teams, reviews submissions, and starts the clock.
-- **Players** join on their phones with a game code, see their tasks, and submit photo or video proof.
-- **Team Captains** are app players assigned to lead a team. The GM can auto-create balanced teams that each include at least one Team Captain and one driver.
-- **Spectators** watch a live scoreboard and photo feed on a TV or projector.
+- **Game Master** — creates the game, sets the rules, picks the tasks, manages players and teams, then starts the clock and reviews submissions.
+- **Players** — join on their phones with a game code, see their team's tasks, and submit proof.
+- **Team Captains** — app players who lead a team and can see the team's shared task list.
+- **Spectators** — anyone watching the public scoreboard and photo feed on a TV or projector.
 
-## Features
+## What a game looks like
 
-- Real-time updates via Socket.io (scores, submissions, game status, viewer feed)
-- Task categories and random, category-balanced task selection when a game is created
-- A guaranteed `Team Photo` task that is always task #1
-- Car/driver tracking for players and auto-team creation with driver/captain constraints
-- Photo, video, and multi-photo proof submissions
-- CSV import/export for default task lists and per-game tasks
-- Bulk task actions (set points, delete) and drag-to-reorder in the Game Master task list
-- Player editing for app and offline players
-- Grid-style submission dashboard with thumbnails
-- GM printout page for offline players
-- Public viewer / scoreboard screen
+1. The Game Master creates a game and gets a code.
+2. Players join with the code, pick a name, and say whether they can drive.
+3. The Game Master builds or imports a task list, then auto-creates balanced teams. Each team gets a Team Captain and at least one driver.
+4. When the Game Master starts the game, the clock starts and Team Captains see a quick instruction popup.
+5. Teams fan out, complete tasks, and submit photo or video proof. Multi-photo tasks are supported for challenges that need more than one image.
+6. The Game Master reviews submissions from a grid dashboard unless the game is set to automatic approval.
+7. The public viewer (`/view/{code}`) shows a live leaderboard and the latest photos as they come in.
+
+## Key features
+
+- Mobile-first player and captain experience
+- Real-time leaderboard, submissions, and viewer feed
+- Photo, video, and multi-photo task proof
+- Random, category-balanced task selection for each game
+- A guaranteed `Team Photo` task that always starts the list
+- Driver tracking and auto-team creation with captain/driver balance
 - Optional return-time bonus and food-drive bonus
-- Guided GM onboarding tour
-- UI animations and transitions
-- Docker deployment with a single app container and a PostgreSQL container
-- Pre-built image published to `ghcr.io/graphichealer/fungeehunt:latest`
+- CSV import/export for task lists
+- Bulk task editing and drag-to-reorder for the Game Master
+- Animated, modern UI
+- One Docker image with the app and a Compose file that includes PostgreSQL
 
 ## Quick start with Docker
 
-All environment variables are in `docker-compose.yml`. Review/change defaults, then run:
+Review the defaults in `docker-compose.yml`, then run:
 
 ```powershell
 docker compose up
 ```
 
-Or run the image directly (you will need a separate Postgres database):
+The app will be available at `http://localhost:3000`.
+
+To log in as the Game Master, use the `GM_PASSPHRASE` value (default is `changeme`).
+
+You can also run the pre-built image directly if you already have a Postgres database available:
 
 ```powershell
 docker run -p 3000:3000 `
@@ -51,9 +60,45 @@ docker run -p 3000:3000 `
   ghcr.io/graphichealer/fungeehunt:latest
 ```
 
-The app will be available at `http://localhost:3000`.
+## How to play
 
-To log in as the Game Master, use the `GM_PASSPHRASE` value (default is `changeme`).
+### As the Game Master
+
+1. Open the app and click **Game Master Login**.
+2. Enter your passphrase and create a new game. The wizard lets you set the date, time, return bonus, food drive, and how many tasks to use.
+3. Build your task list manually, import a CSV, or select from the default library.
+4. Add or import players, then open **Teams** and click **AUTO-CREATE TEAMS**. Every team will get one Team Captain and one driver.
+5. When you are ready, click **START** on the dashboard. The clock starts, the code goes live, and Team Captains see a quick welcome.
+6. Review incoming submissions from the dashboard grid and approve or reject them. If the game is in automatic approval mode, submissions are accepted as soon as they arrive.
+7. Click **END** when the time is up.
+
+### As a player
+
+1. Open `/play/{CODE}` (or the join link).
+2. Enter your display name and whether you have a car.
+3. Wait for the Game Master to start the game.
+4. Browse your task list, complete challenges, and submit proof. The first task is always the `Team Photo`.
+5. Watch the public viewer to see how your team is doing.
+
+### As a Team Captain
+
+When the game starts, the app will show you a quick popup explaining your role. Your team shares the same task list, so focus on coordinating who does what and getting everyone back before the return-time window closes.
+
+### As a spectator
+
+Open `/view/{CODE}` to see the live scoreboard and the most recent photos. It is designed for TVs and projectors.
+
+## Customizing the task list
+
+Default tasks can be managed in **System Settings**. You can download the current list as a CSV, edit it in any spreadsheet, and upload it back. For a single game, use **Import Tasks** on the GM dashboard or in the GM Tasks page.
+
+The CSV columns are:
+
+```
+title, description, points, proofType, photoCount, category
+```
+
+`proofType` can be `PHOTO`, `PHOTOS`, or `VIDEO`. `photoCount` is optional and only used for `PHOTOS` tasks.
 
 ## Local development
 
@@ -114,18 +159,6 @@ npm run dev --workspace=@fungeehunt/web
 ```
 
 The Vite dev server runs on `http://localhost:5173` and proxies `/api` and `/socket.io` to the server.
-
-## Trying a game
-
-1. Open `http://localhost:5173` (dev) or `http://localhost:3000` (Docker).
-2. Click **Game Master Login** and enter your `GM_PASSPHRASE`.
-3. Create a game through the wizard. You can choose how many tasks to include; the app randomly balances categories and always places one `Team Photo` task as #1.
-4. Copy the join link/code from the dashboard.
-5. In another browser or incognito window, open `/play/{CODE}` and enter a player name. The onboarding asks whether the player has a car they can drive.
-6. Back in the GM dashboard, open **Teams** and click **AUTO-CREATE TEAMS** (or build them manually). Every team gets one Team Captain and one driver.
-7. As the Team Captain, the app will show a popup when the game starts explaining their role.
-8. Submit photo or video proof for tasks; the GM reviews submissions unless the game is in automatic approval mode.
-9. Open `/view/{CODE}` for the public scoreboard and photo feed.
 
 ## Common commands
 
