@@ -120,6 +120,17 @@
           </ol>
         </aside>
 
+        {#if data.game.status === 'COMPLETED'}
+          <aside class="viewer-panel viewer-archive">
+            <h2>DOWNLOAD SUBMISSIONS</h2>
+            <p class="archive-hint">Want to see or download everything from the game?</p>
+            {#if data.game.archiveQrUrl}
+              <img class="qr" src={data.game.archiveQrUrl} alt="Archive QR code" />
+            {/if}
+            <a class="viewer-url" href={data.game.archiveUrl} target="_blank" rel="noreferrer">{data.game.archiveUrl}</a>
+          </aside>
+        {/if}
+
         <div class="viewer-stage">
           {#if data.recent?.length}
             <figure class="viewer-slide">
@@ -291,6 +302,21 @@
   .viewer-leaderboard {
     width: 22rem;
     overflow-y: auto;
+  }
+
+  .viewer-archive {
+    width: 18rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .archive-hint {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
   }
 
   .viewer-leaderboard ol {

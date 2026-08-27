@@ -77,6 +77,8 @@ router.get('/', async (req, res) => {
 
     const joinUrl = `${getBaseUrl(req)}/play/${game.code}`;
     const qrUrl = await QRCode.toDataURL(joinUrl, { width: 512, margin: 2 });
+    const archiveUrl = `${getBaseUrl(req)}/play/${game.code}`;
+    const archiveQrUrl = await QRCode.toDataURL(archiveUrl, { width: 512, margin: 2 });
 
     let remainingMs: number | null = null;
     if (game.status === 'LIVE' && game.endAt) {
@@ -95,6 +97,8 @@ router.get('/', async (req, res) => {
         foodDrivePointsPerItem: game.foodDrivePointsPerItem,
         joinUrl,
         qrUrl,
+        archiveUrl,
+        archiveQrUrl,
       },
       leaderboard,
       recent,

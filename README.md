@@ -18,6 +18,7 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 5. Teams fan out, complete tasks, and submit photo or video proof. Multi-photo tasks are supported for challenges that need more than one image.
 6. The Game Master reviews submissions from a grid dashboard unless the game is set to automatic approval.
 7. The public viewer (`/view/{code}`) shows a live leaderboard and the latest photos as they come in.
+8. After the game ends, the same player link (`/play/{code}`) becomes a public archive where anyone can browse teams and download their submissions.
 
 ## Key features
 
@@ -31,6 +32,7 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 - CSV import/export for task lists
 - Bulk task editing and drag-to-reorder for the Game Master
 - Animated, modern UI
+- Post-game archive at `/play/{CODE}` where anyone can download each team\'s submissions
 - One Docker image with the app and a Compose file that includes PostgreSQL
 
 ## Quick start with Docker
