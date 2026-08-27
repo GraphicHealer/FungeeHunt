@@ -18,7 +18,8 @@ import submissionsRoute from './routes/submissions';
 import bonusesRoute from './routes/bonuses';
 import rulesRoute from './routes/rules';
 import settingsRoute from './routes/settings';
-import { seedSystemSettings } from './lib/defaults';
+import recapRoute from './routes/recap';
+import { seedSystemSettings, seedStyleProfiles } from './lib/defaults';
 import { logger } from './lib/logger';
 import { gmAuth } from './middleware/gmAuth';
 
@@ -46,6 +47,7 @@ app.use('/api/gm/games/:gameId/teams', gmAuth, teamsRoute);
 app.use('/api/gm/games/:gameId/players', gmAuth, playersRoute);
 app.use('/api/gm/games/:gameId/bonuses', gmAuth, bonusesRoute);
 app.use('/api/gm/games/:gameId/rules', gmAuth, rulesRoute);
+app.use('/api/gm/games/:gameId/recap', gmAuth, recapRoute);
 app.use('/api/gm/settings', gmAuth, settingsRoute);
 
 app.use(express.static(config.FRONTEND_BUILD_DIR));
@@ -61,8 +63,12 @@ io.on('connection', (socket) => {
   });
 });
 
-seedSystemSettings().then(() => {
-  server.listen(config.WEB_UI, () => {
-    logger.info(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
+console.log(`Starting Fungee-Hunt with LOG_LEVEL=${config.LOG_LEVEL}`);
+
+seedSystemSettings()
+  .then(() => seedStyleProfiles())
+  .then(() => {
+    server.listen(config.WEB_UI, () => {
+      logger.info(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
+    });
   });
-});

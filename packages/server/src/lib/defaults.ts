@@ -587,6 +587,21 @@ const defaultRules = [
   },
 ];
 
+export const defaultStyleProfiles = [
+  { category: 'Team Photo', musicPath: 'packages/server/assets/audio/team-photo', transitions: ['crossfade', 'wipeleft'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'People', musicPath: 'packages/server/assets/audio/people', transitions: ['wipeleft', 'zoomin', 'dissolve'], photoHold: 2.0, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Memories', musicPath: 'packages/server/assets/audio/memories', transitions: ['crossfade', 'fade', 'wipeup'], photoHold: 3.0, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'History', musicPath: 'packages/server/assets/audio/history', transitions: ['wipeleft', 'wipeup', 'crossfade'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Music', musicPath: 'packages/server/assets/audio/music', transitions: ['zoomin', 'wipeleft', 'dissolve'], photoHold: 1.8, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Pranks', musicPath: 'packages/server/assets/audio/pranks', transitions: ['zoomin', 'wipeleft', 'dissolve'], photoHold: 1.8, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Animals', musicPath: 'packages/server/assets/audio/animals', transitions: ['crossfade', 'wipeup', 'fade'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Games', musicPath: 'packages/server/assets/audio/games', transitions: ['wipeleft', 'zoomin', 'dissolve'], photoHold: 2.0, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Vehicles', musicPath: 'packages/server/assets/audio/vehicles', transitions: ['wipeleft', 'zoomin', 'dissolve'], photoHold: 2.0, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Art', musicPath: 'packages/server/assets/audio/art', transitions: ['crossfade', 'wipeup', 'fade'], photoHold: 3.0, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Nature', musicPath: 'packages/server/assets/audio/nature', transitions: ['crossfade', 'wipeup', 'fade'], photoHold: 3.0, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'General', musicPath: 'packages/server/assets/audio/general', transitions: ['crossfade', 'wipeleft', 'fade'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+];
+
 export const defaultSystemSettings = {
   foodDriveEnabled: true,
   foodDrivePointsPerItem: 25,
@@ -625,6 +640,18 @@ export async function seedSystemSettings() {
     }
   } catch (err) {
     logger.error('Could not seed system settings', err);
+  }
+}
+
+export async function seedStyleProfiles() {
+  try {
+    const existing = await db.styleProfile.count();
+    if (!existing) {
+      await db.styleProfile.createMany({ data: defaultStyleProfiles, skipDuplicates: true });
+      logger.info('Seeded default style profiles');
+    }
+  } catch (err) {
+    logger.error('Could not seed style profiles', err);
   }
 }
 

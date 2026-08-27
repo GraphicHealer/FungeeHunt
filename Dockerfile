@@ -2,7 +2,7 @@ FROM node:20-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openssl ffmpeg fonts-dejavu-core fontconfig && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 COPY packages/shared/package*.json ./packages/shared/

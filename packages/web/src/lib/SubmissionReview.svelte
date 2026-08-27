@@ -39,6 +39,25 @@
     }
   }
 
+  async function toggleHighlight() {
+    const res = await fetch(`/api/gm/games/${gameId}/submissions/${sub.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ isHighlight: !sub.isHighlight }),
+    });
+    if (res.ok) {
+      sub.isHighlight = !sub.isHighlight;
+      dispatch('review');
+      toast.add(sub.isHighlight ? 'Marked as Best of' : 'Removed from Best of', 'success');
+    } else {
+      const data = await res.json();
+      toast.add(data.error ?? 'Could not update Best of', 'error');
+    }
+  }
+
   function close() {
     dispatch('close');
   }
@@ -79,6 +98,17 @@
 
     <div class="fungee-btn-row" style="margin-top: 1rem;">
       <button class="fungee-btn secondary" on:click={close}>CLOSE</button>
+      {#if sub.status === 'COMPLETED'}
+        <button
+          class="fungee-btn"
+          class:active={sub.isHighlight}
+          on:click={toggleHighlight}
+          title={sub.isHighlight ? 'Remove from Best of' : 'Mark as Best of'}
+        >
+          <span class="mdi {sub.isHighlight ? 'mdi-star' : 'mdi-star-outline'}"></span>
+          {sub.isHighlight ? 'Best of' : 'Mark Best of'}
+        </button>
+      {/if}
       {#if !rejecting}
         <button class="fungee-btn danger" on:click={() => (rejecting = true)}>REJECT</button>
       {/if}
@@ -129,5 +159,10 @@
     max-height: 50vh;
     border: 1px solid var(--border);
     border-radius: 0.25rem;
+  }
+
+  .active {
+    background: var(--warning);
+    color: #000;
   }
 </style>

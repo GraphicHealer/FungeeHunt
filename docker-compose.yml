@@ -11,7 +11,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U fungeehunt"]
 
   fungee-hunt:
-    image: ghcr.io/graphichealer/fungeehunt:latest
+    # image: ghcr.io/graphichealer/fungeehunt:latest
+    build: .
     depends_on:
       postgres:
         condition: service_healthy

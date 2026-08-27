@@ -24,6 +24,8 @@ model Game {
   foodDrivePointsPerItem Float          @default(0)
   foodDrivePermissible   String?
   foodDriveSuggested     String?
+  recapVideoStatus       RecapVideoStatus @default(PENDING)
+  recapVideoUrl          String?
   players                Player[]
   teams                  Team[]
   tasks                  Task[]
@@ -80,6 +82,7 @@ model Submission {
   proofUrl    String
   proofUrls   String[]         @default([])
   status      SubmissionStatus
+  isHighlight Boolean          @default(false)
   reason      String?
   submittedAt DateTime         @default(now())
   reviewedAt  DateTime?
@@ -95,6 +98,18 @@ model RuleSection {
   title  String
   body   String
   game   Game   @relation(fields: [gameId], references: [id])
+}
+
+model StyleProfile {
+  id          String  @id @default(cuid())
+  category    String  @unique
+  musicPath   String?
+  transitions String[]
+  photoHold   Float   @default(2.5)
+  energy      String  @default("medium")
+  font        String  @default("Arial")
+  textColor   String  @default("#ffffff")
+  overlay     String  @default("lower_third")
 }
 
 model SystemSettings {
@@ -142,4 +157,11 @@ enum SubmissionStatus {
   UNDER_REVIEW
   COMPLETED
   INCOMPLETE
+}
+
+enum RecapVideoStatus {
+  PENDING
+  RENDERING
+  READY
+  FAILED
 }

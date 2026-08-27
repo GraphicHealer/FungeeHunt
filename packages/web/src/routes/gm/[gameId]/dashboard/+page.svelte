@@ -19,6 +19,7 @@
   let socket: any;
   let interval: ReturnType<typeof setInterval>;
   let showImportModal = false;
+  let recap: any = null;
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -151,6 +152,57 @@
     input.value = '';
   }
 
+  async function loadRecap() {
+    const res = await fetch(`/api/gm/games/${gameId}/recap`, {
+      headers: { Authorization: `Bearer ${token()}` },
+    });
+    if (res.ok) {
+      recap = await res.json();
+      stopProgress();
+      if (recap?.status === 'RENDERING') startProgress();
+    }
+  }
+
+  let recapProgress = 0;
+  let progressInterval: ReturnType<typeof setInterval> | null = null;
+
+  async function startRecap() {
+    const res = await fetch(`/api/gm/games/${gameId}/recap`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token()}` },
+    });
+    if (res.ok) {
+      recap = await res.json();
+      recapProgress = 0;
+      startProgress();
+      toast.add('Recap render started', 'success');
+    } else {
+      const data = await res.json();
+      toast.add(data.error ?? 'Could not start recap', 'error');
+    }
+  }
+
+  function startProgress() {
+    if (progressInterval) clearInterval(progressInterval);
+    progressInterval = setInterval(() => {
+      if (recapProgress < 90) {
+        recapProgress = Math.min(90, recapProgress + Math.random() * 3);
+      }
+    }, 1000);
+  }
+
+  function stopProgress() {
+    if (progressInterval) {
+      clearInterval(progressInterval);
+      progressInterval = null;
+    }
+    if (recap?.status === 'READY') {
+      recapProgress = 100;
+    } else if (recap?.status === 'PENDING' || recap?.status === 'FAILED') {
+      recapProgress = 0;
+    }
+  }
+
   function thumbnailUrl(sub: any) {
     const type = sub.task?.proofType;
     if (type === 'PHOTOS' && sub.proofUrls?.length) return sub.proofUrls[0];
@@ -174,6 +226,7 @@
     await load();
     await loadSubmissions();
     await loadTeams();
+    await loadRecap();
     if (game?.code) {
       socket = io({ transports: ['websocket', 'polling'] });
       socket.on(`game:${game.code.toUpperCase()}`, async () => {
@@ -191,6 +244,7 @@
   onDestroy(() => {
     if (socket) socket.disconnect();
     if (interval) clearInterval(interval);
+    stopProgress();
   });
 </script>
 
@@ -257,9 +311,6 @@
         <p class="status" style="margin: 0.25rem 0 0;">● {game.status}</p>
         {#if remainingStr}<p class="timer" style="margin: 0 0 0.5rem;">{remainingStr}</p>{/if}
         <p class="code" style="font-size: 1.1rem; letter-spacing: 0.15rem; margin: 0;">{game.code}</p>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-          <button class="fungee-btn" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => (showImportModal = true)}>IMPORT TASKS</button>
-        </div>
         <div class="join" style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0 0.75rem; flex-wrap: wrap;">
           <a href={game.joinUrl} target="_blank" rel="noreferrer" style="font-size: 0.95rem; word-break: break-all;">{game.joinUrl}</a>
           <button class="fungee-btn" data-tour="copy-link" style="width: auto; padding: 0.4rem 0.75rem; font-size: 0.85rem;" on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
@@ -270,7 +321,36 @@
           {#if game.status === 'COMPLETED'}
             <a class="fungee-btn secondary" style="width: auto; flex: 1; min-width: 6rem; text-align: center;" href="/view/{game.code}/results">RESULTS</a>
           {/if}
+          {#if game.status === 'COMPLETED'}
+            <button
+              class="fungee-btn"
+              style="width: auto; flex: 1; min-width: 6rem;"
+              on:click={startRecap}
+              disabled={recap?.status === 'RENDERING'}
+            >
+              {recap?.status === 'READY' ? 'RE-RENDER RECAP' : 'GENERATE RECAP'}
+            </button>
+          {/if}
         </div>
+        {#if game.status === 'COMPLETED' && recap}
+          {#if recap.status === 'RENDERING'}
+            <div class="recap-progress" style="margin-top: 0.75rem;">
+              <div class="progress-label">Generating recap… {Math.round(recapProgress)}%</div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: {recapProgress}%"></div>
+              </div>
+            </div>
+          {:else if recap.status === 'READY' && recap.url}
+            <p class="recap-status" style="margin: 0.5rem 0 0; font-size: 0.9rem; color: var(--success);">
+              Recap ready
+            </p>
+            <a class="viewer-url" href={recap.url} target="_blank" rel="noreferrer" style="font-size: 0.9rem;">{recap.url}</a>
+          {:else if recap.status === 'FAILED'}
+            <p class="recap-status" style="margin: 0.5rem 0 0; font-size: 0.9rem; color: var(--danger);">
+              Recap failed. Try again.
+            </p>
+          {/if}
+        {/if}
       </section>
 
       {#if game.returnBonusEnabled}
@@ -611,5 +691,31 @@
     background: var(--bg);
     color: var(--text);
     cursor: pointer;
+  }
+
+  .recap-progress {
+    width: 100%;
+  }
+
+  .progress-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 0.5rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--brand);
+    transition: width 0.3s ease;
+    border-radius: 0.25rem;
   }
 </style>

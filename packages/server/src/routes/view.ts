@@ -99,6 +99,8 @@ router.get('/', async (req, res) => {
         qrUrl,
         archiveUrl,
         archiveQrUrl,
+        recapVideoStatus: game.recapVideoStatus,
+        recapVideoUrl: game.recapVideoUrl,
       },
       leaderboard,
       recent,

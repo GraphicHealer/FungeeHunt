@@ -37,12 +37,18 @@ router.get('/', async (req: any, res: any) => {
 
 router.patch('/:submissionId', async (req: any, res: any) => {
   const { gameId, submissionId } = req.params;
-  const { status, reason } = req.body ?? {};
+  const { status, reason, isHighlight } = req.body ?? {};
 
-  if (!['COMPLETED', 'INCOMPLETE', 'UNDER_REVIEW'].includes(status)) {
+  const hasStatus = status !== undefined;
+  const hasHighlight = isHighlight !== undefined;
+  if (!hasStatus && !hasHighlight) {
+    return res.status(400).json({ error: 'Nothing to update' });
+  }
+
+  if (hasStatus && !['COMPLETED', 'INCOMPLETE', 'UNDER_REVIEW'].includes(status)) {
     return res.status(400).json({ error: 'Invalid status' });
   }
-  if (status === 'INCOMPLETE' && !reason?.trim()) {
+  if (hasStatus && status === 'INCOMPLETE' && !reason?.trim()) {
     return res.status(400).json({ error: 'A reason is required when marking a submission incomplete' });
   }
 
@@ -53,25 +59,43 @@ router.patch('/:submissionId', async (req: any, res: any) => {
     const current = await db.submission.findUnique({ where: { id: submissionId } });
     if (!current) return res.status(404).json({ error: 'Submission not found' });
 
-    const updateData: any = { status };
-    if (status === 'INCOMPLETE') {
-      updateData.reason = reason ? reason.trim() : null;
-      updateData.proofUrl = '';
-      updateData.proofUrls = [];
-      updateData.reviewedAt = null;
-      for (const url of new Set([current.proofUrl, ...(current.proofUrls ?? [])])) {
-        if (!url) continue;
-        const filename = url.replace('/uploads/', '');
-        try {
-          unlinkSync(join(config.UPLOAD_DIR, filename));
-        } catch (e) {
-          console.warn('could not delete denied file', url, e);
+    const updateData: any = {};
+    if (hasStatus) {
+      updateData.status = status;
+      if (status === 'INCOMPLETE') {
+        updateData.reason = reason ? reason.trim() : null;
+        updateData.proofUrl = '';
+        updateData.proofUrls = [];
+        updateData.reviewedAt = null;
+        updateData.isHighlight = false;
+        for (const url of new Set([current.proofUrl, ...(current.proofUrls ?? [])])) {
+          if (!url) continue;
+          const filename = url.replace('/uploads/', '');
+          try {
+            unlinkSync(join(config.UPLOAD_DIR, filename));
+          } catch (e) {
+            console.warn('could not delete denied file', url, e);
+          }
         }
+      } else if (status === 'COMPLETED') {
+        updateData.reviewedAt = new Date();
+      } else if (status === 'UNDER_REVIEW') {
+        updateData.reviewedAt = null;
       }
-    } else if (status === 'COMPLETED') {
-      updateData.reviewedAt = new Date();
-    } else if (status === 'UNDER_REVIEW') {
-      updateData.reviewedAt = null;
+    }
+
+    if (hasHighlight) {
+      if (isHighlight) {
+        const count = await db.submission.count({
+          where: { team: { gameId }, isHighlight: true },
+        });
+        if (!current.isHighlight && count >= 5) {
+          return res.status(400).json({ error: 'You can only flag up to 5 submissions as Best of' });
+        }
+        updateData.isHighlight = true;
+      } else {
+        updateData.isHighlight = false;
+      }
     }
 
     const submission = await db.submission.update({

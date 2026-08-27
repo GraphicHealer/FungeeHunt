@@ -150,6 +150,13 @@
         </div>
       </section>
 
+      {#if data.game.status === 'COMPLETED' && data.game.recapVideoUrl}
+        <section class="viewer-panel viewer-recap">
+          <h2>EVENT RECAP</h2>
+          <video src={data.game.recapVideoUrl} controls style="width: 100%; max-height: 60vh;"></video>
+        </section>
+      {/if}
+
       <footer class="viewer-panel viewer-feed">
         <h2>LATEST UPDATES</h2>
         <div class="viewer-ticker">
@@ -397,6 +404,19 @@
   .viewer-loading {
     font-size: 2rem;
     color: var(--muted);
+  }
+
+  .viewer-recap {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .viewer-recap video {
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: #000;
   }
 
   .viewer-feed {
