@@ -3,6 +3,8 @@
   import { onMount } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { formatPoints } from '$lib/format';
+  import { toast } from '$lib/toast';
+  import { downloadTemplate } from '$lib/taskCsv';
 
   const gameId = $page.params.gameId;
 
@@ -27,6 +29,7 @@
   let dragId: string | null = null;
   let dragOverId: string | null = null;
   let showSelectModal = false;
+  let showImportModal = false;
   let defaultTasks: any[] = [];
   let selectedDefaults: any[] = [];
   let expandedDefault: string | null = null;
@@ -90,6 +93,44 @@
     showSelectModal = false;
     selectedDefaults = [];
     expandedDefault = null;
+  }
+
+  function openImport() {
+    showAddMenu = false;
+    showImportModal = true;
+  }
+
+  function closeImport() {
+    showImportModal = false;
+  }
+
+  function downloadGameTemplate() {
+    downloadTemplate('fungeehunt-tasks-template.csv', []);
+  }
+
+  async function importTasks(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const csv = await file.text();
+    const res = await fetch(`/api/gm/games/${gameId}/tasks/import`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ csv }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      toast.add(`${data.count} tasks imported`, 'success');
+      showImportModal = false;
+      await load();
+    } else {
+      const data = await res.json();
+      toast.add(data.error ?? 'Could not import tasks', 'error');
+    }
+    input.value = '';
   }
 
   function isSelected(task: any) {
@@ -360,6 +401,7 @@
           <div class="add-menu">
             <button type="button" on:click={openSelect}>Select task</button>
             <button type="button" on:click={openCustom}>Custom task</button>
+            <button type="button" on:click={openImport}>Import from CSV</button>
           </div>
         {/if}
       </div>
@@ -522,6 +564,29 @@
         <button type="button" on:click={addSelected} disabled={selectedDefaults.length === 0}>
           Add {selectedDefaults.length ? `(${selectedDefaults.length})` : ''}
         </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if showImportModal}
+  <div class="modal-backdrop" on:click={closeImport} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={closeImport}>Close</button>
       </div>
     </div>
   </div>
@@ -794,6 +859,17 @@
 
   .error {
     color: var(--danger);
+  }
+
+  .csv-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .csv-actions input[type="file"] {
+    display: none;
   }
 
   .add-menu-wrap {

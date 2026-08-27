@@ -8,7 +8,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'PHOTO',
     category: 'Team Photo',
-    order: 1,
+
   },
   {
     title: `Retiree Royale`,
@@ -16,7 +16,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'PHOTO',
     category: 'People',
-    order: 2,
+
   },
   {
     title: `The Civil Handshake`,
@@ -24,7 +24,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'PHOTO',
     category: 'People',
-    order: 3,
+
   },
   {
     title: `Baby Got Back... Then`,
@@ -32,7 +32,7 @@ const defaultTasks = [
     points: 75,
     proofType: 'PHOTO',
     category: 'Memories',
-    order: 4,
+
   },
   {
     title: `History in the Making`,
@@ -40,7 +40,7 @@ const defaultTasks = [
     points: 50,
     proofType: 'VIDEO',
     category: 'History',
-    order: 5,
+
   },
   {
     title: `Just Keep Rowing`,
@@ -48,7 +48,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 6,
+
   },
   {
     title: `Mission: Impossible to Speak`,
@@ -56,7 +56,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 7,
+
   },
   {
     title: `The Dog Ate My Homework`,
@@ -64,7 +64,7 @@ const defaultTasks = [
     points: 125,
     proofType: 'VIDEO',
     category: 'Animals',
-    order: 8,
+
   },
   {
     title: `It's Fun to Stay at the...`,
@@ -72,7 +72,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 9,
+
   },
   {
     title: `Going Bananas`,
@@ -80,7 +80,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'PHOTO',
     category: 'Pranks',
-    order: 10,
+
   },
   {
     title: `O Say, Can You Sing?`,
@@ -88,7 +88,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 11,
+
   },
   {
     title: `Carol of the Stranger`,
@@ -96,7 +96,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 12,
+
   },
   {
     title: `Hop, Skip, and a Trip`,
@@ -104,7 +104,7 @@ const defaultTasks = [
     points: 50,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 13,
+
   },
   {
     title: `Keeping Up with the Teams`,
@@ -112,7 +112,7 @@ const defaultTasks = [
     points: 50,
     proofType: 'PHOTOS',
     category: 'Vehicles',
-    order: 14,
+
   },
   {
     title: `Under Pressure`,
@@ -120,7 +120,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'PHOTO',
     category: 'Vehicles',
-    order: 15,
+
   },
   {
     title: `I'm a Little Teapot`,
@@ -128,7 +128,7 @@ const defaultTasks = [
     points: 200,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 16,
+
   },
   {
     title: `15 Minutes of High Fame`,
@@ -136,7 +136,7 @@ const defaultTasks = [
     points: 125,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 17,
+
   },
   {
     title: `The Art of the Steal`,
@@ -144,7 +144,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'PHOTO',
     category: 'Art',
-    order: 18,
+
   },
   {
     title: `The World's Smallest Order`,
@@ -152,7 +152,7 @@ const defaultTasks = [
     points: 125,
     proofType: 'PHOTO',
     category: 'Pranks',
-    order: 19,
+
   },
   {
     title: `Groot's Got Nothing on Us`,
@@ -160,7 +160,7 @@ const defaultTasks = [
     points: 50,
     proofType: 'PHOTO',
     category: 'Nature',
-    order: 20,
+
   },
   {
     title: `A Flower for the Forgotten`,
@@ -168,7 +168,7 @@ const defaultTasks = [
     points: 75,
     proofType: 'PHOTO',
     category: 'History',
-    order: 21,
+
   },
   {
     title: `Employee of the Month`,
@@ -176,7 +176,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'PHOTO',
     category: 'Team Photo',
-    order: 22,
+
   },
   {
     title: `Strike a Pose`,
@@ -184,7 +184,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'PHOTO',
     category: 'Team Photo',
-    order: 23,
+
   },
   {
     title: `How Yellow Is Your Yellow?`,
@@ -192,7 +192,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'PHOTO',
     category: 'Art',
-    order: 24,
+
   },
   {
     title: `Miles Ahead`,
@@ -200,7 +200,7 @@ const defaultTasks = [
     points: 75,
     proofType: 'VIDEO',
     category: 'Vehicles',
-    order: 25,
+
   },
   {
     title: `State of the Plate`,
@@ -208,7 +208,7 @@ const defaultTasks = [
     points: 50,
     proofType: 'PHOTO',
     category: 'Vehicles',
-    order: 26,
+
   },
   {
     title: `Gerbil? I Hardly Know Her!`,
@@ -216,7 +216,7 @@ const defaultTasks = [
     points: 200,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 27,
+
   },
   {
     title: `The Elbow Has It`,
@@ -224,7 +224,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Art',
-    order: 28,
+
   },
   {
     title: `Cart Blanche`,
@@ -232,7 +232,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'People',
-    order: 29,
+
   },
   {
     title: `I Can See Clearly Now`,
@@ -240,7 +240,7 @@ const defaultTasks = [
     points: 175,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 30,
+
   },
   {
     title: `Elmo's World: The Interview`,
@@ -248,7 +248,7 @@ const defaultTasks = [
     points: 175,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 31,
+
   },
   {
     title: `Do or Do Not... Sing Christmas`,
@@ -256,7 +256,7 @@ const defaultTasks = [
     points: 200,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 32,
+
   },
   {
     title: `To Clerk, or Not to Clerk`,
@@ -264,7 +264,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 33,
+
   },
   {
     title: `Lost in Translation`,
@@ -272,7 +272,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'People',
-    order: 34,
+
   },
   {
     title: `Put Your Whole Self In`,
@@ -280,7 +280,7 @@ const defaultTasks = [
     points: 125,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 35,
+
   },
   {
     title: `Don't Blink`,
@@ -288,7 +288,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 36,
+
   },
   {
     title: `Draw Me Like You See Me`,
@@ -296,7 +296,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'PHOTO',
     category: 'Art',
-    order: 37,
+
   },
   {
     title: `Build a People Pyramid`,
@@ -304,7 +304,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'PHOTO',
     category: 'Games',
-    order: 38,
+
   },
   {
     title: `Simon Says... You Do It`,
@@ -312,7 +312,7 @@ const defaultTasks = [
     points: 125,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 39,
+
   },
   {
     title: `Rock, Paper, Stranger`,
@@ -320,7 +320,7 @@ const defaultTasks = [
     points: 75,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 40,
+
   },
   {
     title: `See the World Through Their Eyes`,
@@ -328,7 +328,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 41,
+
   },
   {
     title: `Conga Where You Are`,
@@ -336,7 +336,7 @@ const defaultTasks = [
     points: 125,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 42,
+
   },
   {
     title: `Stranger\u2019s Got Talent`,
@@ -344,7 +344,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'People',
-    order: 43,
+
   },
   {
     title: `Thumbs Up, Stranger`,
@@ -352,7 +352,7 @@ const defaultTasks = [
     points: 75,
     proofType: 'PHOTO',
     category: 'Games',
-    order: 44,
+
   },
   {
     title: `Tag, You're It!`,
@@ -360,7 +360,7 @@ const defaultTasks = [
     points: 125,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 45,
+
   },
   {
     title: `Behold! Your Tour Guide`,
@@ -368,7 +368,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'History',
-    order: 46,
+
   },
   {
     title: `Laugh, Actually`,
@@ -376,7 +376,7 @@ const defaultTasks = [
     points: 75,
     proofType: 'VIDEO',
     category: 'People',
-    order: 47,
+
   },
   {
     title: `Call Me Maybe`,
@@ -384,7 +384,7 @@ const defaultTasks = [
     points: 175,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 48,
+
   },
   {
     title: `To Protect and Selfie`,
@@ -392,7 +392,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'PHOTO',
     category: 'People',
-    order: 49,
+
   },
   {
     title: `Where in the World Is...`,
@@ -400,7 +400,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 50,
+
   },
   {
     title: `Honey, I Shrunk the Building`,
@@ -408,7 +408,7 @@ const defaultTasks = [
     points: 50,
     proofType: 'PHOTO',
     category: 'Art',
-    order: 51,
+
   },
   {
     title: `Those Who Ignore History...`,
@@ -416,7 +416,7 @@ const defaultTasks = [
     points: 75,
     proofType: 'PHOTO',
     category: 'History',
-    order: 52,
+
   },
   {
     title: `Dance Like Nobody's Playing Music`,
@@ -424,7 +424,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 53,
+
   },
   {
     title: `Hot Ones: Local Edition`,
@@ -432,7 +432,7 @@ const defaultTasks = [
     points: 125,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 54,
+
   },
   {
     title: `Trolling for Answers`,
@@ -440,7 +440,7 @@ const defaultTasks = [
     points: 50,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 55,
+
   },
   {
     title: `Hide-and-Seek: Store Edition`,
@@ -448,7 +448,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 56,
+
   },
   {
     title: `One Team's Trash...`,
@@ -456,7 +456,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'PHOTO',
     category: 'People',
-    order: 57,
+
   },
   {
     title: `The Skipping Stones`,
@@ -464,7 +464,7 @@ const defaultTasks = [
     points: 50,
     proofType: 'VIDEO',
     category: 'Nature',
-    order: 58,
+
   },
   {
     title: `Goose Encounter`,
@@ -472,7 +472,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Animals',
-    order: 59,
+
   },
   {
     title: `Shoe Fly, Don't Drop`,
@@ -480,7 +480,7 @@ const defaultTasks = [
     points: 75,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 60,
+
   },
   {
     title: `The Campaign Trail`,
@@ -488,7 +488,7 @@ const defaultTasks = [
     points: 175,
     proofType: 'VIDEO',
     category: 'Pranks',
-    order: 61,
+
   },
   {
     title: `Animal Planet`,
@@ -496,7 +496,7 @@ const defaultTasks = [
     points: 75,
     proofType: 'PHOTOS',
     category: 'Animals',
-    order: 62,
+
   },
   {
     title: `Bird Watchers' Blitz`,
@@ -504,7 +504,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'PHOTOS',
     category: 'Animals',
-    order: 63,
+
   },
   {
     title: `Pimp My Ride: Team Edition`,
@@ -512,7 +512,7 @@ const defaultTasks = [
     points: 150,
     proofType: 'PHOTO',
     category: 'Team Photo',
-    order: 64,
+
   },
   {
     title: `Hollywood Charades`,
@@ -520,7 +520,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Games',
-    order: 65,
+
   },
   {
     title: `The Senior Citizen's Last Stand`,
@@ -528,7 +528,7 @@ const defaultTasks = [
     points: 125,
     proofType: 'VIDEO',
     category: 'People',
-    order: 66,
+
   },
   {
     title: `Yodeling… Is an ART!!!`,
@@ -536,7 +536,7 @@ const defaultTasks = [
     points: 100,
     proofType: 'VIDEO',
     category: 'Music',
-    order: 67,
+
   },
 ];
 

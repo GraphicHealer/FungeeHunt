@@ -28,7 +28,7 @@ export function parseCsv(text: string): string[][] {
   return lines.map((l) => l.trim()).filter((l) => l).map(parseCsvLine);
 }
 
-const CSV_HEADERS = ['title', 'description', 'points', 'proofType', 'photoCount', 'category', 'order'];
+const CSV_HEADERS = ['title', 'description', 'points', 'proofType', 'photoCount', 'category'];
 
 export function parseTaskRows(rows: string[][]): any[] {
   if (rows.length < 2) return [];
@@ -47,8 +47,6 @@ export function parseTaskRows(rows: string[][]): any[] {
     const photoCountRaw = get(row, 'photocount').trim();
     const photoCount = photoCountRaw ? Number(photoCountRaw) : null;
     const category = (get(row, 'category') || '').trim() || undefined;
-    const orderRaw = get(row, 'order').trim();
-    const order = orderRaw ? Number(orderRaw) : undefined;
 
     return {
       title,
@@ -57,7 +55,6 @@ export function parseTaskRows(rows: string[][]): any[] {
       proofType: validProofType,
       photoCount: Number.isFinite(photoCount as any) && photoCount ? photoCount : null,
       category,
-      order,
     };
   }).filter((t) => t.title);
 }
@@ -71,7 +68,6 @@ export function toCsv(tasks: any[]): string {
     csvCell(t.proofType ?? 'PHOTO'),
     csvCell(t.photoCount ? String(t.photoCount) : ''),
     csvCell(t.category ?? ''),
-    csvCell(String(t.order ?? '')),
   ]);
   return [headers, ...rows].map((r) => r.join(',')).join('\n');
 }

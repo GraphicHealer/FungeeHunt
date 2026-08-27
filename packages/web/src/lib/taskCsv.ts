@@ -1,4 +1,4 @@
-const CSV_HEADERS = ['title', 'description', 'points', 'proofType', 'photoCount', 'category', 'order'];
+const CSV_HEADERS = ['title', 'description', 'points', 'proofType', 'photoCount', 'category'];
 
 export function toCsv(tasks: any[]): string {
   const rows = tasks.map((t) => [
@@ -8,7 +8,6 @@ export function toCsv(tasks: any[]): string {
     csvCell(t.proofType ?? 'PHOTO'),
     csvCell(t.photoCount ? String(t.photoCount) : ''),
     csvCell(t.category ?? ''),
-    csvCell(String(t.order ?? '')),
   ]);
   return [CSV_HEADERS, ...rows].map((r) => r.join(',')).join('\n');
 }
@@ -22,7 +21,6 @@ export function downloadTemplate(filename: string, tasks?: any[]) {
       proofType: 'PHOTO',
       photoCount: '',
       category: 'Team Photo',
-      order: 1,
     },
   ];
   const csv = toCsv(sample);
