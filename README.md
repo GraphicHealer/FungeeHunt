@@ -1,12 +1,12 @@
 # Fungee-Hunt
 
-A self-hosted, mobile-first scavenger-hunt platform built for Game Masters, team captains, players, and public spectators. Run it on a server or a local machine with Docker.
+A self-hosted, mobile-first scavenger-hunt platform built for Game Masters, Team Captains, players, and public spectators. Run it on a server or a local machine with Docker.
 
 ## What it does
 
 - **Game Master** creates a game, sets the rules, builds a task list, manages players/teams, reviews submissions, and starts the clock.
 - **Players** join on their phones with a game code, see their tasks, and submit photo or video proof.
-- **Captains** are app players assigned to lead a team. The GM can auto-create balanced teams that each include at least one captain and one driver.
+- **Team Captains** are app players assigned to lead a team. The GM can auto-create balanced teams that each include at least one Team Captain and one driver.
 - **Spectators** watch a live scoreboard and photo feed on a TV or projector.
 
 ## Features
@@ -15,12 +15,18 @@ A self-hosted, mobile-first scavenger-hunt platform built for Game Masters, team
 - Task categories and random, category-balanced task selection when a game is created
 - A guaranteed `Team Photo` task that is always task #1
 - Car/driver tracking for players and auto-team creation with driver/captain constraints
-- Photo/video proof submissions (one proof type per task)
-- GM printout page for offline players who are not using phones
+- Photo, video, and multi-photo proof submissions
+- CSV import/export for default task lists and per-game tasks
+- Bulk task actions (set points, delete) and drag-to-reorder in the Game Master task list
+- Player editing for app and offline players
+- Grid-style submission dashboard with thumbnails
+- GM printout page for offline players
 - Public viewer / scoreboard screen
 - Optional return-time bonus and food-drive bonus
 - Guided GM onboarding tour
+- UI animations and transitions
 - Docker deployment with a single app container and a PostgreSQL container
+- Pre-built image published to `ghcr.io/graphichealer/fungeehunt:latest`
 
 ## Quick start with Docker
 
@@ -33,15 +39,15 @@ docker compose up
 Or run the image directly (you will need a separate Postgres database):
 
 ```powershell
-docker run -p 3000:3000 \
-  -e GM_PASSPHRASE=changeme \
-  -e SESSION_SECRET=changeme \
-  -e DATABASE_URL=postgresql://fungeehunt:changeme@host.docker.internal:5432/fungeehunt \
-  -e WEB_UI=3000 \
-  -e UPLOAD_DIR=/data/uploads \
-  -e LOG_LEVEL=debug \
-  -e TZ=America/New_York \
-  -v uploads_data:/data/uploads \
+docker run -p 3000:3000 `
+  -e GM_PASSPHRASE=changeme `
+  -e SESSION_SECRET=changeme `
+  -e DATABASE_URL=postgresql://fungeehunt:changeme@host.docker.internal:5432/fungeehunt `
+  -e WEB_UI=3000 `
+  -e UPLOAD_DIR=/data/uploads `
+  -e LOG_LEVEL=debug `
+  -e TZ=America/New_York `
+  -v uploads_data:/data/uploads `
   ghcr.io/graphichealer/fungeehunt:latest
 ```
 
@@ -116,8 +122,8 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api` and `/soc
 3. Create a game through the wizard. You can choose how many tasks to include; the app randomly balances categories and always places one `Team Photo` task as #1.
 4. Copy the join link/code from the dashboard.
 5. In another browser or incognito window, open `/play/{CODE}` and enter a player name. The onboarding asks whether the player has a car they can drive.
-6. Back in the GM dashboard, open **Teams** and click **AUTO-CREATE TEAMS** (or build them manually). Every team gets one captain and one driver.
-7. As the captain, the app will show a popup when the game starts explaining their role.
+6. Back in the GM dashboard, open **Teams** and click **AUTO-CREATE TEAMS** (or build them manually). Every team gets one Team Captain and one driver.
+7. As the Team Captain, the app will show a popup when the game starts explaining their role.
 8. Submit photo or video proof for tasks; the GM reviews submissions unless the game is in automatic approval mode.
 9. Open `/view/{CODE}` for the public scoreboard and photo feed.
 
@@ -167,3 +173,4 @@ npm run build --workspace=@fungeehunt/web
 - Only the `fungee-hunt` container needs a public port exposed.
 - Uploaded media is stored in the `UPLOAD_DIR` volume and served by the app.
 - Default tasks and task categories are seeded on first run from `packages/server/src/lib/defaults.ts`. Update them in **System Settings** after the first launch, or reset the database to re-seed.
+- The GitHub Actions workflow in `.github/workflows/docker.yml` builds and pushes `ghcr.io/graphichealer/fungeehunt:latest` on every push to `main`.
