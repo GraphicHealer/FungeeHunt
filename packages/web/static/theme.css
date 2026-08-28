@@ -314,6 +314,7 @@ body {
   background: none;
   border: none;
   font: inherit;
+  text-align: left;
   cursor: pointer;
   color: var(--text);
 }

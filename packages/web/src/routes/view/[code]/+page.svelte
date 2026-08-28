@@ -45,10 +45,10 @@
 
   function thumbStyle() {
     return {
-      left: `${random(8, 58)}%`,
-      top: `${random(8, 45)}%`,
-      scale: random(0.85, 1.0),
-      rotate: random(-8, 8),
+      left: `${random(3, 68)}%`,
+      top: `${random(3, 58)}%`,
+      scale: random(0.75, 1.0),
+      rotate: random(-15, 15),
       zIndex: displayed.length,
     };
   }
@@ -450,6 +450,7 @@
     position: absolute;
     inset: 0;
     z-index: 100;
+    background: var(--bg);
   }
 
   .viewer-leaderboard ol {
@@ -508,9 +509,9 @@
 
   .collage-item {
     position: absolute;
-    width: 28%;
+    width: 24%;
     min-width: 10rem;
-    max-width: 22rem;
+    max-width: 18rem;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
