@@ -34,6 +34,7 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 - Animated, modern UI
 - Post-game archive at `/play/{CODE}` where anyone can download each team\'s submissions
 - One Docker image with the app and a Compose file that includes PostgreSQL
+- Recap video music by **Kevin MacLeod** (incompetech.com) — **do not redistribute the music from this repo; get it from https://incompetech.com/music/royalty-free/music.html**
 
 ## Quick start with Docker
 
@@ -201,6 +202,17 @@ npm run build --workspace=@fungeehunt/web
 | `DATABASE_URL` | PostgreSQL connection string |
 | `UPLOAD_DIR` | Where player uploads are stored |
 | `WEB_UI` | Port the server listens on |
+
+## Music attribution
+
+The included recap video music tracks are **composed by Kevin MacLeod** and licensed under Creative Commons: By Attribution 4.0.
+
+**Do not download the music files from this GitHub repository.**
+Please get your own copies directly from Kevin MacLeod's website:
+
+https://incompetech.com/music/royalty-free/music.html
+
+Full track details and required credit lines are in `packages/server/assets/audio/Attribution.md`.
 
 ## Production notes
 

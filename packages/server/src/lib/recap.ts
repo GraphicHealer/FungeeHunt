@@ -368,13 +368,14 @@ async function buildSegment(
   return output;
 }
 
-async function buildColorCard(text: string, duration: number, output: string, textColor = '#ffffff') {
+async function buildColorCard(text: string, duration: number, output: string, textColor = '#ffffff', attribution = 'Music by Kevin MacLeod - incompetech.com') {
   await runFFmpeg([
     '-y',
     '-f', 'lavfi',
     '-i', `color=c=black:s=${OUTPUT_SIZE}:d=${duration}:r=${OUTPUT_FPS}`,
     '-vf',
-    `drawtext=fontfile=${FONTFILE}:text='${escapeText(text)}':fontcolor=${textColor}:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2`,
+    `[in]drawtext=fontfile=${FONTFILE}:text='${escapeText(text)}':fontcolor=${textColor}:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2-40[text];[text]drawtext=fontfile=${FONTFILE}:text='${escapeText(attribution)}':fontcolor=${textColor}:fontsize=20:x=(w-text_w)/2:y=h-text_h-24[out]`,
+    '-map', '[out]',
     '-c:v', 'libx264',
     '-pix_fmt', 'yuv420p',
     '-r', String(OUTPUT_FPS),
@@ -406,6 +407,25 @@ async function buildScrapbook(photoPaths: string[], output: string, text: string
   }
 
   const used = photoPaths.slice(0, 12);
+
+  if (used.length === 1) {
+    const args = [
+      '-y',
+      '-i', used[0],
+      '-filter_complex',
+      `[0:v]scale=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:force_original_aspect_ratio=decrease,pad=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:(ow-iw)/2:(oh-ih)/2:black,setsar=1[bg];[bg]drawtext=fontfile=${FONTFILE}:text='${escapeText(text)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2-40[text];[text]drawtext=fontfile=${FONTFILE}:text='Music by Kevin MacLeod - incompetech.com':fontcolor=white:fontsize=20:x=(w-text_w)/2:y=h-text_h-24[out]`,
+      '-map', '[out]',
+      '-c:v', 'libx264',
+      '-pix_fmt', 'yuv420p',
+      '-r', String(OUTPUT_FPS),
+      '-t', '5',
+      '-an',
+      output,
+    ];
+    await runFFmpeg(args);
+    return;
+  }
+
   const cols = Math.min(3, used.length);
   const rows = Math.ceil(used.length / cols);
   const w = Math.floor(1280 / cols);
@@ -419,8 +439,8 @@ async function buildScrapbook(photoPaths: string[], output: string, text: string
     '-y',
     ...used.map((p) => ['-i', p]).flat(),
     '-filter_complex',
-    `${pads}${stack}xstack=inputs=${used.length}:layout=${layout}[v];[v]drawtext=fontfile=${FONTFILE}:text='${escapeText(text)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2[t]`,
-    '-map', '[t]',
+    `${pads}${stack}xstack=inputs=${used.length}:layout=${layout}[v];[v]drawtext=fontfile=${FONTFILE}:text='${escapeText(text)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2-40[text];[text]drawtext=fontfile=${FONTFILE}:text='Music by Kevin MacLeod - incompetech.com':fontcolor=white:fontsize=20:x=(w-text_w)/2:y=h-text_h-24[out]`,
+    '-map', '[out]',
     '-c:v', 'libx264',
     '-pix_fmt', 'yuv420p',
     '-r', String(OUTPUT_FPS),

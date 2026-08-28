@@ -281,6 +281,7 @@
             on:ended={() => (recapPlayed = true)}
             style="width: 100%; max-height: 60vh;"
           ></video>
+          <p class="recap-attribution">Music by Kevin MacLeod - incompetech.com</p>
         </section>
       {/if}
 
@@ -592,6 +593,13 @@
     border-radius: 0.5rem;
     border: 1px solid var(--border);
     background: #000;
+  }
+
+  .recap-attribution {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    text-align: center;
   }
 
   .viewer-feed {
