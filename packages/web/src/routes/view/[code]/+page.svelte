@@ -15,7 +15,7 @@
   let now = Date.now();
 
   const MIN_PHOTO_MS = 6000;
-  const MAX_THUMBNAILS = 18;
+  const MAX_THUMBNAILS = 6;
 
   let queue: any[] = [];
   let seen = new Set<string>();
@@ -23,7 +23,6 @@
   let displayed: any[] = [];
   let isProcessing = false;
   let photoTimer: ReturnType<typeof setTimeout> | null = null;
-  let activeVideo: HTMLVideoElement | null = null;
 
   function formatDuration(ms: number): string {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -137,12 +136,6 @@
     finishActive();
   }
 
-  function handleVideoLoaded() {
-    if (activeVideo && data?.game?.status === 'LIVE') {
-      activeVideo.play().catch(() => {});
-    }
-  }
-
   onMount(() => {
     load();
 
@@ -233,7 +226,7 @@
                 {#if item._isVideo}
                   <video class="collage-thumb" src={item.proofUrl} muted preload="metadata" playsinline></video>
                 {:else}
-                  <img class="collage-thumb" src={item.proofUrl} alt={item.task?.title ?? 'Submission'} />
+                  <img class="collage-thumb" src={item.proofUrl} alt={item.task?.title ?? 'Submission'} loading="lazy" decoding="async" />
                 {/if}
                 <span class="collage-label">{item.team?.name ?? 'Unknown team'}</span>
               </div>
@@ -244,12 +237,10 @@
             <div class="collage-active" style="z-index: {displayed.length + 10}">
               {#if activeItem._isVideo}
                 <video
-                  bind:this={activeVideo}
                   class="collage-active-media"
                   src={activeItem.proofUrl}
                   playsinline
                   autoplay
-                  on:loadedmetadata={handleVideoLoaded}
                   on:ended={handleVideoEnded}
                 ></video>
               {:else}
