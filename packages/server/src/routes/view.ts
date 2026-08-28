@@ -42,10 +42,7 @@ router.get('/', async (req, res) => {
       orderBy: { submittedAt: 'desc' },
     });
 
-    const photoSubmissions = completedSubmissions.filter((s) => {
-      const task = taskMap.get(s.taskId);
-      return task && task.proofType !== 'VIDEO';
-    });
+    const recentSubmissions = completedSubmissions.slice(0, 20);
 
     const scoreMap = new Map<string, number>();
     for (const sub of completedSubmissions) {
@@ -69,7 +66,7 @@ router.get('/', async (req, res) => {
       })
       .sort((a, b) => b.score - a.score);
 
-    const recent = photoSubmissions.slice(0, 20).map((sub) => ({
+    const recent = recentSubmissions.map((sub) => ({
       ...sub,
       team: teamMap.get(sub.teamId),
       task: taskMap.get(sub.taskId),

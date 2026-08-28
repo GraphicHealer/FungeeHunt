@@ -8,12 +8,22 @@
 
   let data: any = null;
   let error = '';
-  let currentSlide = 0;
-  let slideTimer: ReturnType<typeof setInterval> | null = null;
   let countdownTimer: ReturnType<typeof setInterval> | null = null;
   let socket: any;
+  let recapPlayed = false;
 
   let now = Date.now();
+
+  const MIN_PHOTO_MS = 6000;
+  const MAX_THUMBNAILS = 18;
+
+  let queue: any[] = [];
+  let seen = new Set<string>();
+  let activeItem: any = null;
+  let displayed: any[] = [];
+  let isProcessing = false;
+  let photoTimer: ReturnType<typeof setTimeout> | null = null;
+  let activeVideo: HTMLVideoElement | null = null;
 
   function formatDuration(ms: number): string {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -23,34 +33,113 @@
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   }
 
+  function isVideo(sub: any) {
+    if (!sub.proofUrl) return false;
+    if (sub.task?.proofType === 'VIDEO') return true;
+    return sub.proofUrl.endsWith('.mp4') || sub.proofUrl.endsWith('.mov') || sub.proofUrl.endsWith('.webm');
+  }
+
+  function random(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function thumbStyle() {
+    return {
+      left: `${random(8, 58)}%`,
+      top: `${random(8, 45)}%`,
+      scale: random(0.85, 1.0),
+      rotate: random(-8, 8),
+      zIndex: displayed.length,
+    };
+  }
+
+  function addToQueue(newData: any[]) {
+    if (!newData?.length) return;
+    const items: any[] = [];
+    for (const sub of newData) {
+      if (!seen.has(sub.id)) {
+        seen.add(sub.id);
+        items.push({ ...sub, _isVideo: isVideo(sub) });
+      }
+    }
+    if (items.length) {
+      queue = [...queue, ...items.slice().reverse()];
+      startQueue();
+    }
+  }
+
   async function load() {
     const res = await fetch(`/api/view/${code}`);
     if (res.ok) {
       const next = await res.json();
-      if (data && next.recent?.[0]?.id !== data.recent?.[0]?.id) {
-        currentSlide = 0;
-      }
+      const previous = data?.recent ?? [];
       data = next;
       setupTimers();
+      addToQueue(next.recent ?? []);
     } else {
       error = 'Could not load viewer';
     }
   }
 
   function setupTimers() {
-    if (slideTimer) clearInterval(slideTimer);
     if (countdownTimer) clearInterval(countdownTimer);
 
-    if (data?.game?.status === 'LIVE') {
-      slideTimer = setInterval(() => {
-        if (data?.recent?.length) {
-          currentSlide = (currentSlide + 1) % data.recent.length;
-        }
-      }, 6000);
-    } else {
+    if (data?.game?.status === 'NOT_STARTED') {
       countdownTimer = setInterval(() => {
         now = Date.now();
       }, 1000);
+    }
+  }
+
+  function startQueue() {
+    if (isProcessing || !queue.length || activeItem || data?.game?.status !== 'LIVE') return;
+
+    isProcessing = true;
+    const next = queue.shift();
+    activeItem = next ? { ...next, startedAt: Date.now() } : null;
+    queue = queue;
+
+    if (!activeItem) {
+      isProcessing = false;
+      return;
+    }
+
+    if (activeItem._isVideo) {
+      // wait for on:ended in the active video element
+    } else {
+      photoTimer = setTimeout(finishActive, MIN_PHOTO_MS);
+    }
+  }
+
+  function finishActive() {
+    if (!activeItem) return;
+
+    const style = thumbStyle();
+    const thumb = { ...activeItem, thumbStyle: style, thumbnail: true };
+    displayed = [...displayed, thumb];
+
+    if (displayed.length > MAX_THUMBNAILS) {
+      displayed = displayed.slice(displayed.length - MAX_THUMBNAILS);
+    }
+
+    if (photoTimer) {
+      clearTimeout(photoTimer);
+      photoTimer = null;
+    }
+
+    activeItem = null;
+    isProcessing = false;
+
+    setTimeout(startQueue, 250);
+  }
+
+  function handleVideoEnded() {
+    finishActive();
+  }
+
+  function handleVideoLoaded() {
+    if (activeVideo && data?.game?.status === 'LIVE') {
+      activeVideo.play().catch(() => {});
     }
   }
 
@@ -65,8 +154,8 @@
 
   onDestroy(() => {
     if (socket) socket.disconnect();
-    if (slideTimer) clearInterval(slideTimer);
     if (countdownTimer) clearInterval(countdownTimer);
+    if (photoTimer) clearTimeout(photoTimer);
   });
 
   $: startsIn = data?.game?.startAt
@@ -106,6 +195,20 @@
         </div>
       </header>
 
+      {#if data.game.status === 'COMPLETED' && (!data.game.recapVideoUrl || recapPlayed)}
+        <section class="viewer-join viewer-archive">
+          <h1 class="viewer-title">Download Submissions</h1>
+          <p class="viewer-hint">Scan the QR code or visit the URL below to download every team&apos;s photos and videos</p>
+
+          {#if data.game.archiveQrUrl}
+            <img class="qr" src={data.game.archiveQrUrl} alt="Download submissions QR code" />
+          {/if}
+
+          <p class="viewer-code">{data.game.code}</p>
+          <a class="viewer-url" href={data.game.archiveUrl} target="_blank" rel="noreferrer">{data.game.archiveUrl}</a>
+        </section>
+      {/if}
+
       <section class="viewer-main">
         <aside class="viewer-panel viewer-leaderboard">
           <h2>LEADERBOARD</h2>
@@ -120,31 +223,49 @@
           </ol>
         </aside>
 
-        {#if data.game.status === 'COMPLETED'}
-          <aside class="viewer-panel viewer-archive">
-            <h2>DOWNLOAD SUBMISSIONS</h2>
-            <p class="archive-hint">Want to see or download everything from the game?</p>
-            {#if data.game.archiveQrUrl}
-              <img class="qr" src={data.game.archiveQrUrl} alt="Archive QR code" />
-            {/if}
-            <a class="viewer-url" href={data.game.archiveUrl} target="_blank" rel="noreferrer">{data.game.archiveUrl}</a>
-          </aside>
-        {/if}
-
         <div class="viewer-stage">
-          {#if data.recent?.length}
-            <figure class="viewer-slide">
-              <img
-                src={data.recent[currentSlide].proofUrl}
-                alt={data.recent[currentSlide].task?.title ?? 'Submitted photo'}
-              />
-              <figcaption>
-                <span class="team">{data.recent[currentSlide].team?.name ?? 'Unknown team'}</span>
-                <span class="task">{data.recent[currentSlide].task?.title ?? ''}</span>
-                <span class="points">+{formatPoints(data.recent[currentSlide].task?.points ?? 0)}</span>
-              </figcaption>
-            </figure>
-          {:else}
+          {#if displayed.length}
+            {#each displayed as item (item.id)}
+              <div
+                class="collage-item"
+                style="left: {item.thumbStyle.left}; top: {item.thumbStyle.top}; transform: scale({item.thumbStyle.scale}) rotate({item.thumbStyle.rotate}deg); z-index: {item.thumbStyle.zIndex};"
+              >
+                {#if item._isVideo}
+                  <video class="collage-thumb" src={item.proofUrl} muted preload="metadata" playsinline></video>
+                {:else}
+                  <img class="collage-thumb" src={item.proofUrl} alt={item.task?.title ?? 'Submission'} />
+                {/if}
+                <span class="collage-label">{item.team?.name ?? 'Unknown team'}</span>
+              </div>
+            {/each}
+          {/if}
+
+          {#if activeItem}
+            <div class="collage-active" style="z-index: {displayed.length + 10}">
+              {#if activeItem._isVideo}
+                <video
+                  bind:this={activeVideo}
+                  class="collage-active-media"
+                  src={activeItem.proofUrl}
+                  playsinline
+                  autoplay
+                  on:loadedmetadata={handleVideoLoaded}
+                  on:ended={handleVideoEnded}
+                ></video>
+              {:else}
+                <img
+                  class="collage-active-media"
+                  src={activeItem.proofUrl}
+                  alt={activeItem.task?.title ?? 'Submitted photo'}
+                />
+              {/if}
+              <div class="collage-caption">
+                <span class="team">{activeItem.team?.name ?? 'Unknown team'}</span>
+                <span class="task">{activeItem.task?.title ?? ''}</span>
+                <span class="points">+{formatPoints(activeItem.task?.points ?? 0)}</span>
+              </div>
+            </div>
+          {:else if !displayed.length}
             <div class="viewer-empty">Waiting for the first submission…</div>
           {/if}
         </div>
@@ -153,7 +274,13 @@
       {#if data.game.status === 'COMPLETED' && data.game.recapVideoUrl}
         <section class="viewer-panel viewer-recap">
           <h2>EVENT RECAP</h2>
-          <video src={data.game.recapVideoUrl} controls style="width: 100%; max-height: 60vh;"></video>
+          <video
+            src={data.game.recapVideoUrl}
+            controls
+            autoplay
+            on:ended={() => (recapPlayed = true)}
+            style="width: 100%; max-height: 60vh;"
+          ></video>
         </section>
       {/if}
 
@@ -179,6 +306,7 @@
 
 <style>
   .viewer {
+    position: relative;
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -311,19 +439,16 @@
     overflow-y: auto;
   }
 
-  .viewer-archive {
-    width: 18rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.75rem;
-  }
-
   .archive-hint {
     margin: 0;
     color: var(--muted);
     font-size: 0.95rem;
+  }
+
+  .viewer-archive {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
   }
 
   .viewer-leaderboard ol {
@@ -362,48 +487,98 @@
 
   .viewer-stage {
     flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 0.75rem;
-    position: relative;
     overflow: hidden;
-  }
-
-  .viewer-slide {
-    margin: 0;
-    text-align: center;
-    max-height: 100%;
-  }
-
-  .viewer-slide img {
-    max-width: 100%;
-    max-height: 65vh;
-    object-fit: contain;
-    border-radius: 0.5rem;
-    border: 1px solid var(--border);
-  }
-
-  figcaption {
-    margin-top: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    font-size: 1.35rem;
-    color: var(--text);
-  }
-
-  .points {
-    font-weight: bold;
-    color: var(--success);
   }
 
   .viewer-empty,
   .viewer-loading {
     font-size: 2rem;
     color: var(--muted);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .collage-item {
+    position: absolute;
+    width: 28%;
+    min-width: 10rem;
+    max-width: 22rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .collage-thumb {
+    width: 100%;
+    height: auto;
+    max-height: 38%;
+    object-fit: contain;
+    border-radius: 0.35rem;
+    background: var(--bg);
+  }
+
+  .collage-label {
+    font-size: 0.85rem;
+    color: var(--text);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .collage-active {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(3px);
+  }
+
+  .collage-active-media {
+    max-width: 80%;
+    max-height: 70%;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: #000;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
+  }
+
+  .collage-caption {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: 1.5rem;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  }
+
+  .collage-caption .team {
+    font-weight: bold;
+  }
+
+  .collage-caption .points {
+    color: var(--success);
+    font-weight: bold;
   }
 
   .viewer-recap {

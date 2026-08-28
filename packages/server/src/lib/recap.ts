@@ -27,7 +27,9 @@ export interface RecapPlan {
   winners: any[];
 }
 
-const OUTPUT_SIZE = '1280x720';
+const OUTPUT_WIDTH = 1280;
+const OUTPUT_HEIGHT = 720;
+const OUTPUT_SIZE = `${OUTPUT_WIDTH}x${OUTPUT_HEIGHT}`;
 const OUTPUT_FPS = 30;
 const FONTFILE = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
 
@@ -213,7 +215,7 @@ async function buildClip(
     await runFFmpeg([
       '-y',
       '-i', input,
-      '-vf', `scale=${OUTPUT_SIZE}:force_original_aspect_ratio=decrease,pad=${OUTPUT_SIZE}:(ow-iw)/2:(oh-ih)/2:black,setsar=1${drawTop}${drawBottom}`,
+      '-vf', `scale=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:force_original_aspect_ratio=decrease,pad=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:(ow-iw)/2:(oh-ih)/2:black,setsar=1${drawTop}${drawBottom}`,
       '-r', String(OUTPUT_FPS),
       '-c:v', 'libx264',
       '-pix_fmt', 'yuv420p',
