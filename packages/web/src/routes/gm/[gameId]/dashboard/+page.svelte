@@ -19,10 +19,6 @@
   let socket: any;
   let interval: ReturnType<typeof setInterval>;
   let showImportModal = false;
-  let showSpectatorDropdown = false;
-  let showSpectatorModal = false;
-  let spectatorCode = '';
-  let spectatorError = '';
   let recap: any = null;
   let showAnnouncementModal = false;
   let announcementMessage = '';
@@ -32,31 +28,6 @@
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
-  }
-
-  async function pairSpectator() {
-    spectatorError = '';
-    const code = spectatorCode.replace(/\s/g, '').toLowerCase();
-    if (!/^[0-9]{6}$/.test(code)) {
-      spectatorError = 'Enter a 6-digit spectator code';
-      return;
-    }
-    const res = await fetch(`/api/spectator/${code}/pair`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token()}`,
-      },
-      body: JSON.stringify({ gameId }),
-    });
-    if (res.ok) {
-      spectatorCode = '';
-      showSpectatorModal = false;
-      toast.success('Spectator connected');
-    } else {
-      const data = await res.json().catch(() => ({}));
-      spectatorError = data.error || 'Could not connect spectator';
-    }
   }
 
   async function sendAnnouncement() {
@@ -364,40 +335,11 @@
     </div>
 
     <aside class="side">
-      <button class="fungee-btn announce" style="width: 100%; margin: 0 0 0.75rem; padding: 1rem; background: #ffd700; color: #333; border-color: #ffd700;" on:click={() => (showAnnouncementModal = true)}>ANNOUNCE</button>
+      <button class="fungee-btn announce" style="width: 100%; margin: 0; padding: 1rem; background: #ffd700; color: #333; border-color: #ffd700;" on:click={() => (showAnnouncementModal = true)}>ANNOUNCE</button>
       <a class="fungee-btn" data-tour="print-link" style="width: 100%; margin: 0; padding: 1rem;" href="/gm/{gameId}/print" target="_blank" rel="noreferrer">PRINT TASKS & RULES</a>
 
-      <section class="side-card controls-card" data-tour="game-controls" style="position: relative;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
-          <h3 class="fungee-section-title" style="font-size: 1rem; margin: 0;">Game Controls</h3>
-          <div style="position: relative;">
-            <button
-              class="fungee-btn"
-              style="width: auto; margin: 0; padding: 0.4rem 0.75rem; font-size: 0.85rem;"
-              on:click={() => (showSpectatorDropdown = !showSpectatorDropdown)}
-            >
-              SPECTATOR <span class="mdi mdi-menu-down"></span>
-            </button>
-            {#if showSpectatorDropdown}
-              <div class="dropdown" style="position: absolute; top: 100%; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: var(--shadow); z-index: 10; margin-top: 0.25rem; overflow: hidden; min-width: 10rem;">
-                <button
-                  type="button"
-                  class="dropdown-item"
-                  style="width: 100%; text-align: left; padding: 0.6rem 0.9rem; background: none; border: none; color: var(--text); cursor: pointer; font-weight: 600; font-size: 0.9rem;"
-                  on:click={() => { showSpectatorDropdown = false; showSpectatorModal = true; }}
-                >Pair Spectator</button>
-                <a
-                  class="dropdown-item"
-                  style="display: block; padding: 0.6rem 0.9rem; color: var(--text); text-decoration: none; font-weight: 600; font-size: 0.9rem;"
-                  href="/view/{game?.code}"
-                  target="_blank"
-                  rel="noreferrer"
-                  on:click={() => (showSpectatorDropdown = false)}
-                >Open Spectator</a>
-              </div>
-            {/if}
-          </div>
-        </div>
+      <section class="side-card controls-card" data-tour="game-controls">
+        <h3 class="fungee-section-title" style="font-size: 1rem; margin: 0;">Game Controls</h3>
         <p class="status" style="margin: 0.25rem 0 0;">● {game.status}</p>
         {#if remainingStr}<p class="timer" style="margin: 0 0 0.5rem;">{remainingStr}</p>{/if}
         <div class="code" style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0 0.5rem;">
@@ -519,30 +461,7 @@
   </div>
 {/if}
 
-{#if showSpectatorModal}
-  <div class="modal-backdrop" on:click={() => (showSpectatorModal = false)} transition:fade={{ duration: 180 }}>
-    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
-      <h3>Connect Spectator</h3>
-      <p style="margin: 0 0 1rem; color: var(--muted);">Enter the 6-digit code shown on the spectator screen.</p>
-      <input
-        class="fungee-input"
-        type="text"
-        bind:value={spectatorCode}
-        placeholder="123456"
-        maxlength="6"
-        inputmode="numeric"
-        style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: 700;"
-      />
-      {#if spectatorError}
-        <p class="error" style="margin-top: 0.5rem;">{spectatorError}</p>
-      {/if}
-      <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
-        <button type="button" on:click={() => (showSpectatorModal = false)}>Cancel</button>
-        <button class="fungee-btn" type="button" on:click={pairSpectator}>Connect</button>
-      </div>
-    </div>
-  </div>
-{/if}
+
 
 {#if showAnnouncementModal}
   <div class="modal-backdrop" on:click={() => (showAnnouncementModal = false)} transition:fade={{ duration: 180 }}>
@@ -574,9 +493,9 @@
           {/each}
         </div>
       {/if}
-      <div class="actions" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-        <button type="button" on:click={() => (showAnnouncementModal = false)}>Cancel</button>
-        <button class="fungee-btn" type="button" on:click={sendAnnouncement} disabled={!announcementMessage.trim()}>Send</button>
+      <div class="actions" style="display: flex; gap: 0.5rem;">
+        <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showAnnouncementModal = false)}>Cancel</button>
+        <button class="fungee-btn" style="flex: 1; margin: 0; background: var(--brand); color: #fff;" type="button" on:click={sendAnnouncement} disabled={!announcementMessage.trim()}>Send</button>
       </div>
     </div>
   </div>

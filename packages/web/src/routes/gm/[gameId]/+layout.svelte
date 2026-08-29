@@ -145,7 +145,7 @@
                   <span class="mdi mdi-open-in-new"></span> Open
                 </a>
                 <button type="button" on:click={() => { showSpectatorDropdown = false; showSpectatorModal = true; }}>
-                  <span class="mdi mdi-bluetooth-connect"></span> Pair
+                  <span class="mdi mdi-television"></span> Pair
                 </button>
               </div>
             {/if}
@@ -178,9 +178,9 @@
       {#if spectatorError}
         <p class="error" style="color: var(--danger); margin-top: 0.5rem;">{spectatorError}</p>
       {/if}
-      <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
-        <button type="button" on:click={() => (showSpectatorModal = false)}>Cancel</button>
-        <button class="fungee-btn" type="button" on:click={pairSpectator}>Connect</button>
+      <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+        <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showSpectatorModal = false)}>Cancel</button>
+        <button class="fungee-btn" style="flex: 1; margin: 0;" type="button" on:click={pairSpectator}>Connect</button>
       </div>
     </div>
   </div>

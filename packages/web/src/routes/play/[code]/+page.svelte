@@ -48,7 +48,7 @@
     });
     if (res.ok) {
       const state = await res.json();
-      if (state.game?.status === 'LIVE') {
+      if (state.game?.status === 'LIVE' && state.team) {
         goto(`/play/${code}/tasks`);
       } else if (state.game?.status === 'COMPLETED') {
         goto(`/play/${code}`);

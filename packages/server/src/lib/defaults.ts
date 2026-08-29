@@ -611,7 +611,7 @@ export const defaultSystemSettings = {
   returnBonusEnabled: true,
   returnBonusWindowMinutes: 10,
   returnBonusPoints: 100,
-  randomizeReturnBonus: false,
+  randomizeReturnBonus: true,
   welcomeShown: false,
   tourStep: 0,
   tourDone: false,
