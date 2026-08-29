@@ -10,7 +10,7 @@
 
   let state: any = null;
   let error = '';
-  let selected: Record<string, FileList | null> = {};
+  let selected: Record<string, (File | null)[] | null> = {};
   let uploading: Record<string, boolean> = {};
   let uploadProgress: Record<string, number> = {};
   let expanded = '';
@@ -42,7 +42,7 @@
   }
 
   function capture(task: any) {
-    if (task.proofType === 'PHOTO' || task.proofType === 'VIDEO') return 'environment';
+    if (task.proofType === 'PHOTO' || task.proofType === 'PHOTOS' || task.proofType === 'VIDEO') return 'environment';
     return undefined;
   }
 
@@ -66,9 +66,24 @@
     return status;
   }
 
-  function handleFile(taskId: string, e: Event) {
+  function initialSlots(task: any) {
+    if (task.proofType === 'PHOTOS' && task.photoCount) {
+      return new Array(task.photoCount).fill(null);
+    }
+    return [null];
+  }
+
+  function handleFile(taskId: string, index: number, e: Event) {
     const files = (e.currentTarget as HTMLInputElement).files;
-    selected = { ...selected, [taskId]: files };
+    const file = files?.[0] ?? null;
+    const slots = selected[taskId] ?? new Array(index + 1).fill(null);
+    slots[index] = file;
+    selected = { ...selected, [taskId]: [...slots] };
+  }
+
+  function addPhotoSlot(task: any) {
+    const slots = selected[task.id] ?? initialSlots(task);
+    selected = { ...selected, [task.id]: [...slots, null] };
   }
 
   async function load() {
@@ -88,8 +103,9 @@
   }
 
   function submitTask(taskId: string) {
-    const files = selected[taskId];
-    if (!files || files.length === 0) return;
+    const slots = selected[taskId];
+    const files = (slots ?? []).filter((f): f is File => f !== null);
+    if (files.length === 0) return;
 
     uploading = { ...uploading, [taskId]: true };
     uploadProgress = { ...uploadProgress, [taskId]: 0 };
@@ -199,25 +215,34 @@
 
                   {#if isManager() && state.game.status === 'LIVE' && (!task.submission || task.submission.status === 'INCOMPLETE')}
                     <div class="submit-row">
-                      <input
-                        id="proof-{task.id}"
-                        class="file-input"
-                        type="file"
-                        accept={accept(task)}
-                        capture={capture(task)}
-                        multiple={task.proofType === 'PHOTOS'}
-                        on:change={(e) => handleFile(task.id, e)}
-                        disabled={uploading[task.id]}
-                      />
                       {#if !uploading[task.id]}
-                        <label for="proof-{task.id}" class="fungee-btn take-btn" class:ready={selected[task.id]}>
-                          {#if selected[task.id]?.length}
-                            {selected[task.id].length} photo{selected[task.id].length === 1 ? '' : 's'}
-                          {:else}
-                            {proofLabel(task)}
-                          {/if}
-                        </label>
-                        <button class="fungee-btn" style="margin: 0; width: auto;" on:click={() => submitTask(task.id)} disabled={!selected[task.id] || selected[task.id].length === 0}>Submit</button>
+                        {#each (selected[task.id] ?? initialSlots(task)) as file, i (i)}
+                          <div class="slot">
+                            <input
+                              id="proof-{task.id}-{i}"
+                              class="file-input"
+                              type="file"
+                              accept={accept(task)}
+                              capture={capture(task)}
+                              on:change={(e) => handleFile(task.id, i, e)}
+                              disabled={uploading[task.id]}
+                            />
+                            <label for="proof-{task.id}-{i}" class="fungee-btn take-btn" class:ready={file}>
+                              {file ? (file.name ?? `File ${i + 1}`) : (task.proofType === 'PHOTOS' ? `Photo ${i + 1}` : proofLabel(task))}
+                            </label>
+                          </div>
+                        {/each}
+
+                        {#if task.proofType === 'PHOTOS' && !task.photoCount}
+                          <button class="fungee-btn secondary" style="margin: 0; width: auto;" on:click={() => addPhotoSlot(task)}>+ Add Photo</button>
+                        {/if}
+
+                        <button
+                          class="fungee-btn"
+                          style="margin: 0; width: auto;"
+                          on:click={() => submitTask(task.id)}
+                          disabled={!((selected[task.id] ?? initialSlots(task)).some(Boolean))}
+                        >Submit</button>
                       {:else}
                         <div class="fungee-btn take-btn uploading" style="--progress: {uploadProgress[task.id] ?? 0}%">
                           <span class="uploading-text">Uploading... {Math.round(uploadProgress[task.id] ?? 0)}%</span>
@@ -302,6 +327,12 @@
     align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
+  }
+
+  .slot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
   .file-input {

@@ -14,7 +14,7 @@ const defaultTasks = [
     title: `Retiree Royale`,
     description: `All team members must fist bump a retired public servant.`,
     points: 100,
-    proofType: 'PHOTO',
+    proofType: 'VIDEO',
     category: 'People',
 
   },
@@ -22,7 +22,7 @@ const defaultTasks = [
     title: `The Civil Handshake`,
     description: `Everyone on your team must shake hands with the same civil servant or community helper.`,
     points: 100,
-    proofType: 'PHOTO',
+    proofType: 'VIDEO',
     category: 'People',
 
   },
@@ -150,7 +150,7 @@ const defaultTasks = [
     title: `The World's Smallest Order`,
     description: `A team member must go into a restaurant and order one single sesame seed.`,
     points: 125,
-    proofType: 'PHOTO',
+    proofType: 'VIDEO',
     category: 'Pranks',
 
   },
@@ -350,7 +350,7 @@ const defaultTasks = [
     title: `Thumbs Up, Stranger`,
     description: `Challenge a stranger to a thumb war.`,
     points: 75,
-    proofType: 'PHOTO',
+    proofType: 'VIDEO',
     category: 'Games',
 
   },
@@ -412,9 +412,9 @@ const defaultTasks = [
   },
   {
     title: `Those Who Ignore History...`,
-    description: `Find a local historical site and take a photo of your team reenacting a part of that history.`,
+    description: `Find a local historical site and take a video of your team reenacting a part of that history.`,
     points: 75,
-    proofType: 'PHOTO',
+    proofType: 'VIDEO',
     category: 'History',
 
   },
