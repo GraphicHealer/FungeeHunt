@@ -317,7 +317,15 @@
       <p>
         Make sure your phone is charged and ready once the game starts. Good luck!
       </p>
-      <button class="fungee-btn" style="width: 100%; margin-top: 1rem;" on:click={() => (showManagerInfo = false)}>GOT IT</button>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 1.25rem; font-weight: 700; color: var(--brand); text-align: center; margin: 0 0 1rem;">
+        After taking a photo, tap <strong>Submit</strong>!
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => (showManagerInfo = false)}>GOT IT</button>
     </div>
   </div>
 {/if}

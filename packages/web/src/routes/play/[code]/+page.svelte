@@ -11,6 +11,7 @@
   let archive: any = null;
   let selectedTeamId: string | null = null;
   let loading = true;
+  let myTeamId: string | null = null;
 
   function filenameFromUrl(url: string) {
     return url.split('/').pop() ?? url;
@@ -28,6 +29,7 @@
       if (data.game?.status === 'COMPLETED') {
         archive = data;
         loading = false;
+        await loadMyTeam();
         return;
       }
     }
@@ -41,6 +43,24 @@
       goto(`/play/${code}/name`);
     }
   });
+
+  async function loadMyTeam() {
+    const t = localStorage.getItem(`token:${code}`);
+    if (!t) return;
+    const res = await fetch(`/api/play/${code}`, {
+      headers: { Authorization: `Bearer ${t}` },
+    });
+    if (res.ok) {
+      const state = await res.json();
+      myTeamId = state.team?.id ?? null;
+    }
+  }
+
+  $: myTeam = myTeamId ? archive?.teams?.find((t) => t.id === myTeamId) : null;
+  $: completedTaskIds = myTeam ? new Set(myTeam.submissions.filter((s) => s.status === 'COMPLETED').map((s) => s.taskId)) : new Set();
+  $: completedCount = completedTaskIds.size;
+  $: allTasks = archive?.tasks ?? [];
+  $: missedTasks = allTasks.filter((t) => !completedTaskIds.has(t.id));
 
   async function loadAndGo() {
     const res = await fetch(`/api/play/${code}`, {
@@ -66,6 +86,18 @@
     <div class="fungee-card wide">
       <h1 class="fungee-title">{archive.game.name}</h1>
       <p class="fungee-subtitle">Game over. Pick a team to download their submissions.</p>
+
+      {#if myTeam}
+        <div class="result-card" in:fade={{ duration: 300 }}>
+          <h2 class="fungee-section-title" style="margin: 0 0 0.25rem;">Your Team: {myTeam.name ?? 'Unnamed team'}</h2>
+          <p class="completion">{completedCount} / {allTasks.length} challenges completed</p>
+          {#if missedTasks.length}
+            <p class="missed"><strong>Missed:</strong> {missedTasks.map((t) => ` #${t.order} ${t.title}`).join(',')}</p>
+          {:else}
+            <p class="missed all-done">Completed every challenge!</p>
+          {/if}
+        </div>
+      {/if}
 
       <div class="team-list" in:fade={{ duration: 300 }}>
         {#each archive.teams as team (team.id)}
@@ -116,6 +148,30 @@
 {/if}
 
 <style>
+  .result-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .result-card .completion {
+    color: var(--success);
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+  }
+
+  .result-card .missed {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  .result-card .missed.all-done {
+    color: var(--success);
+  }
+
   .team-list {
     display: flex;
     flex-direction: column;

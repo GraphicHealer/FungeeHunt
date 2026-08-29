@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount, onDestroy } from 'svelte';
+  import { goto } from '$app/navigation';
   import { io } from 'socket.io-client';
   import { formatPoints } from './format';
 
@@ -51,6 +52,11 @@
     load();
     socket = io({ transports: ['websocket', 'polling'] });
     socket.on(`game:${code.toUpperCase()}`, (payload: any) => {
+      if (payload?.type === 'deleted') {
+        localStorage.removeItem(`token:${code}`);
+        goto('/');
+        return;
+      }
       if (payload?.type === 'announce') {
         const matchAll = !payload.teamIds || payload.teamIds === 'all' || (Array.isArray(payload.teamIds) && payload.teamIds.length === 0);
         const matchTeam = state?.team && Array.isArray(payload.teamIds) && payload.teamIds.includes(state.team.id);

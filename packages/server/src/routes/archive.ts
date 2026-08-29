@@ -16,19 +16,27 @@ router.get('/', async (req: any, res: any) => {
       return res.json({ game: { name: game.name, code: game.code, status: game.status }, teams: [] });
     }
 
-    const teams = await db.team.findMany({
-      where: { gameId: game.id },
-      orderBy: { name: 'asc' },
-      include: {
-        submissions: {
-          include: { task: { select: { id: true, title: true, points: true, proofType: true, order: true } } },
-          orderBy: { submittedAt: 'desc' },
+    const [teams, tasks] = await Promise.all([
+      db.team.findMany({
+        where: { gameId: game.id },
+        orderBy: { name: 'asc' },
+        include: {
+          submissions: {
+            include: { task: { select: { id: true, title: true, points: true, proofType: true, order: true } } },
+            orderBy: { task: { order: 'asc' } },
+          },
         },
-      },
-    });
+      }),
+      db.task.findMany({
+        where: { gameId: game.id },
+        orderBy: { order: 'asc' },
+        select: { id: true, title: true, order: true, points: true },
+      }),
+    ]);
 
     res.json({
       game: { name: game.name, code: game.code, status: game.status },
+      tasks,
       teams: teams.map((t: any) => ({
         id: t.id,
         name: t.name,

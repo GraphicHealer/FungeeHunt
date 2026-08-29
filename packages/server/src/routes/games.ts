@@ -315,6 +315,9 @@ router.delete('/:gameId', async (req: any, res: any) => {
       await tx.game.delete({ where: { id: gameId } });
     });
 
+    const io = req.app.get('io') as any;
+    io?.emit(`game:${game.code.toUpperCase()}`, { type: 'deleted' });
+
     res.status(204).end();
   } catch (err) {
     console.error('delete game failed', err);

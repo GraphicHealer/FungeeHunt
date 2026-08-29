@@ -97,8 +97,8 @@ router.patch('/team', async (req, res) => {
       where: { id: player.teamId },
       data: { name },
     });
-    const game = await db.game.findUnique({ where: { id: player.gameId } });
-    if (game) {
+    const game = (res.locals as any).game;
+    if (game?.code) {
       const io = (req as any).app.get('io') as any;
       io?.emit(`game:${game.code.toUpperCase()}`, { type: 'team-update' });
     }
@@ -128,6 +128,10 @@ router.patch('/food-drive', async (req, res) => {
       where: { id: player.teamId },
       data: { foodDriveItems: Math.max(0, Number(items) || 0) },
     });
+    if (game?.code) {
+      const io = (req as any).app.get('io') as any;
+      io?.emit(`game:${game.code.toUpperCase()}`, { type: 'team-update' });
+    }
     res.json(team);
   } catch (err) {
     console.error('update food drive failed', err);

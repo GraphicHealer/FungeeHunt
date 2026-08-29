@@ -164,24 +164,26 @@
 {#if showSpectatorModal}
   <div class="modal-backdrop" on:click={() => (showSpectatorModal = false)} transition:fade={{ duration: 180 }}>
     <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
-      <h3>Pair Spectator</h3>
-      <p style="margin: 0 0 1rem; color: var(--muted);">Enter the 6-digit code shown on the spectator screen.</p>
-      <input
-        class="fungee-input"
-        type="text"
-        bind:value={spectatorCode}
-        placeholder="123456"
-        maxlength="6"
-        inputmode="numeric"
-        style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: 700;"
-      />
-      {#if spectatorError}
-        <p class="error" style="color: var(--danger); margin-top: 0.5rem;">{spectatorError}</p>
-      {/if}
-      <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-        <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showSpectatorModal = false)}>Cancel</button>
-        <button class="fungee-btn" style="flex: 1; margin: 0;" type="button" on:click={pairSpectator}>Connect</button>
-      </div>
+      <form on:submit|preventDefault={pairSpectator}>
+        <h3>Pair Spectator</h3>
+        <p style="margin: 0 0 1rem; color: var(--muted);">Enter the 6-digit code shown on the spectator screen.</p>
+        <input
+          class="fungee-input"
+          type="text"
+          bind:value={spectatorCode}
+          placeholder="123456"
+          maxlength="6"
+          inputmode="numeric"
+          style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: 700;"
+        />
+        {#if spectatorError}
+          <p class="error" style="color: var(--danger); margin-top: 0.5rem;">{spectatorError}</p>
+        {/if}
+        <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+          <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showSpectatorModal = false)}>Cancel</button>
+          <button class="fungee-btn" style="flex: 1; margin: 0;" type="submit">Connect</button>
+        </div>
+      </form>
     </div>
   </div>
 {/if}

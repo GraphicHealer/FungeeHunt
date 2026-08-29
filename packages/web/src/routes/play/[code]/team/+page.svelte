@@ -10,6 +10,7 @@
 
   let state: any = null;
   let newName = '';
+  let editing = false;
   let error = '';
   let showManagerInfo = false;
   let socket: any;
@@ -60,6 +61,7 @@
       body: JSON.stringify({ name: newName }),
     });
     if (res.ok) {
+      editing = false;
       await load();
     } else {
       const data = await res.json();
@@ -81,17 +83,27 @@
 <main class="fungee-page" style="padding-top: 3rem; padding-bottom: 8rem;">
   <div class="fungee-card wide">
     {#if state}
-      <h1 class="fungee-title">{state.team?.name ?? 'Unnamed team'}</h1>
-      <p class="fungee-subtitle" style="font-size: 1.25rem; font-weight: 600;">{formatPoints(state.team?.score ?? 0)} POINTS</p>
-
-      {#if isManager()}
-        <div style="display: flex; gap: 0.75rem; margin: 1rem 0; flex-wrap: wrap;">
+      {#if isManager() && editing}
+        <form class="team-name" on:submit|preventDefault={rename} style="display: flex; gap: 0.5rem; align-items: center; margin: 0 0 0.5rem;">
           <input class="fungee-input" type="text" bind:value={newName} placeholder="Team name" style="flex: 1; margin: 0;" />
-          <button class="fungee-btn" style="width: auto; margin: 0; padding: 0.5rem 0.75rem;" on:click={rename} title="Rename team">
-            <span class="mdi mdi-pencil"></span>
+          <button class="fungee-btn" style="width: auto; margin: 0;" type="submit" title="Save team name">
+            <span class="mdi mdi-check"></span>
           </button>
+          <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={() => { editing = false; newName = state.team?.name ?? ''; }} title="Cancel">
+            <span class="mdi mdi-close"></span>
+          </button>
+        </form>
+      {:else}
+        <div class="team-title" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 0 0.5rem;">
+          <h1 class="fungee-title" style="margin: 0;">{state.team?.name ?? 'Unnamed team'}</h1>
+          {#if isManager()}
+            <button class="fungee-btn" style="width: auto; margin: 0; padding: 0.4rem 0.6rem;" on:click={() => { editing = true; newName = state.team?.name ?? ''; }} title="Rename team">
+              <span class="mdi mdi-pencil"></span>
+            </button>
+          {/if}
         </div>
       {/if}
+      <p class="fungee-subtitle" style="font-size: 1.25rem; font-weight: 600;">{formatPoints(state.team?.score ?? 0)} POINTS</p>
 
       {#if error}<p class="fungee-error">{error}</p>{/if}
 

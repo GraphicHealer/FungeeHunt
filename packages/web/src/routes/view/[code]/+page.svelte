@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount, onDestroy } from 'svelte';
+  import { goto } from '$app/navigation';
   import { io } from 'socket.io-client';
   import { formatPoints } from '$lib/format';
 
@@ -298,7 +299,13 @@
     socket = io({
       transports: ['websocket', 'polling'],
     });
-    socket.on(`game:${code.toUpperCase()}`, load);
+    socket.on(`game:${code.toUpperCase()}`, (payload: any) => {
+      if (payload?.type === 'deleted') {
+        goto('/spectator');
+        return;
+      }
+      load();
+    });
   });
 
   onDestroy(() => {

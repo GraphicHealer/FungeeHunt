@@ -342,12 +342,9 @@
         <h3 class="fungee-section-title" style="font-size: 1rem; margin: 0;">Game Controls</h3>
         <p class="status" style="margin: 0.25rem 0 0;">● {game.status}</p>
         {#if remainingStr}<p class="timer" style="margin: 0 0 0.5rem;">{remainingStr}</p>{/if}
-        <div class="code" style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0 0.5rem;">
-          <p style="font-size: 1.1rem; letter-spacing: 0.15rem; margin: 0;">{game.code}</p>
-          <button class="fungee-btn" data-tour="copy-link" style="width: auto; padding: 0.4rem 0.75rem; font-size: 0.85rem;" on:click={() => navigator.clipboard.writeText(game.code)}>COPY</button>
-        </div>
-        <div class="join" style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0 0.75rem; flex-wrap: wrap;">
-          <a href={game.joinUrl} target="_blank" rel="noreferrer" style="font-size: 0.95rem; word-break: break-all;">{game.joinUrl}</a>
+        <div class="code" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0.25rem 0 0.75rem;">
+          <p style="font-size: 1.1rem; line-height: 1.2; letter-spacing: 0.15rem; margin: 0;">{game.code}</p>
+          <button class="fungee-btn" data-tour="copy-link" style="width: auto; margin: 0; padding: 0.15rem 0.75rem; font-size: 0.85rem;" on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
         </div>
         <div class="controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
           <button class="fungee-btn success" data-tour="start-game" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('LIVE')} disabled={game.status !== 'NOT_STARTED'}>START</button>
