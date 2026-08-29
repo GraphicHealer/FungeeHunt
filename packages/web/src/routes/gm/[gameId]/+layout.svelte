@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount, onDestroy } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
 
   const gameId = $page.params.gameId;
@@ -9,6 +10,10 @@
   let socket: any;
   let remainingStr = '';
   let interval: ReturnType<typeof setInterval>;
+  let showSpectatorDropdown = false;
+  let showSpectatorModal = false;
+  let spectatorCode = '';
+  let spectatorError = '';
 
   const nav = [
     { label: 'Dashboard', path: 'dashboard' },
@@ -23,6 +28,31 @@
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
+  }
+
+  async function pairSpectator() {
+    spectatorError = '';
+    const code = spectatorCode.replace(/\s/g, '').toLowerCase();
+    if (!/^[0-9]{6}$/.test(code)) {
+      spectatorError = 'Enter a 6-digit spectator code';
+      return;
+    }
+    const res = await fetch(`/api/spectator/${code}/pair`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ gameId }),
+    });
+    if (res.ok) {
+      spectatorCode = '';
+      showSpectatorModal = false;
+      showSpectatorDropdown = false;
+    } else {
+      const data = await res.json().catch(() => ({}));
+      spectatorError = data.error || 'Could not connect spectator';
+    }
   }
 
   async function load() {
@@ -99,10 +129,27 @@
               <span>{fmtTime(game.startAt)} – {fmtTime(game.endAt)}</span>
             {/if}
           </div>
-          <a class="spectator" href={game.viewUrl} data-tour="view-link" target="_blank" rel="noreferrer" title="Open spectator screen">
-            <span class="mdi mdi-open-in-new"></span>
-            <span class="label">SPECTATOR</span>
-          </a>
+          <div class="spectator-wrap">
+            <button
+              class="spectator"
+              on:click={() => (showSpectatorDropdown = !showSpectatorDropdown)}
+              data-tour="view-link"
+              title="Spectator options"
+            >
+              <span class="mdi mdi-open-in-new"></span>
+              <span class="label">SPECTATOR</span>
+            </button>
+            {#if showSpectatorDropdown}
+              <div class="dropdown" on:mouseleave={() => (showSpectatorDropdown = false)}>
+                <a href={game.viewUrl} target="_blank" rel="noreferrer" on:click={() => (showSpectatorDropdown = false)}>
+                  <span class="mdi mdi-open-in-new"></span> Open
+                </a>
+                <button type="button" on:click={() => { showSpectatorDropdown = false; showSpectatorModal = true; }}>
+                  <span class="mdi mdi-bluetooth-connect"></span> Pair
+                </button>
+              </div>
+            {/if}
+          </div>
         </div>
       {:else}
         <h1>Loading…</h1>
@@ -113,6 +160,31 @@
     </div>
   </main>
 </div>
+
+{#if showSpectatorModal}
+  <div class="modal-backdrop" on:click={() => (showSpectatorModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Pair Spectator</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">Enter the 6-digit code shown on the spectator screen.</p>
+      <input
+        class="fungee-input"
+        type="text"
+        bind:value={spectatorCode}
+        placeholder="123456"
+        maxlength="6"
+        inputmode="numeric"
+        style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: 700;"
+      />
+      {#if spectatorError}
+        <p class="error" style="color: var(--danger); margin-top: 0.5rem;">{spectatorError}</p>
+      {/if}
+      <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+        <button type="button" on:click={() => (showSpectatorModal = false)}>Cancel</button>
+        <button class="fungee-btn" type="button" on:click={pairSpectator}>Connect</button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   .layout {
@@ -216,6 +288,10 @@
     gap: 1rem;
   }
 
+  .spectator-wrap {
+    position: relative;
+  }
+
   .spectator {
     display: flex;
     align-items: center;
@@ -224,6 +300,10 @@
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
   }
 
   .spectator .mdi {
@@ -232,6 +312,74 @@
 
   .spectator:hover {
     color: var(--brand);
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    min-width: 9rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dropdown a,
+  .dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.9rem;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .dropdown a:hover,
+  .dropdown button:hover {
+    background: var(--brand);
+    color: #fff;
+  }
+
+  .dropdown .mdi {
+    font-size: 1.1rem;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    padding: 1rem;
+  }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    max-width: 22rem;
+    width: 100%;
+    box-shadow: var(--shadow);
+  }
+
+  .modal h3 {
+    margin-top: 0;
   }
 
   .content {

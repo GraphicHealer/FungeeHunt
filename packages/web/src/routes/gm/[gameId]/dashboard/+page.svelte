@@ -364,38 +364,40 @@
     </div>
 
     <aside class="side">
-      <div class="side-card" style="position: relative;">
-        <button
-          class="fungee-btn"
-          style="width: 100%; margin: 0; padding: 1rem;"
-          on:click={() => (showSpectatorDropdown = !showSpectatorDropdown)}
-        >
-          SPECTATOR <span class="mdi mdi-menu-down"></span>
-        </button>
-        {#if showSpectatorDropdown}
-          <div class="dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: var(--shadow); z-index: 10; margin-top: 0.25rem; overflow: hidden;">
-            <button
-              type="button"
-              class="dropdown-item"
-              style="width: 100%; text-align: left; padding: 0.75rem 1rem; background: none; border: none; color: var(--text); cursor: pointer;"
-              on:click={() => { showSpectatorDropdown = false; showSpectatorModal = true; }}
-            >Pair Spectator</button>
-            <a
-              class="dropdown-item"
-              style="display: block; padding: 0.75rem 1rem; color: var(--text); text-decoration: none;"
-              href="/view/{game?.code}"
-              target="_blank"
-              rel="noreferrer"
-              on:click={() => (showSpectatorDropdown = false)}
-            >Open Spectator</a>
-          </div>
-        {/if}
-      </div>
       <button class="fungee-btn announce" style="width: 100%; margin: 0 0 0.75rem; padding: 1rem; background: #ffd700; color: #333; border-color: #ffd700;" on:click={() => (showAnnouncementModal = true)}>ANNOUNCE</button>
       <a class="fungee-btn" data-tour="print-link" style="width: 100%; margin: 0; padding: 1rem;" href="/gm/{gameId}/print" target="_blank" rel="noreferrer">PRINT TASKS & RULES</a>
 
-      <section class="side-card controls-card" data-tour="game-controls">
-        <h3 class="fungee-section-title" style="font-size: 1rem; margin: 0;">Game Controls</h3>
+      <section class="side-card controls-card" data-tour="game-controls" style="position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+          <h3 class="fungee-section-title" style="font-size: 1rem; margin: 0;">Game Controls</h3>
+          <div style="position: relative;">
+            <button
+              class="fungee-btn"
+              style="width: auto; margin: 0; padding: 0.4rem 0.75rem; font-size: 0.85rem;"
+              on:click={() => (showSpectatorDropdown = !showSpectatorDropdown)}
+            >
+              SPECTATOR <span class="mdi mdi-menu-down"></span>
+            </button>
+            {#if showSpectatorDropdown}
+              <div class="dropdown" style="position: absolute; top: 100%; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: var(--shadow); z-index: 10; margin-top: 0.25rem; overflow: hidden; min-width: 10rem;">
+                <button
+                  type="button"
+                  class="dropdown-item"
+                  style="width: 100%; text-align: left; padding: 0.6rem 0.9rem; background: none; border: none; color: var(--text); cursor: pointer; font-weight: 600; font-size: 0.9rem;"
+                  on:click={() => { showSpectatorDropdown = false; showSpectatorModal = true; }}
+                >Pair Spectator</button>
+                <a
+                  class="dropdown-item"
+                  style="display: block; padding: 0.6rem 0.9rem; color: var(--text); text-decoration: none; font-weight: 600; font-size: 0.9rem;"
+                  href="/view/{game?.code}"
+                  target="_blank"
+                  rel="noreferrer"
+                  on:click={() => (showSpectatorDropdown = false)}
+                >Open Spectator</a>
+              </div>
+            {/if}
+          </div>
+        </div>
         <p class="status" style="margin: 0.25rem 0 0;">● {game.status}</p>
         {#if remainingStr}<p class="timer" style="margin: 0 0 0.5rem;">{remainingStr}</p>{/if}
         <div class="code" style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0 0.5rem;">
