@@ -96,4 +96,39 @@ router.post('/tasks', async (req: any, res: any) => {
   }
 });
 
+router.post('/default-tasks', async (req: any, res: any) => {
+  const task = req.body?.task;
+  if (!task || !task.title) {
+    return res.status(400).json({ error: 'Task title is required' });
+  }
+
+  try {
+    const settings = await db.systemSettings.findFirst();
+    if (!settings) return res.status(404).json({ error: 'Settings not found' });
+    const list = settings.defaultTasks ? JSON.parse(settings.defaultTasks) : [];
+    const clean = {
+      title: task.title,
+      description: task.description ?? '',
+      points: Number(task.points) || 0,
+      proofType: task.proofType ?? 'PHOTO',
+      category: task.category ?? 'General',
+    };
+    const idx = list.findIndex((t: any) => t.title?.toLowerCase() === clean.title.toLowerCase());
+    const updated = idx >= 0 ? 'updated' : 'saved';
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...clean };
+    } else {
+      list.push(clean);
+    }
+    await db.systemSettings.update({
+      where: { id: settings.id },
+      data: { defaultTasks: JSON.stringify(list) },
+    });
+    res.json({ updated, count: list.length });
+  } catch (err) {
+    console.error('save default task failed', err);
+    res.status(500).json({ error: 'Could not save task to database' });
+  }
+});
+
 export default router;

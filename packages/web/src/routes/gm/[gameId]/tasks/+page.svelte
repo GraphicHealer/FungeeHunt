@@ -185,6 +185,35 @@
     showModal = false;
   }
 
+  async function saveToDefault() {
+    if (!title.trim()) return;
+    error = '';
+    const res = await fetch('/api/gm/settings/default-tasks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({
+        task: {
+          title,
+          description,
+          points,
+          proofType,
+          photoCount: proofType === 'PHOTOS' ? photoCount : null,
+        },
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      toast.add(`Task ${data.updated} in database`, 'success');
+      await loadDefaults();
+    } else {
+      const data = await res.json();
+      error = data.error ?? 'Could not save task to database';
+    }
+  }
+
   async function save() {
     error = '';
     const url = editId
@@ -514,6 +543,7 @@
 
         <div class="actions">
           <button type="button" on:click={close}>Cancel</button>
+          <button type="button" on:click={saveToDefault} disabled={!title}>Save to Database</button>
           {#if editId}
             <button type="button" class="danger" on:click={() => remove(editId)}>Delete</button>
           {/if}
