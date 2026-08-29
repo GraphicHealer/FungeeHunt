@@ -531,7 +531,7 @@ const defaultTasks = [
 
   },
   {
-    title: `Yodeling… Is an ART!!!`,
+    title: `Yodeling... Is an ART!!!`,
     description: `Have one team member yodel at the base of a water tower, a second team member must play the part of the echo.`,
     points: 100,
     proofType: 'VIDEO',
