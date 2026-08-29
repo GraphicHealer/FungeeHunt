@@ -74,6 +74,15 @@
           <span class="task">{sub.task?.title ?? ''}</span>
           <span class="status">{sub.status === 'INCOMPLETE' ? 'REJECTED' : sub.status}</span>
         </div>
+        <div class="thumb">
+          {#if sub.proofUrl}
+            {#if sub.task?.proofType === 'VIDEO' || sub.proofUrl?.endsWith('.mp4') || sub.proofUrl?.endsWith('.mov')}
+              <video src={sub.proofUrl} muted playsinline preload="metadata" />
+            {:else}
+              <img src={sub.proofUrl} alt="Submission" />
+            {/if}
+          {/if}
+        </div>
       </li>
     {/each}
   </ul>
@@ -148,5 +157,14 @@
   .submissions li.incomplete {
     border-color: var(--danger);
     box-shadow: 0 0 0 1px var(--danger);
+  }
+
+  .thumb img,
+  .thumb video {
+    width: 6rem;
+    height: 4rem;
+    object-fit: cover;
+    border-radius: 0.375rem;
+    background: var(--bg);
   }
 </style>

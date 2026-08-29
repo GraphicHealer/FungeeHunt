@@ -228,7 +228,11 @@
                               disabled={uploading[task.id]}
                             />
                             <label for="proof-{task.id}-{i}" class="fungee-btn take-btn" class:ready={file}>
-                              {file ? (file.name ?? `File ${i + 1}`) : (task.proofType === 'PHOTOS' ? `Photo ${i + 1}` : proofLabel(task))}
+                              {#if file}
+                                {task.proofType === 'VIDEO' ? 'Video loaded' : (task.proofType === 'PHOTOS' ? `Photo ${i + 1} loaded` : 'Photo loaded')}
+                              {:else}
+                                {task.proofType === 'PHOTOS' ? `Photo ${i + 1}` : proofLabel(task)}
+                              {/if}
                             </label>
                           </div>
                         {/each}

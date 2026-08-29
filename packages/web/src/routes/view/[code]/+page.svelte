@@ -167,11 +167,25 @@
 
   function createVideoThumb(video: HTMLVideoElement) {
     const canvas = document.createElement('canvas');
-    canvas.width = 480;
-    canvas.height = 270;
+    const max = 640;
+    const vw = video.videoWidth || 1280;
+    const vh = video.videoHeight || 720;
+    let w = vw;
+    let h = vh;
+    if (vw > max || vh > max) {
+      if (vw > vh) {
+        w = max;
+        h = Math.round((vh * max) / vw);
+      } else {
+        h = max;
+        w = Math.round((vw * max) / vh);
+      }
+    }
+    canvas.width = w;
+    canvas.height = h;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, w, h);
     return canvas.toDataURL('image/jpeg', 0.85);
   }
 
