@@ -19,10 +19,38 @@
   let socket: any;
   let interval: ReturnType<typeof setInterval>;
   let showImportModal = false;
+  let showSpectatorModal = false;
+  let spectatorCode = '';
+  let spectatorError = '';
   let recap: any = null;
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
+  }
+
+  async function pairSpectator() {
+    spectatorError = '';
+    const code = spectatorCode.replace(/\s/g, '').toLowerCase();
+    if (!/^[0-9]{6}$/.test(code)) {
+      spectatorError = 'Enter a 6-digit spectator code';
+      return;
+    }
+    const res = await fetch(`/api/spectator/${code}/pair`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ gameId }),
+    });
+    if (res.ok) {
+      spectatorCode = '';
+      showSpectatorModal = false;
+      toast.success('Spectator connected');
+    } else {
+      const data = await res.json().catch(() => ({}));
+      spectatorError = data.error || 'Could not connect spectator';
+    }
   }
 
   async function load() {
@@ -316,6 +344,7 @@
           <button class="fungee-btn" data-tour="copy-link" style="width: auto; padding: 0.4rem 0.75rem; font-size: 0.85rem;" on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
         </div>
         <div class="controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="fungee-btn" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => (showSpectatorModal = true)}>SPECTATOR</button>
           <button class="fungee-btn success" data-tour="start-game" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('LIVE')} disabled={game.status !== 'NOT_STARTED'}>START</button>
           <button class="fungee-btn danger" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('COMPLETED')} disabled={game.status !== 'LIVE'}>END</button>
           {#if game.status === 'COMPLETED'}
@@ -422,6 +451,31 @@
       </div>
       <div class="actions" style="margin-top: 1rem;">
         <button type="button" on:click={() => (showImportModal = false)}>Close</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if showSpectatorModal}
+  <div class="modal-backdrop" on:click={() => (showSpectatorModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Connect Spectator</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">Enter the 6-digit code shown on the spectator screen.</p>
+      <input
+        class="fungee-input"
+        type="text"
+        bind:value={spectatorCode}
+        placeholder="123456"
+        maxlength="6"
+        inputmode="numeric"
+        style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: 700;"
+      />
+      {#if spectatorError}
+        <p class="error" style="margin-top: 0.5rem;">{spectatorError}</p>
+      {/if}
+      <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+        <button type="button" on:click={() => (showSpectatorModal = false)}>Cancel</button>
+        <button class="fungee-btn" type="button" on:click={pairSpectator}>Connect</button>
       </div>
     </div>
   </div>

@@ -352,7 +352,7 @@ async function addMusicToSegment(video: string, music: string | null, output: st
     '-i', video,
     '-i', music,
     '-filter_complex',
-    `[1:a]atrim=0:${total.toFixed(2)},afade=t=in:ss=0:d=0.5,afade=t=out:st=${fadeStart.toFixed(2)}:d=${fadeDur.toFixed(2)},volume=0.8[music];[0:a][music]amix=inputs=2:duration=first[aout]`,
+    `[1:a]atrim=0:${total.toFixed(2)},afade=t=in:st=0:d=0.5,afade=t=out:st=${fadeStart.toFixed(2)}:d=${fadeDur.toFixed(2)},volume=0.8[music];[0:a][music]amix=inputs=2:duration=first[aout]`,
     '-map', '0:v',
     '-map', '[aout]',
     '-c:v', 'copy',

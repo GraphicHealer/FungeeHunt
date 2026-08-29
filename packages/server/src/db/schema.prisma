@@ -30,6 +30,7 @@ model Game {
   teams                  Team[]
   tasks                  Task[]
   rulesSections          RuleSection[]
+  spectatorSessions      SpectatorSession[]
 }
 
 model Player {
@@ -90,6 +91,15 @@ model Submission {
   team        Team             @relation(fields: [teamId], references: [id])
 
   @@unique([taskId, teamId])
+}
+
+model SpectatorSession {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  gameId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  game      Game?    @relation(fields: [gameId], references: [id])
 }
 
 model RuleSection {

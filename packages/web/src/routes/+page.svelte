@@ -15,7 +15,10 @@
     <span class="mdi mdi-trophy"></span>
     <span class="logo-text">FUNGEE-HUNT</span>
   </div>
-  <button class="login" data-tour="login" on:click={() => goto('/login')}>LOG IN</button>
+  <div class="topbar-actions">
+    <button class="spectator" on:click={() => goto('/spectator')}>SPECTATOR</button>
+    <button class="login" data-tour="login" on:click={() => goto('/login')}>LOG IN</button>
+  </div>
 </header>
 
 <main class="fungee-page" style="padding-top: 5rem;">
@@ -67,7 +70,13 @@
     font-size: 1.75rem;
   }
 
-  .login {
+  .topbar-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .login,
+  .spectator {
     padding: 0.5rem 1rem;
     border: 1px solid var(--border);
     border-radius: 0.5rem;
@@ -77,6 +86,7 @@
     font-weight: 600;
   }
 
+  .spectator:hover,
   .login:hover {
     background: var(--brand);
     color: #fff;
