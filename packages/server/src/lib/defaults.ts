@@ -538,6 +538,62 @@ const defaultTasks = [
     category: 'Music',
 
   },
+  {
+    title: "When the Chips are Down...",
+    description: "Gather your entire team around a cow patty and sing \"Home on the Range\" together.",
+    points: 100,
+    proofType: "VIDEO",
+    category: "Music"
+  },
+  {
+    title: "Apartment Gothic",
+    description: "Recreate the famous American Gothic painting using a boat paddle or oar, with an apartment building in the background.",
+    points: 125,
+    proofType: "PHOTO",
+    category: "Art"
+  },
+  {
+    title: "A Very Important Meeting",
+    description: "Have your entire team sit together somewhere public and conduct a completely serious 30-second business meeting about an obviously ridiculous subject.",
+    points: 100,
+    proofType: "VIDEO",
+    category: "Pranks",
+  },
+  {
+    title: "Name That Tune",
+    description: "Hum a recognizable song to a stranger and have them correctly identify the song. You may not sing any lyrics.",
+    points: 100,
+    proofType: "VIDEO",
+    category: "Music",
+  },
+  {
+    title: "Ship-Shape Directions",
+    description: "Have one team member give another team member turn-by-turn directions to a nearby location with at least 7 turns, using only nautical terminology. They may use terms such as port, starboard, bow, stern, ahead, astern, and abaft, but may not use the words left, right, north, south, east, or west. No gesturing or pointing allowed.",
+    points: 100,
+    proofType: "VIDEO",
+    category: "Games",
+  },
+  {
+    title: "And the winner by an antenne...",
+    description: "Find two bugs already moving along a public sidewalk and cheer them on as they race toward a finish line of your choosing. Do not touch, move, block, or otherwise interfere with the bugs.",
+    points: 100,
+    proofType: "VIDEO",
+    category: "Animals",
+  },
+  {
+    title: "Raising the Bar",
+    description: "Choose two different brands of candy bar and have two team members hold a 30-second public debate arguing which candy bar is superior. The debate must be conducted in a public place where others can hear it.",
+    points: 100,
+    proofType: "VIDEO",
+    category: "Pranks",
+  },
+  {
+    title: "Saltine Serenade",
+    description: "A team member must eat three saltine crackers, then whistle the tune of \"Whistle While You Work\" from start to finish.",
+    points: 100,
+    proofType: "VIDEO",
+    category: "Music",
+  },
 ];
 
 const defaultRules = [
