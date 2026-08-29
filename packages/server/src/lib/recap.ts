@@ -33,6 +33,16 @@ const OUTPUT_SIZE = `${OUTPUT_WIDTH}x${OUTPUT_HEIGHT}`;
 const OUTPUT_FPS = 30;
 const FONTFILE = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
 
+const recapProgress = new Map<string, number>();
+
+export function getRecapProgress(gameId: string) {
+  return recapProgress.get(gameId) ?? 0;
+}
+
+function setRecapProgress(gameId: string, value: number) {
+  recapProgress.set(gameId, Math.max(0, Math.min(100, value)));
+}
+
 export function pickTransition(style: any, fallback = 'crossfade') {
   const pool = style?.transitions;
   if (Array.isArray(pool) && pool.length) return pool[Math.floor(Math.random() * pool.length)];
@@ -53,6 +63,8 @@ function escapeText(text: string) {
   return (text ?? '')
     .replace(/\\/g, '\\\\')
     .replace(/'/g, "\\'")
+    .replace(/:/g, '\\:')
+    .replace(/=/g, '\\=')
     .substring(0, 80);
 }
 
@@ -179,6 +191,10 @@ export async function getRecapPlan(gameId: string): Promise<RecapPlan> {
 }
 
 export async function updateRecapStatus(gameId: string, status: string, url?: string) {
+  if (process.env.RECAP_DEV) {
+    logger.info('Skipping DB recap status update in dev mode', { gameId, status, url });
+    return;
+  }
   await db.game.update({
     where: { id: gameId },
     data: { recapVideoStatus: status, recapVideoUrl: url ?? null },
@@ -186,12 +202,14 @@ export async function updateRecapStatus(gameId: string, status: string, url?: st
 }
 
 export async function startRecapRender(gameId: string) {
+  setRecapProgress(gameId, 0);
   await updateRecapStatus(gameId, 'RENDERING');
   try {
     const plan = await getRecapPlan(gameId);
     await renderRecap(gameId, plan);
   } catch (err: any) {
     console.error('recap render failed', err);
+    setRecapProgress(gameId, 0);
     await updateRecapStatus(gameId, 'FAILED');
   }
 }
@@ -502,8 +520,16 @@ export async function renderRecap(gameId: string, plan: RecapPlan) {
   const outputName = `recap_${gameId}.mp4`;
   const outputPath = path.join(config.UPLOAD_DIR, outputName);
 
+  const totalSteps = (plan.highlights.length ? 1 : 0) + plan.segments.length + 2;
+  let completedSteps = 0;
+  const bump = () => {
+    completedSteps += 1;
+    setRecapProgress(gameId, Math.round((completedSteps / totalSteps) * 90));
+  };
+
   try {
     const segments: string[] = [];
+    setRecapProgress(gameId, 5);
 
     // 1. Cold open from highlights
     if (plan.highlights.length) {
@@ -524,6 +550,9 @@ export async function renderRecap(gameId: string, plan: RecapPlan) {
       }
       const coldOpen = await buildSegment(workDir, 'coldopen', clips, ['dissolve', 'wipeleft', 'slideleft'], specialAudioFolders.coldOpen);
       segments.push(coldOpen);
+      bump();
+    } else {
+      bump();
     }
 
     // 2. Per-task segments
@@ -548,6 +577,7 @@ export async function renderRecap(gameId: string, plan: RecapPlan) {
         const taskSegment = await buildSegment(workDir, `task_${segment.task.id}`, clips, style.transitions, style.musicPath);
         segments.push(taskSegment);
       }
+      bump();
     }
 
     // 3. Winners closer
@@ -607,6 +637,7 @@ export async function renderRecap(gameId: string, plan: RecapPlan) {
 
     const winnersSegment = await buildSegment(workDir, 'winners', winnerCards, ['wipeleft', 'zoomin'], specialAudioFolders.winners);
     segments.push(winnersSegment);
+    bump();
 
     // 4. Scrapbook outro
     const allPhotos = filterExistingPhotos(plan.teamPhotoSubmissions.map((s: any) => localPath(s.proofUrl)));
@@ -616,11 +647,14 @@ export async function renderRecap(gameId: string, plan: RecapPlan) {
     const outroWithMusic = path.join(workDir, 'outro_final.mp4');
     await addMusicToSegment(outro, outroMusic, outroWithMusic);
     segments.push(outroWithMusic);
+    bump();
 
     // 5. Build final
+    setRecapProgress(gameId, 95);
     await buildFinal(segments, outputPath);
 
     logger.info('Recap complete', { outputPath });
+    setRecapProgress(gameId, 100);
     await updateRecapStatus(gameId, 'READY', `/uploads/${outputName}`);
   } catch (err: any) {
     logger.error('Recap render failed', { gameId, error: err.message });

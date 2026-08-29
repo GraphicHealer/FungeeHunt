@@ -158,6 +158,7 @@
     });
     if (res.ok) {
       recap = await res.json();
+      recapProgress = recap?.progress ?? 0;
       stopProgress();
       if (recap?.status === 'RENDERING') startProgress();
     }
@@ -185,10 +186,8 @@
   function startProgress() {
     if (progressInterval) clearInterval(progressInterval);
     progressInterval = setInterval(() => {
-      if (recapProgress < 90) {
-        recapProgress = Math.min(90, recapProgress + Math.random() * 3);
-      }
-    }, 1000);
+      loadRecap();
+    }, 800);
   }
 
   function stopProgress() {

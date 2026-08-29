@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db/client';
-import { getRecapPlan, startRecapRender, updateRecapStatus } from '../lib/recap';
+import { getRecapPlan, getRecapProgress, startRecapRender, updateRecapStatus } from '../lib/recap';
 
 const router = Router({ mergeParams: true });
 
@@ -17,6 +17,7 @@ router.get('/', async (req: any, res: any) => {
     res.json({
       status: game.recapVideoStatus,
       url: game.recapVideoUrl,
+      progress: getRecapProgress(gameId),
       plan,
     });
   } catch (err) {

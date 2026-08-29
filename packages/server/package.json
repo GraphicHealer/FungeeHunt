@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
-  },
+    "start": "node dist/index.js",
+    "recap:dev": "tsx src/scripts/recap-dev.ts"
+  }
   "dependencies": {
     "@prisma/client": "^5.15.0",
     "dotenv": "^16.4.5",

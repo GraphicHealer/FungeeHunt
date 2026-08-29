@@ -15,7 +15,6 @@
   let now = Date.now();
 
   const MIN_PHOTO_MS = 6000;
-  const MAX_THUMBNAILS = 6;
 
   let queue: any[] = [];
   let seen = new Set<string>();
@@ -23,6 +22,7 @@
   let displayed: any[] = [];
   let isProcessing = false;
   let photoTimer: ReturnType<typeof setTimeout> | null = null;
+  let activeVideo: HTMLVideoElement | null = null;
 
   function formatDuration(ms: number): string {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -42,13 +42,47 @@
     return Math.random() * (max - min) + min;
   }
 
-  function thumbStyle() {
+  function nextCellPosition(items: any[]) {
+    const cols = 3;
+    const rows = 2;
+    const cellW = 100 / cols;
+    const cellH = 100 / rows;
+    const itemW = 26; // approximate collage-item width %
+    const itemH = 42; // approximate max collage-item height %
+    const margin = 1;
+
+    const cellCounts = new Array(cols * rows).fill(0);
+    for (const item of items) {
+      if (item?.thumbStyle?.cell !== undefined) {
+        cellCounts[item.thumbStyle.cell] += 1;
+      }
+    }
+
+    function cellFor(x: number, y: number) {
+      const c = Math.floor(x / cellW);
+      const r = Math.floor(y / cellH);
+      return Math.max(0, Math.min(c, cols - 1)) + Math.max(0, Math.min(r, rows - 1)) * cols;
+    }
+
+    let best = { left: 50, top: 50, cell: 0, count: Infinity };
+    const attempts = 20;
+    for (let i = 0; i < attempts; i++) {
+      const left = random(margin, 100 - itemW - margin);
+      const top = random(margin, 100 - itemH - margin);
+      const cell = cellFor(left, top);
+      const count = cellCounts[cell];
+      if (count < best.count) {
+        best = { left, top, cell, count };
+      }
+    }
+
     return {
-      left: `${random(3, 68)}%`,
-      top: `${random(3, 58)}%`,
-      scale: random(0.75, 1.0),
-      rotate: random(-15, 15),
-      zIndex: displayed.length,
+      cell: best.cell,
+      left: `${best.left}%`,
+      top: `${best.top}%`,
+      scale: random(0.85, 1.0),
+      rotate: random(-8, 8),
+      zIndex: items.length,
     };
   }
 
@@ -113,13 +147,12 @@
   function finishActive() {
     if (!activeItem) return;
 
-    const style = thumbStyle();
-    const thumb = { ...activeItem, thumbStyle: style, thumbnail: true };
-    displayed = [...displayed, thumb];
-
-    if (displayed.length > MAX_THUMBNAILS) {
-      displayed = displayed.slice(displayed.length - MAX_THUMBNAILS);
+    const style = nextCellPosition(displayed);
+    const thumb: any = { ...activeItem, thumbStyle: style, thumbnail: true };
+    if (activeItem._isVideo && activeVideo) {
+      thumb.thumbUrl = createVideoThumb(activeVideo);
     }
+    displayed = [...displayed, thumb];
 
     if (photoTimer) {
       clearTimeout(photoTimer);
@@ -132,8 +165,24 @@
     setTimeout(startQueue, 250);
   }
 
+  function createVideoThumb(video: HTMLVideoElement) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 480;
+    canvas.height = 270;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', 0.85);
+  }
+
   function handleVideoEnded() {
     finishActive();
+  }
+
+  function handleCanPlayThrough() {
+    if (activeVideo && activeVideo.paused && data?.game?.status === 'LIVE') {
+      activeVideo.play().catch(() => {});
+    }
   }
 
   onMount(() => {
@@ -218,15 +267,15 @@
 
         <div class="viewer-stage">
           {#if displayed.length}
-            {#each displayed as item (item.id)}
+            {#each displayed as item, i (item.id)}
               <div
                 class="collage-item"
                 style="left: {item.thumbStyle.left}; top: {item.thumbStyle.top}; transform: scale({item.thumbStyle.scale}) rotate({item.thumbStyle.rotate}deg); z-index: {item.thumbStyle.zIndex};"
               >
-                {#if item._isVideo}
-                  <video class="collage-thumb" src={item.proofUrl} muted preload="metadata" playsinline></video>
+                {#if item._isVideo && !item.thumbUrl}
+                  <video class="collage-thumb" src={item.proofUrl} muted preload={i === displayed.length - 1 ? 'metadata' : 'none'} playsinline></video>
                 {:else}
-                  <img class="collage-thumb" src={item.proofUrl} alt={item.task?.title ?? 'Submission'} loading="lazy" decoding="async" />
+                  <img class="collage-thumb" src={item.thumbUrl ?? item.proofUrl} alt={item.task?.title ?? 'Submission'} loading="lazy" decoding="async" />
                 {/if}
                 <span class="collage-label">{item.team?.name ?? 'Unknown team'}</span>
               </div>
@@ -237,10 +286,12 @@
             <div class="collage-active" style="z-index: {displayed.length + 10}">
               {#if activeItem._isVideo}
                 <video
+                  bind:this={activeVideo}
                   class="collage-active-media"
                   src={activeItem.proofUrl}
                   playsinline
-                  autoplay
+                  preload="auto"
+                  on:canplaythrough={handleCanPlayThrough}
                   on:ended={handleVideoEnded}
                 ></video>
               {:else}
@@ -268,7 +319,6 @@
           <video
             src={data.game.recapVideoUrl}
             controls
-            autoplay
             on:ended={() => (recapPlayed = true)}
             style="width: 100%; max-height: 60vh;"
           ></video>
