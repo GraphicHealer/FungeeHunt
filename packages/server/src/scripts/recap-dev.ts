@@ -57,7 +57,7 @@ const plan = {
     {
       task: { id: 'dev-general', title: 'General', category: 'General', proofType: 'PHOTO' },
       style: {
-        transitions: ['crossfade', 'wipeleft', 'slideleft'],
+        transitions: ['fade', 'wipeleft', 'slideleft'],
         photoHold: 2.5,
         textColor: '#ffffff',
       },

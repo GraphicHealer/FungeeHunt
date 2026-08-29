@@ -588,18 +588,18 @@ const defaultRules = [
 ];
 
 export const defaultStyleProfiles = [
-  { category: 'Team Photo', musicPath: 'packages/server/assets/audio/team-photo', transitions: ['crossfade', 'wipeleft'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Team Photo', musicPath: 'packages/server/assets/audio/team-photo', transitions: ['fade', 'wipeleft'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
   { category: 'People', musicPath: 'packages/server/assets/audio/people', transitions: ['wipeleft', 'zoomin', 'dissolve'], photoHold: 2.0, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
-  { category: 'Memories', musicPath: 'packages/server/assets/audio/memories', transitions: ['crossfade', 'fade', 'wipeup'], photoHold: 3.0, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
-  { category: 'History', musicPath: 'packages/server/assets/audio/history', transitions: ['wipeleft', 'wipeup', 'crossfade'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Memories', musicPath: 'packages/server/assets/audio/memories', transitions: ['fade', 'fade', 'wipeup'], photoHold: 3.0, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'History', musicPath: 'packages/server/assets/audio/history', transitions: ['wipeleft', 'wipeup', 'fade'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
   { category: 'Music', musicPath: 'packages/server/assets/audio/music', transitions: ['zoomin', 'wipeleft', 'dissolve'], photoHold: 1.8, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
   { category: 'Pranks', musicPath: 'packages/server/assets/audio/pranks', transitions: ['zoomin', 'wipeleft', 'dissolve'], photoHold: 1.8, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
-  { category: 'Animals', musicPath: 'packages/server/assets/audio/animals', transitions: ['crossfade', 'wipeup', 'fade'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Animals', musicPath: 'packages/server/assets/audio/animals', transitions: ['fade', 'wipeup', 'fade'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
   { category: 'Games', musicPath: 'packages/server/assets/audio/games', transitions: ['wipeleft', 'zoomin', 'dissolve'], photoHold: 2.0, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
   { category: 'Vehicles', musicPath: 'packages/server/assets/audio/vehicles', transitions: ['wipeleft', 'zoomin', 'dissolve'], photoHold: 2.0, energy: 'high', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
-  { category: 'Art', musicPath: 'packages/server/assets/audio/art', transitions: ['crossfade', 'wipeup', 'fade'], photoHold: 3.0, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
-  { category: 'Nature', musicPath: 'packages/server/assets/audio/nature', transitions: ['crossfade', 'wipeup', 'fade'], photoHold: 3.0, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
-  { category: 'General', musicPath: 'packages/server/assets/audio/general', transitions: ['crossfade', 'wipeleft', 'fade'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Art', musicPath: 'packages/server/assets/audio/art', transitions: ['fade', 'wipeup', 'fade'], photoHold: 3.0, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'Nature', musicPath: 'packages/server/assets/audio/nature', transitions: ['fade', 'wipeup', 'fade'], photoHold: 3.0, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
+  { category: 'General', musicPath: 'packages/server/assets/audio/general', transitions: ['fade', 'wipeleft', 'fade'], photoHold: 2.5, energy: 'medium', font: 'Arial', textColor: '#ffffff', overlay: 'lower_third' },
 ];
 
 export const defaultSystemSettings = {

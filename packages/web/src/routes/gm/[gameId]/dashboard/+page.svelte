@@ -206,6 +206,7 @@
     const type = sub.task?.proofType;
     if (type === 'PHOTOS' && sub.proofUrls?.length) return sub.proofUrls[0];
     if (type === 'PHOTO') return sub.proofUrl ?? '';
+    if (type === 'VIDEO' && sub.proofUrl) return `${sub.proofUrl}.thumb.jpg`;
     return '';
   }
 

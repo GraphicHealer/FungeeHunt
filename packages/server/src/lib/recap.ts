@@ -43,7 +43,7 @@ function setRecapProgress(gameId: string, value: number) {
   recapProgress.set(gameId, Math.max(0, Math.min(100, value)));
 }
 
-export function pickTransition(style: any, fallback = 'crossfade') {
+export function pickTransition(style: any, fallback = 'fade') {
   const pool = style?.transitions;
   if (Array.isArray(pool) && pool.length) return pool[Math.floor(Math.random() * pool.length)];
   return fallback;
@@ -139,9 +139,13 @@ export async function getRecapPlan(gameId: string): Promise<RecapPlan> {
     const task = sub.task;
     if (!task || (task.category ?? '').toLowerCase() === 'team photo') continue;
     if (!segmentsMap[task.id]) {
+      const baseStyle = styleMap.get(task.category ?? 'General') ?? styleMap.get('General') ?? null;
+      const style = baseStyle
+        ? { ...baseStyle, ...(task.proofType === 'PHOTOS' ? { photoHold: 1.5 } : {}) }
+        : (task.proofType === 'PHOTOS' ? { transitions: ['fade'], photoHold: 1.5, textColor: '#ffffff' } : null);
       segmentsMap[task.id] = {
         task,
-        style: styleMap.get(task.category ?? 'General') ?? styleMap.get('General') ?? null,
+        style,
         submissions: [],
       };
     }
@@ -236,25 +240,30 @@ async function buildClip(
       '-vf', `scale=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:force_original_aspect_ratio=decrease,pad=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:(ow-iw)/2:(oh-ih)/2:black,setsar=1${drawTop}${drawBottom}`,
       '-r', String(OUTPUT_FPS),
       '-c:v', 'libx264',
+      '-c:a', 'aac',
+      '-b:a', '192k',
       '-pix_fmt', 'yuv420p',
       '-preset', 'fast',
-      '-an',
       output,
     ]);
   } else {
-    const frames = Math.max(15, Math.floor((options.photoHold ?? 2.5) * OUTPUT_FPS));
+    const hold = options.photoHold ?? 2.5;
+    const frames = Math.max(15, Math.floor(hold * OUTPUT_FPS));
     await runFFmpeg([
       '-y',
       '-framerate', String(OUTPUT_FPS),
       '-loop', '1',
       '-i', input,
-      '-t', String(options.photoHold ?? 2.5),
-      '-vf', `zoompan=z='min(zoom+0.0015,1.5)':d=${frames}:s=${OUTPUT_SIZE}:fps=${OUTPUT_FPS},setsar=1${drawTop}${drawBottom}`,
+      '-f', 'lavfi', '-i', `anullsrc=r=44100:cl=stereo`,
+      '-t', String(hold),
+      '-vf', `[0:v]scale=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:force_original_aspect_ratio=decrease,pad=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:(ow-iw)/2:(oh-ih)/2:black,zoompan=z='min(zoom+0.0015,1.5)':d=${frames}:s=${OUTPUT_SIZE}:fps=${OUTPUT_FPS},setsar=1${drawTop}${drawBottom}`,
       '-r', String(OUTPUT_FPS),
       '-c:v', 'libx264',
+      '-c:a', 'aac',
+      '-b:a', '192k',
       '-pix_fmt', 'yuv420p',
       '-preset', 'fast',
-      '-an',
+      '-shortest',
       output,
     ]);
   }
@@ -272,22 +281,26 @@ async function combineClips(clips: string[], transitions: string[], output: stri
   }
 
   const duration = 0.5;
-  let filter = '';
-  let label = '0';
+  let filter = '[0:v]setsar=1[v0];[0:a]anull[a0];';
+  let vLabel = 'v0';
+  let aLabel = 'a0';
   let currentDuration = getClipDuration(clips[0]);
 
   for (let i = 0; i < clips.length - 1; i++) {
     const nextDuration = getClipDuration(clips[i + 1]);
-    const trans = transitions[i % transitions.length] || 'crossfade';
+    const trans = transitions[i % transitions.length] || 'fade';
     const actualDur = Math.min(duration, currentDuration * 0.25, nextDuration * 0.25);
     const offset = currentDuration - actualDur;
-    const newLabel = `v${i + 1}`;
-    filter += `[${label}:v][${i + 1}:v]xfade=transition=${trans}:duration=${actualDur}:offset=${offset.toFixed(2)}[${newLabel}];`;
-    label = newLabel;
+    const newV = `vseg${i + 1}`;
+    const newA = `aseg${i + 1}`;
+    filter += `[${vLabel}][${i + 1}:v]xfade=transition=${trans}:duration=${actualDur.toFixed(2)}:offset=${offset.toFixed(2)}[${newV}];`;
+    filter += `[${aLabel}][${i + 1}:a]afade=d=${actualDur.toFixed(2)}[${newA}];`;
+    vLabel = newV;
+    aLabel = newA;
     currentDuration = offset + nextDuration;
   }
 
-  filter += `[${label}]setsar=1[vout]`;
+  filter += `[${vLabel}]setsar=1[vout];[${aLabel}]anull[aout]`;
 
   const args = ['-y'];
   for (const clip of clips) {
@@ -296,11 +309,13 @@ async function combineClips(clips: string[], transitions: string[], output: stri
   args.push(
     '-filter_complex', filter,
     '-map', '[vout]',
+    '-map', '[aout]',
     '-c:v', 'libx264',
+    '-c:a', 'aac',
+    '-b:a', '192k',
     '-pix_fmt', 'yuv420p',
     '-r', String(OUTPUT_FPS),
     '-preset', 'fast',
-    '-an',
     output,
   );
 
@@ -325,21 +340,7 @@ async function addMusicToSegment(video: string, music: string | null, output: st
   const total = getClipDuration(video);
 
   if (!music || !exists(music)) {
-    await runFFmpeg([
-      '-y',
-      '-i', video,
-      '-f', 'lavfi',
-      '-i', `anullsrc=r=44100:cl=stereo`,
-      '-filter_complex',
-      `[1:a]atrim=0:${total.toFixed(2)}[aout]`,
-      '-map', '0:v',
-      '-map', '[aout]',
-      '-c:v', 'copy',
-      '-c:a', 'aac',
-      '-b:a', '192k',
-      '-shortest',
-      output,
-    ]);
+    fs.copyFileSync(video, output);
     return;
   }
 
@@ -351,7 +352,7 @@ async function addMusicToSegment(video: string, music: string | null, output: st
     '-i', video,
     '-i', music,
     '-filter_complex',
-    `[1:a]atrim=0:${total.toFixed(2)},afade=t=in:ss=0:d=0.5,afade=t=out:st=${fadeStart.toFixed(2)}:d=${fadeDur.toFixed(2)}[aout]`,
+    `[1:a]atrim=0:${total.toFixed(2)},afade=t=in:ss=0:d=0.5,afade=t=out:st=${fadeStart.toFixed(2)}:d=${fadeDur.toFixed(2)},volume=0.8[music];[0:a][music]amix=inputs=2:duration=first[aout]`,
     '-map', '0:v',
     '-map', '[aout]',
     '-c:v', 'copy',
@@ -391,13 +392,19 @@ async function buildColorCard(text: string, duration: number, output: string, te
     '-y',
     '-f', 'lavfi',
     '-i', `color=c=black:s=${OUTPUT_SIZE}:d=${duration}:r=${OUTPUT_FPS}`,
+    '-f', 'lavfi',
+    '-i', `anullsrc=r=44100:cl=stereo`,
     '-vf',
     `[in]drawtext=fontfile=${FONTFILE}:text='${escapeText(text)}':fontcolor=${textColor}:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2-40[text];[text]drawtext=fontfile=${FONTFILE}:text='${escapeText(attribution)}':fontcolor=${textColor}:fontsize=20:x=(w-text_w)/2:y=h-text_h-24[out]`,
     '-map', '[out]',
+    '-map', '1:a',
     '-c:v', 'libx264',
+    '-c:a', 'aac',
+    '-b:a', '192k',
     '-pix_fmt', 'yuv420p',
     '-r', String(OUTPUT_FPS),
-    '-an',
+    '-t', String(duration),
+    '-shortest',
     output,
   ]);
 }
@@ -407,13 +414,17 @@ async function buildSideBySide(left: string, right: string, leftText: string, ri
     '-y',
     '-i', left,
     '-i', right,
+    '-f', 'lavfi',
+    '-i', `anullsrc=r=44100:cl=stereo`,
     '-filter_complex',
     `[0:v]scale=640:720:force_original_aspect_ratio=decrease,pad=640:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,drawtext=fontfile=${FONTFILE}:text='${escapeText(leftText)}':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=h-text_h-24[l];[1:v]scale=640:720:force_original_aspect_ratio=decrease,pad=640:720:(ow-iw)/2:(oh-ih)/2:black,setsar=1,drawtext=fontfile=${FONTFILE}:text='${escapeText(rightText)}':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=h-text_h-24[r];[l][r]hstack=inputs=2[v]`,
     '-map', '[v]',
+    '-map', '2:a',
     '-c:v', 'libx264',
+    '-c:a', 'aac',
+    '-b:a', '192k',
     '-pix_fmt', 'yuv420p',
     '-r', String(OUTPUT_FPS),
-    '-an',
     output,
   ]);
 }
@@ -430,14 +441,18 @@ async function buildScrapbook(photoPaths: string[], output: string, text: string
     const args = [
       '-y',
       '-i', used[0],
+      '-f', 'lavfi', '-i', `anullsrc=r=44100:cl=stereo`,
       '-filter_complex',
       `[0:v]scale=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:force_original_aspect_ratio=decrease,pad=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:(ow-iw)/2:(oh-ih)/2:black,setsar=1[bg];[bg]drawtext=fontfile=${FONTFILE}:text='${escapeText(text)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2-40[text];[text]drawtext=fontfile=${FONTFILE}:text='Music by Kevin MacLeod - incompetech.com':fontcolor=white:fontsize=20:x=(w-text_w)/2:y=h-text_h-24[out]`,
       '-map', '[out]',
+      '-map', '1:a',
       '-c:v', 'libx264',
+      '-c:a', 'aac',
+      '-b:a', '192k',
       '-pix_fmt', 'yuv420p',
       '-r', String(OUTPUT_FPS),
       '-t', '5',
-      '-an',
+      '-shortest',
       output,
     ];
     await runFFmpeg(args);
@@ -456,14 +471,18 @@ async function buildScrapbook(photoPaths: string[], output: string, text: string
   const args = [
     '-y',
     ...used.map((p) => ['-i', p]).flat(),
+    '-f', 'lavfi', '-i', `anullsrc=r=44100:cl=stereo`,
     '-filter_complex',
     `${pads}${stack}xstack=inputs=${used.length}:layout=${layout}[v];[v]drawtext=fontfile=${FONTFILE}:text='${escapeText(text)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2-40[text];[text]drawtext=fontfile=${FONTFILE}:text='Music by Kevin MacLeod - incompetech.com':fontcolor=white:fontsize=20:x=(w-text_w)/2:y=h-text_h-24[out]`,
     '-map', '[out]',
+    '-map', `${used.length}:a`,
     '-c:v', 'libx264',
+    '-c:a', 'aac',
+    '-b:a', '192k',
     '-pix_fmt', 'yuv420p',
     '-r', String(OUTPUT_FPS),
     '-t', '5',
-    '-an',
+    '-shortest',
     output,
   ];
 
@@ -558,7 +577,7 @@ export async function renderRecap(gameId: string, plan: RecapPlan) {
     // 2. Per-task segments
     for (const segment of plan.segments) {
       const clips: { input: string; isVideo?: boolean; textTop?: string; textBottom?: string; textColor?: string; photoHold?: number }[] = [];
-      const style = segment.style ?? { transitions: ['crossfade'], photoHold: 2.5, textColor: '#ffffff' };
+      const style = segment.style ?? { transitions: ['fade'], photoHold: 2.5, textColor: '#ffffff' };
       for (const sub of segment.submissions) {
         for (const url of proofUrlsFor(sub)) {
           const file = localPath(url);

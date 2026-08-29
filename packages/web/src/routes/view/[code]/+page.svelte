@@ -15,6 +15,7 @@
   let now = Date.now();
 
   const MIN_PHOTO_MS = 6000;
+  const MULTI_PHOTO_MS = 2500;
 
   let queue: any[] = [];
   let seen = new Set<string>();
@@ -23,6 +24,8 @@
   let isProcessing = false;
   let photoTimer: ReturnType<typeof setTimeout> | null = null;
   let activeVideo: HTMLVideoElement | null = null;
+  let activePhoto: HTMLImageElement | null = null;
+  let stage: HTMLDivElement | null = null;
 
   function formatDuration(ms: number): string {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -42,46 +45,97 @@
     return Math.random() * (max - min) + min;
   }
 
-  function nextCellPosition(items: any[]) {
-    const cols = 3;
-    const rows = 2;
-    const cellW = 100 / cols;
-    const cellH = 100 / rows;
-    const itemW = 26; // approximate collage-item width %
-    const itemH = 42; // approximate max collage-item height %
-    const margin = 1;
+  function computeItemDimensions(intrinsicW: number, intrinsicH: number) {
+    const fallback = { width: 24, h: 30, itemW: 0, itemH: 0 };
+    if (!stage) return fallback;
+    const stageW = stage.clientWidth;
+    const stageH = stage.clientHeight;
+    const fontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const pad = 0.5 * fontSize;
+    const gap = 0.35 * fontSize;
+    const labelH = 2 * fontSize;
+    const maxItemH = stageH * 0.6;
 
-    const cellCounts = new Array(cols * rows).fill(0);
-    for (const item of items) {
-      if (item?.thumbStyle?.cell !== undefined) {
-        cellCounts[item.thumbStyle.cell] += 1;
-      }
-    }
+    let itemW = Math.min(Math.max(stageW * 0.24, 10 * fontSize), 18 * fontSize);
+    const contentW = Math.max(itemW - 2 * pad, 1);
+    let thumbH = contentW * (intrinsicH / intrinsicW);
+    let itemH = thumbH + labelH + gap + 2 * pad;
 
-    function cellFor(x: number, y: number) {
-      const c = Math.floor(x / cellW);
-      const r = Math.floor(y / cellH);
-      return Math.max(0, Math.min(c, cols - 1)) + Math.max(0, Math.min(r, rows - 1)) * cols;
-    }
-
-    let best = { left: 50, top: 50, cell: 0, count: Infinity };
-    const attempts = 20;
-    for (let i = 0; i < attempts; i++) {
-      const left = random(margin, 100 - itemW - margin);
-      const top = random(margin, 100 - itemH - margin);
-      const cell = cellFor(left, top);
-      const count = cellCounts[cell];
-      if (count < best.count) {
-        best = { left, top, cell, count };
-      }
+    if (itemH > maxItemH) {
+      const maxThumbH = Math.max(1, maxItemH - labelH - gap - 2 * pad);
+      const newContentW = maxThumbH * (intrinsicW / intrinsicH);
+      itemW = newContentW + 2 * pad;
+      if (itemW < 10 * fontSize) itemW = 10 * fontSize;
+      thumbH = (itemW - 2 * pad) * (intrinsicH / intrinsicW);
+      itemH = thumbH + labelH + gap + 2 * pad;
     }
 
     return {
-      cell: best.cell,
-      left: `${best.left}%`,
-      top: `${best.top}%`,
-      scale: random(0.85, 1.0),
-      rotate: random(-8, 8),
+      width: (itemW / stageW) * 100,
+      h: (itemH / stageH) * 100,
+      itemW,
+      itemH,
+    };
+  }
+
+  function nextPosition(intrinsicW: number, intrinsicH: number, items: any[]) {
+    const dims = computeItemDimensions(intrinsicW, intrinsicH);
+    const wPct = dims.width;
+    const hPct = dims.h;
+    const margin = 1;
+
+    const existing = items
+      .filter((it) => it?.thumbStyle?.w && it?.thumbStyle?.h)
+      .map((it) => ({
+        x: parseFloat(it.thumbStyle.left),
+        y: parseFloat(it.thumbStyle.top),
+        w: it.thumbStyle.w,
+        h: it.thumbStyle.h,
+      }));
+
+    let best: { x: number; y: number; overlap: number; minDist: number } | null = null;
+    const attempts = 120;
+    const xRange = Math.max(0, 100 - wPct - 2 * margin);
+    const yRange = Math.max(0, 100 - hPct - 2 * margin);
+    for (let i = 0; i < attempts; i++) {
+      const x = margin + Math.random() * xRange;
+      const y = margin + Math.random() * yRange;
+      let overlap = 0;
+      let minDist = Infinity;
+      for (const e of existing) {
+        if (
+          x + wPct < e.x ||
+          x > e.x + e.w ||
+          y + hPct < e.y ||
+          y > e.y + e.h
+        ) {
+          const dx = x + wPct / 2 - (e.x + e.w / 2);
+          const dy = y + hPct / 2 - (e.y + e.h / 2);
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < minDist) minDist = dist;
+        } else {
+          const ox = Math.max(0, Math.min(x + wPct, e.x + e.w) - Math.max(x, e.x));
+          const oy = Math.max(0, Math.min(y + hPct, e.y + e.h) - Math.max(y, e.y));
+          overlap += ox * oy;
+          minDist = 0;
+        }
+      }
+      if (minDist === Infinity) minDist = 100;
+      if (!best || overlap < best.overlap || (overlap === best.overlap && minDist > best.minDist)) {
+        best = { x, y, overlap, minDist };
+      }
+    }
+
+    if (!best) best = { x: 50 - wPct / 2, y: 50 - hPct / 2, overlap: 0, minDist: 0 };
+
+    return {
+      left: `${best.x}%`,
+      top: `${best.y}%`,
+      width: wPct,
+      w: wPct,
+      h: hPct,
+      scale: random(0.9, 1.0),
+      rotate: random(-6, 6),
       zIndex: items.length,
     };
   }
@@ -90,9 +144,17 @@
     if (!newData?.length) return;
     const items: any[] = [];
     for (const sub of newData) {
-      if (!seen.has(sub.id)) {
+      if (sub.task?.proofType === 'PHOTOS' && sub.proofUrls?.length) {
+        for (let i = 0; i < sub.proofUrls.length; i++) {
+          const url = sub.proofUrls[i];
+          if (!seen.has(url)) {
+            seen.add(url);
+            items.push({ ...sub, id: `${sub.id}-${i}`, proofUrl: url, _isVideo: false, _isMulti: true });
+          }
+        }
+      } else if (!seen.has(sub.id)) {
         seen.add(sub.id);
-        items.push({ ...sub, _isVideo: isVideo(sub) });
+        items.push({ ...sub, _isVideo: isVideo(sub), _isMulti: false });
       }
     }
     if (items.length) {
@@ -140,17 +202,33 @@
     if (activeItem._isVideo) {
       // wait for on:ended in the active video element
     } else {
-      photoTimer = setTimeout(finishActive, MIN_PHOTO_MS);
+      const hold = activeItem._isMulti ? MULTI_PHOTO_MS : MIN_PHOTO_MS;
+      photoTimer = setTimeout(finishActive, hold);
     }
   }
 
   function finishActive() {
     if (!activeItem) return;
 
-    const style = nextCellPosition(displayed);
-    const thumb: any = { ...activeItem, thumbStyle: style, thumbnail: true };
+    let intrinsicW = 1280;
+    let intrinsicH = 720;
+    let thumbData = null as { dataUrl: string; w: number; h: number } | null;
+
     if (activeItem._isVideo && activeVideo) {
-      thumb.thumbUrl = createVideoThumb(activeVideo);
+      thumbData = createVideoThumb(activeVideo);
+      if (thumbData) {
+        intrinsicW = thumbData.w;
+        intrinsicH = thumbData.h;
+      }
+    } else if (activePhoto) {
+      intrinsicW = activePhoto.naturalWidth || 1280;
+      intrinsicH = activePhoto.naturalHeight || 720;
+    }
+
+    const style = nextPosition(intrinsicW, intrinsicH, displayed);
+    const thumb: any = { ...activeItem, thumbStyle: style, thumbnail: true };
+    if (thumbData) {
+      thumb.thumbUrl = thumbData.dataUrl;
     }
     displayed = [...displayed, thumb];
 
@@ -186,7 +264,7 @@
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
     ctx.drawImage(video, 0, 0, w, h);
-    return canvas.toDataURL('image/jpeg', 0.85);
+    return { dataUrl: canvas.toDataURL('image/jpeg', 0.85), w, h };
   }
 
   function handleVideoEnded() {
@@ -279,12 +357,12 @@
           </ol>
         </aside>
 
-        <div class="viewer-stage">
+        <div class="viewer-stage" bind:this={stage}>
           {#if displayed.length}
             {#each displayed as item, i (item.id)}
               <div
                 class="collage-item"
-                style="left: {item.thumbStyle.left}; top: {item.thumbStyle.top}; transform: scale({item.thumbStyle.scale}) rotate({item.thumbStyle.rotate}deg); z-index: {item.thumbStyle.zIndex};"
+                style="left: {item.thumbStyle.left}; top: {item.thumbStyle.top}; width: {item.thumbStyle.width}%; transform: scale({item.thumbStyle.scale}) rotate({item.thumbStyle.rotate}deg); z-index: {item.thumbStyle.zIndex};"
               >
                 {#if item._isVideo && !item.thumbUrl}
                   <video class="collage-thumb" src={item.proofUrl} muted preload={i === displayed.length - 1 ? 'metadata' : 'none'} playsinline></video>
@@ -310,6 +388,7 @@
                 ></video>
               {:else}
                 <img
+                  bind:this={activePhoto}
                   class="collage-active-media"
                   src={activeItem.proofUrl}
                   alt={activeItem.task?.title ?? 'Submitted photo'}
@@ -564,9 +643,8 @@
 
   .collage-item {
     position: absolute;
-    width: 24%;
-    min-width: 10rem;
-    max-width: 18rem;
+    width: auto;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
@@ -580,7 +658,6 @@
   .collage-thumb {
     width: 100%;
     height: auto;
-    max-height: 38%;
     object-fit: contain;
     border-radius: 0.35rem;
     background: var(--bg);
