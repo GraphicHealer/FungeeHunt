@@ -68,6 +68,9 @@ function buildGameData(body: any, partial = false) {
   if (body.foodDriveSuggested !== undefined || !partial) {
     data.foodDriveSuggested = body.foodDriveSuggested ?? '';
   }
+  if (body.captainCanUpdateFoodDrive !== undefined || !partial) {
+    data.captainCanUpdateFoodDrive = asBool(body.captainCanUpdateFoodDrive);
+  }
 
   return data;
 }
@@ -203,6 +206,7 @@ router.post('/', async (req: any, res: any) => {
       foodDrivePointsPerItem: settings.foodDrivePointsPerItem,
       foodDrivePermissible: settings.foodDrivePermissible,
       foodDriveSuggested: settings.foodDriveSuggested,
+      captainCanUpdateFoodDrive: settings.captainCanUpdateFoodDrive,
     };
     const body = { ...defaults, ...(req.body ?? {}) };
 
@@ -372,6 +376,29 @@ router.patch('/:gameId', async (req: any, res: any) => {
   } catch (err) {
     console.error('update game failed', err);
     res.status(500).json({ error: 'Could not update game' });
+  }
+});
+
+router.post('/:gameId/announce', async (req: any, res: any) => {
+  const { gameId } = req.params;
+  const { message = '', teamIds = 'all', captainsOnly = false } = req.body ?? {};
+
+  try {
+    const game = await db.game.findUnique({ where: { id: gameId } });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+
+    const payload = {
+      type: 'announce',
+      message,
+      teamIds,
+      captainsOnly,
+    };
+    const io = req.app.get('io') as any;
+    io.emit(`game:${game.code.toUpperCase()}`, payload);
+    res.json({ sent: true });
+  } catch (err) {
+    console.error('announce failed', err);
+    res.status(500).json({ error: 'Could not send announcement' });
   }
 });
 

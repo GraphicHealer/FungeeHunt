@@ -45,10 +45,14 @@ router.get('/', async (req, res) => {
     const recentSubmissions = completedSubmissions.slice(0, 20);
 
     const scoreMap = new Map<string, number>();
+    const completedIdsMap = new Map<string, string[]>();
     for (const sub of completedSubmissions) {
       const task = taskMap.get(sub.taskId);
       if (!task) continue;
       scoreMap.set(sub.teamId, (scoreMap.get(sub.teamId) ?? 0) + task.points);
+      const list = completedIdsMap.get(sub.teamId) ?? [];
+      list.push(task.id);
+      completedIdsMap.set(sub.teamId, list);
     }
 
     const leaderboard = teams
@@ -62,6 +66,7 @@ router.get('/', async (req, res) => {
           ...team,
           score: completedScore + returnBonus + foodDriveBonus,
           completed: completedSubmissions.filter((s) => s.teamId === team.id).length,
+          completedTaskIds: completedIdsMap.get(team.id) ?? [],
         };
       })
       .sort((a, b) => b.score - a.score);
@@ -100,6 +105,7 @@ router.get('/', async (req, res) => {
         recapVideoUrl: game.recapVideoUrl,
       },
       leaderboard,
+      tasks,
       recent,
       remaining: remainingMs ? formatDuration(remainingMs) : null,
     });

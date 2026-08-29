@@ -57,6 +57,7 @@
         foodDrivePointsPerItem: Number(settings.foodDrivePointsPerItem),
         foodDrivePermissible: settings.foodDrivePermissible,
         foodDriveSuggested: settings.foodDriveSuggested,
+        captainCanUpdateFoodDrive: settings.captainCanUpdateFoodDrive,
         returnBonusEnabled: settings.returnBonusEnabled,
         returnBonusWindowMinutes: Number(settings.returnBonusWindowMinutes),
         returnBonusPoints: Number(settings.returnBonusPoints),
@@ -132,6 +133,10 @@
         <label class="fungee-check">
           <input type="checkbox" bind:checked={settings.foodDriveEnabled} />
           Enabled by default
+        </label>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={settings.captainCanUpdateFoodDrive} />
+          Captains can update food drive count
         </label>
         <label for="fdpp">Default points per item</label>
         <input id="fdpp" type="number" step="0.1" bind:value={settings.foodDrivePointsPerItem} min="0" />

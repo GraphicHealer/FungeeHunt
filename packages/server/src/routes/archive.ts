@@ -21,7 +21,7 @@ router.get('/', async (req: any, res: any) => {
       orderBy: { name: 'asc' },
       include: {
         submissions: {
-          include: { task: { select: { title: true, points: true, proofType: true } } },
+          include: { task: { select: { id: true, title: true, points: true, proofType: true, order: true } } },
           orderBy: { submittedAt: 'desc' },
         },
       },
@@ -40,6 +40,8 @@ router.get('/', async (req: any, res: any) => {
           taskTitle: s.task?.title ?? 'Unknown task',
           taskPoints: s.task?.points ?? 0,
           proofType: s.task?.proofType ?? 'PHOTO',
+          taskOrder: s.task?.order ?? 0,
+          taskId: s.task?.id ?? '',
         })),
       })),
     });

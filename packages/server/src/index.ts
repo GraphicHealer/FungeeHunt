@@ -33,7 +33,13 @@ const io = new Server(server, {
 app.set('io', io);
 
 app.use(express.json());
-app.use('/uploads', express.static(config.UPLOAD_DIR));
+app.use('/uploads', express.static(config.UPLOAD_DIR, {
+  setHeaders: (res, filePath) => {
+    if (filePath.toLowerCase().endsWith('.mov')) {
+      res.set('Content-Type', 'video/mp4');
+    }
+  },
+}));
 app.use('/api/config', configRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/join', joinRoute);

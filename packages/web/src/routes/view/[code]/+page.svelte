@@ -11,6 +11,7 @@
   let countdownTimer: ReturnType<typeof setInterval> | null = null;
   let socket: any;
   let recapPlayed = false;
+  let myTeamId: string | null = null;
 
   let now = Date.now();
 
@@ -176,14 +177,27 @@
     }
   }
 
+  async function loadMyTeam() {
+    const token = localStorage.getItem(`token:${code}`);
+    if (!token) return;
+    try {
+      const res = await fetch(`/api/play/${code}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const state = await res.json();
+        myTeamId = state.team?.id ?? null;
+      }
+    } catch (err) {
+      // ignore; viewer is still public
+    }
+  }
+
   function setupTimers() {
     if (countdownTimer) clearInterval(countdownTimer);
-
-    if (data?.game?.status === 'NOT_STARTED') {
-      countdownTimer = setInterval(() => {
-        now = Date.now();
-      }, 1000);
-    }
+    countdownTimer = setInterval(() => {
+      now = Date.now();
+    }, 1000);
   }
 
   function startQueue() {
@@ -277,8 +291,9 @@
     }
   }
 
-  onMount(() => {
-    load();
+  onMount(async () => {
+    await load();
+    await loadMyTeam();
 
     socket = io({
       transports: ['websocket', 'polling'],
@@ -294,6 +309,12 @@
 
   $: startsIn = data?.game?.startAt
     ? new Date(data.game.startAt).getTime() - now
+    : null;
+  $: endsIn = data?.game?.status === 'LIVE' && data?.game?.endAt
+    ? Math.max(0, new Date(data.game.endAt).getTime() - now)
+    : null;
+  $: myTeam = data?.leaderboard && myTeamId
+    ? data.leaderboard.find((t: any) => t.id === myTeamId)
     : null;
 </script>
 
@@ -323,11 +344,30 @@
         <h1>{data.game.name}</h1>
         <div class="viewer-status">
           <span class="viewer-badge">{data.game.status}</span>
-          {#if data.remaining}
-            <span class="viewer-remaining">{data.remaining} REMAINING</span>
+          {#if endsIn !== null}
+            <span class="viewer-remaining">{formatDuration(endsIn)} REMAINING</span>
           {/if}
         </div>
       </header>
+
+      {#if data.game.status === 'COMPLETED' && myTeam}
+          <section class="viewer-join viewer-archive">
+            <h1 class="viewer-title">Your Team&apos;s Challenges</h1>
+            <ul class="viewer-challenge-list">
+              <li class="viewer-challenge-item">
+                <span class="team-name">{myTeam.name ?? 'Unnamed team'}</span>
+                <span class="completion">{myTeam.completed} / {data.tasks.length} completed</span>
+                {#if myTeam.completed < data.tasks.length}
+                  <span class="missed">
+                    Missed: {data.tasks.filter((t) => !(myTeam.completedTaskIds ?? []).includes(t.id)).map((t) => t.title).join(', ')}
+                  </span>
+                {:else}
+                  <span class="missed all-done">Completed every challenge!</span>
+                {/if}
+              </li>
+            </ul>
+          </section>
+        {/if}
 
       {#if data.game.status === 'COMPLETED' && (!data.game.recapVideoUrl || recapPlayed)}
         <section class="viewer-join viewer-archive">
@@ -587,6 +627,48 @@
     background: var(--bg);
   }
 
+  .viewer-challenge-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: left;
+    max-width: 32rem;
+    width: 100%;
+  }
+
+  .viewer-challenge-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .viewer-challenge-item .team-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  .viewer-challenge-item .completion {
+    color: var(--success);
+    font-weight: 600;
+  }
+
+  .viewer-challenge-item .missed {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+
+  .viewer-challenge-item .missed.all-done {
+    color: var(--success);
+  }
+
   .viewer-leaderboard ol {
     list-style: none;
     padding: 0;
@@ -686,6 +768,9 @@
   }
 
   .collage-active-media {
+    display: block;
+    width: auto;
+    height: auto;
     max-width: 80%;
     max-height: 70%;
     object-fit: contain;
@@ -693,6 +778,7 @@
     border: 1px solid var(--border);
     background: #000;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
+    margin: auto;
   }
 
   .collage-caption {

@@ -26,6 +26,7 @@ router.patch('/', async (req, res) => {
     foodDrivePointsPerItem,
     foodDrivePermissible,
     foodDriveSuggested,
+    captainCanUpdateFoodDrive,
     returnBonusEnabled,
     returnBonusWindowMinutes,
     returnBonusPoints,
@@ -44,6 +45,7 @@ router.patch('/', async (req, res) => {
     if (foodDrivePointsPerItem !== undefined) data.foodDrivePointsPerItem = Number(foodDrivePointsPerItem) || 0;
     if (foodDrivePermissible !== undefined) data.foodDrivePermissible = foodDrivePermissible;
     if (foodDriveSuggested !== undefined) data.foodDriveSuggested = foodDriveSuggested;
+    if (captainCanUpdateFoodDrive !== undefined) data.captainCanUpdateFoodDrive = captainCanUpdateFoodDrive === true || captainCanUpdateFoodDrive === 'true' || captainCanUpdateFoodDrive === 'on' || captainCanUpdateFoodDrive === '1';
     if (returnBonusEnabled !== undefined) data.returnBonusEnabled = returnBonusEnabled === true || returnBonusEnabled === 'true' || returnBonusEnabled === 'on' || returnBonusEnabled === '1';
     if (returnBonusWindowMinutes !== undefined) data.returnBonusWindowMinutes = Number(returnBonusWindowMinutes) || 0;
     if (returnBonusPoints !== undefined) data.returnBonusPoints = Number(returnBonusPoints) || 0;

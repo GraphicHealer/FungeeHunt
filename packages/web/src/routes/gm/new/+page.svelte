@@ -28,6 +28,7 @@
   let returnEndTime = '';
   let returnPoints = 100;
   let returnBonusWindowMinutes = 10;
+  let returnRandomized = false;
 
   let taskCount = 20;
   let availableTasks: any[] = [];
@@ -49,6 +50,12 @@
     const start = fromInputValue(returnStart);
     const end = new Date(start.getTime() + returnBonusWindowMinutes * 60 * 1000);
     returnEndTime = toInputValue(end).slice(11, 16);
+  }
+
+  $: if (step !== 2) returnRandomized = false;
+  $: if (step === 2 && returnBonusEnabled && !returnRandomized) {
+    returnRandomized = true;
+    randomizeReturn();
   }
 
   onMount(async () => {

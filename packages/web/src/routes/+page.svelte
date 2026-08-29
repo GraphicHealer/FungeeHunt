@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
 
   let code = '';
+  let showSpectatorDropdown = false;
 
   function join() {
     if (code.trim()) {
@@ -16,7 +17,17 @@
     <span class="logo-text">FUNGEE-HUNT</span>
   </div>
   <div class="topbar-actions">
-    <button class="spectator" on:click={() => goto('/spectator')}>SPECTATOR</button>
+    <div class="dropdown-wrap">
+      <button class="spectator" on:click={() => (showSpectatorDropdown = !showSpectatorDropdown)}>
+        SPECTATOR <span class="mdi mdi-menu-down"></span>
+      </button>
+      {#if showSpectatorDropdown}
+        <div class="dropdown" on:mouseleave={() => (showSpectatorDropdown = false)}>
+          <a href="/spectator" on:click={() => (showSpectatorDropdown = false)}>Open Spectator</a>
+          <a href="/login" on:click={() => (showSpectatorDropdown = false)}>Pair Spectator</a>
+        </div>
+      {/if}
+    </div>
     <button class="login" data-tour="login" on:click={() => goto('/login')}>LOG IN</button>
   </div>
 </header>
@@ -91,6 +102,40 @@
     background: var(--brand);
     color: #fff;
     border-color: var(--brand);
+  }
+
+  .dropdown-wrap {
+    position: relative;
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.25rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+    min-width: 10rem;
+    overflow: hidden;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dropdown a {
+    padding: 0.6rem 0.9rem;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .dropdown a:hover {
+    background: var(--brand);
+    color: #fff;
   }
 
   .code-input {

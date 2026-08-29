@@ -54,6 +54,11 @@
     showModal = true;
   }
 
+  function isAvailable(player: any) {
+    if (!player.team) return true;
+    return editId && player.team.id === editId;
+  }
+
   function close() {
     showModal = false;
   }
@@ -180,14 +185,14 @@
         <label for="manager">Team Captain</label>
         <select id="manager" bind:value={managerId}>
           <option value="">Select Team Captain…</option>
-          {#each players.filter((p) => p.type === 'APP') as player (player.id)}
+          {#each players.filter((p) => p.type === 'APP' && isAvailable(p)) as player (player.id)}
             <option value={player.id}>{player.displayName}</option>
           {/each}
         </select>
 
         <p class="label">Members</p>
         <div class="members">
-          {#each players as player (player.id)}
+          {#each players.filter(isAvailable) as player (player.id)}
             <label>
               <input type="checkbox" value={player.id} bind:group={selectedMembers} />
               {player.displayName} ({player.type})

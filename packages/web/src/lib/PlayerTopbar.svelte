@@ -10,6 +10,8 @@
   let remainingStr = '';
   let socket: any;
   let interval: ReturnType<typeof setInterval>;
+  let showAnnouncement = false;
+  let announcementMessage = '';
 
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
@@ -48,7 +50,19 @@
   onMount(() => {
     load();
     socket = io({ transports: ['websocket', 'polling'] });
-    socket.on(`game:${code.toUpperCase()}`, load);
+    socket.on(`game:${code.toUpperCase()}`, (payload: any) => {
+      if (payload?.type === 'announce') {
+        const matchAll = !payload.teamIds || payload.teamIds === 'all' || (Array.isArray(payload.teamIds) && payload.teamIds.length === 0);
+        const matchTeam = state?.team && Array.isArray(payload.teamIds) && payload.teamIds.includes(state.team.id);
+        const matchCaptain = !payload.captainsOnly || state?.player?.id === state?.team?.managerId;
+        if (matchCaptain && (matchAll || matchTeam)) {
+          announcementMessage = payload.message;
+          showAnnouncement = true;
+        }
+      } else {
+        load();
+      }
+    });
     interval = setInterval(() => {
       remainingStr = remaining();
     }, 1000);
@@ -66,6 +80,16 @@
     <span class="countdown">{remainingStr}</span>
     <span class="side right">{formatPoints(state.team?.score ?? 0)} pts</span>
   </header>
+{/if}
+
+{#if showAnnouncement}
+  <div class="announcement-backdrop" on:click={() => (showAnnouncement = false)}>
+    <div class="announcement-modal" on:click|stopPropagation>
+      <h3>Announcement</h3>
+      <p>{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => (showAnnouncement = false)}>OK</button>
+    </div>
+  </div>
 {/if}
 
 <style>
@@ -109,5 +133,37 @@
     font-variant-numeric: tabular-nums;
     color: var(--brand);
     text-align: center;
+  }
+
+  .announcement-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+    padding: 1rem;
+  }
+
+  .announcement-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    max-width: 24rem;
+    width: 100%;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+
+  .announcement-modal h3 {
+    margin-top: 0;
+    color: var(--brand);
+  }
+
+  .announcement-modal p {
+    white-space: pre-wrap;
+    margin: 0 0 1rem;
   }
 </style>

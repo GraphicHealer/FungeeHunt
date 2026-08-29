@@ -16,6 +16,7 @@
   let expanded = '';
   let showManagerInfo = false;
   let socket: any;
+  let foodDriveCount = 0;
 
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
@@ -96,9 +97,28 @@
         goto(`/play/${code}`);
         return;
       }
+      foodDriveCount = state.team?.foodDriveItems ?? 0;
       maybeShowManagerInfo();
     } else {
       error = 'Could not load game state';
+    }
+  }
+
+  async function saveFoodDrive() {
+    const res = await fetch(`/api/play/${code}/food-drive`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify({ items: foodDriveCount }),
+    });
+    if (res.ok) {
+      const team = await res.json();
+      state = { ...state, team: { ...state.team, foodDriveItems: team.foodDriveItems } };
+      foodDriveCount = team.foodDriveItems;
+    } else {
+      error = 'Could not save food drive count';
     }
   }
 
@@ -269,6 +289,12 @@
             {/if}
             {#if state.game.foodDriveSuggested}
               <p style="margin: 0.25rem 0; color: var(--muted);"><strong>Suggested:</strong> {state.game.foodDriveSuggested}</p>
+            {/if}
+            {#if state.game.captainCanUpdateFoodDrive && isManager()}
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem;">
+                <input class="fungee-input" type="number" bind:value={foodDriveCount} min="0" style="width: 4rem; margin: 0;" />
+                <button class="fungee-btn" style="width: auto; margin: 0;" on:click={saveFoodDrive}>SAVE</button>
+              </div>
             {/if}
           </div>
         {/if}

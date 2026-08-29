@@ -607,6 +607,7 @@ export const defaultSystemSettings = {
   foodDrivePointsPerItem: 25,
   foodDrivePermissible: 'canned goods, boxed pasta, rice, peanut butter',
   foodDriveSuggested: 'soup, canned vegetables, cereal, diapers',
+  captainCanUpdateFoodDrive: true,
   returnBonusEnabled: true,
   returnBonusWindowMinutes: 10,
   returnBonusPoints: 100,

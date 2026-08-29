@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
 
     res.json({
       player,
-      team: team ? { ...team, score: completedScore + returnBonus + foodDriveBonus } : null,
+      team: team ? { ...team, foodDriveItems: team.foodDriveItems ?? 0, score: completedScore + returnBonus + foodDriveBonus } : null,
       game: {
         id: game.id,
         name: game.name,
@@ -58,6 +58,7 @@ router.get('/', async (req, res) => {
         foodDrivePointsPerItem: game.foodDrivePointsPerItem,
         foodDrivePermissible: game.foodDrivePermissible,
         foodDriveSuggested: game.foodDriveSuggested,
+        captainCanUpdateFoodDrive: game.captainCanUpdateFoodDrive,
       },
       tasks: tasksWithStatus,
     });
@@ -96,10 +97,41 @@ router.patch('/team', async (req, res) => {
       where: { id: player.teamId },
       data: { name },
     });
+    const game = await db.game.findUnique({ where: { id: player.gameId } });
+    if (game) {
+      const io = (req as any).app.get('io') as any;
+      io?.emit(`game:${game.code.toUpperCase()}`, { type: 'team-update' });
+    }
     res.json(team);
   } catch (err) {
     console.error('rename team failed', err);
     res.status(500).json({ error: 'Could not rename team' });
+  }
+});
+
+router.patch('/food-drive', async (req, res) => {
+  const player = (res.locals as any).player;
+  const game = (res.locals as any).game;
+  const { items } = req.body ?? {};
+
+  try {
+    if (!player.teamId) {
+      return res.status(400).json({ error: 'Not assigned to a team' });
+    }
+    if (player.team?.managerId !== player.id) {
+      return res.status(403).json({ error: 'Only the Team Captain can update the food drive count' });
+    }
+    if (!game.foodDriveEnabled || !game.captainCanUpdateFoodDrive) {
+      return res.status(403).json({ error: 'Food drive updates are disabled' });
+    }
+    const team = await db.team.update({
+      where: { id: player.teamId },
+      data: { foodDriveItems: Math.max(0, Number(items) || 0) },
+    });
+    res.json(team);
+  } catch (err) {
+    console.error('update food drive failed', err);
+    res.status(500).json({ error: 'Could not update food drive count' });
   }
 });
 

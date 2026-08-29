@@ -84,7 +84,7 @@
                 {#each team.submissions as sub (sub.id)}
                   <div class="submission">
                     <div class="sub-header">
-                      <span class="sub-title">{sub.taskTitle}</span>
+                      <span class="sub-title">#{sub.taskOrder} {sub.taskTitle}</span>
                       <span class="sub-points">+{formatPoints(sub.taskPoints)}</span>
                     </div>
                     <div class="thumbs">

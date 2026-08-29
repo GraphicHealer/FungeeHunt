@@ -20,10 +20,11 @@ model Game {
   returnStart            DateTime?
   returnEnd              DateTime?
   returnPoints           Float          @default(0)
-  foodDriveEnabled       Boolean        @default(false)
-  foodDrivePointsPerItem Float          @default(0)
-  foodDrivePermissible   String?
-  foodDriveSuggested     String?
+  foodDriveEnabled            Boolean        @default(false)
+  foodDrivePointsPerItem      Float          @default(0)
+  foodDrivePermissible        String?
+  foodDriveSuggested          String?
+  captainCanUpdateFoodDrive   Boolean        @default(true)
   recapVideoStatus       RecapVideoStatus @default(PENDING)
   recapVideoUrl          String?
   players                Player[]
@@ -124,10 +125,11 @@ model StyleProfile {
 
 model SystemSettings {
   id                       String  @id @default(cuid())
-  foodDriveEnabled         Boolean @default(true)
-  foodDrivePointsPerItem   Float   @default(1)
-  foodDrivePermissible     String?
-  foodDriveSuggested       String?
+  foodDriveEnabled            Boolean @default(true)
+  foodDrivePointsPerItem      Float   @default(1)
+  foodDrivePermissible        String?
+  foodDriveSuggested          String?
+  captainCanUpdateFoodDrive   Boolean @default(true)
   returnBonusEnabled       Boolean @default(true)
   returnBonusWindowMinutes Int     @default(10)
   returnBonusPoints        Float   @default(100)

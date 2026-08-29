@@ -87,7 +87,9 @@
       {#if isManager()}
         <div style="display: flex; gap: 0.75rem; margin: 1rem 0; flex-wrap: wrap;">
           <input class="fungee-input" type="text" bind:value={newName} placeholder="Team name" style="flex: 1; margin: 0;" />
-          <button class="fungee-btn" style="width: auto; margin: 0;" on:click={rename}>RENAME TEAM</button>
+          <button class="fungee-btn" style="width: auto; margin: 0; padding: 0.5rem 0.75rem;" on:click={rename} title="Rename team">
+            <span class="mdi mdi-pencil"></span>
+          </button>
         </div>
       {/if}
 
@@ -107,7 +109,7 @@
             {#if member.id === state.team?.managerId}
               <span class="fungee-status">Team Captain</span>
             {:else if member.type === 'OFFLINE'}
-              <span class="fungee-status incomplete">Offline</span>
+              <span class="mdi mdi-cellphone-off" style="color: var(--muted);" title="No phone"></span>
             {/if}
           </li>
         {/each}
@@ -129,6 +131,14 @@
       </p>
       <p>
         Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--muted); text-align: center;">
+        After taking a photo, tap <strong>Submit</strong>.
       </p>
       <button class="fungee-btn" style="width: 100%; margin-top: 1rem;" on:click={() => (showManagerInfo = false)}>GOT IT</button>
     </div>

@@ -19,10 +19,16 @@
   let socket: any;
   let interval: ReturnType<typeof setInterval>;
   let showImportModal = false;
+  let showSpectatorDropdown = false;
   let showSpectatorModal = false;
   let spectatorCode = '';
   let spectatorError = '';
   let recap: any = null;
+  let showAnnouncementModal = false;
+  let announcementMessage = '';
+  let announcementTeamIds: string[] = [];
+  let announcementAll = true;
+  let announcementCaptainsOnly = false;
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -50,6 +56,32 @@
     } else {
       const data = await res.json().catch(() => ({}));
       spectatorError = data.error || 'Could not connect spectator';
+    }
+  }
+
+  async function sendAnnouncement() {
+    const trimmed = announcementMessage.trim();
+    if (!trimmed) return;
+    const body: any = {
+      message: trimmed,
+      captainsOnly: announcementCaptainsOnly,
+      teamIds: announcementAll ? 'all' : announcementTeamIds,
+    };
+    const res = await fetch(`/api/gm/games/${gameId}/announce`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      announcementMessage = '';
+      announcementTeamIds = [];
+      showAnnouncementModal = false;
+      toast.success('Announcement sent');
+    } else {
+      toast.error('Could not send announcement');
     }
   }
 
@@ -332,19 +364,48 @@
     </div>
 
     <aside class="side">
+      <div class="side-card" style="position: relative;">
+        <button
+          class="fungee-btn"
+          style="width: 100%; margin: 0; padding: 1rem;"
+          on:click={() => (showSpectatorDropdown = !showSpectatorDropdown)}
+        >
+          SPECTATOR <span class="mdi mdi-menu-down"></span>
+        </button>
+        {#if showSpectatorDropdown}
+          <div class="dropdown" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem; box-shadow: var(--shadow); z-index: 10; margin-top: 0.25rem; overflow: hidden;">
+            <button
+              type="button"
+              class="dropdown-item"
+              style="width: 100%; text-align: left; padding: 0.75rem 1rem; background: none; border: none; color: var(--text); cursor: pointer;"
+              on:click={() => { showSpectatorDropdown = false; showSpectatorModal = true; }}
+            >Pair Spectator</button>
+            <a
+              class="dropdown-item"
+              style="display: block; padding: 0.75rem 1rem; color: var(--text); text-decoration: none;"
+              href="/view/{game?.code}"
+              target="_blank"
+              rel="noreferrer"
+              on:click={() => (showSpectatorDropdown = false)}
+            >Open Spectator</a>
+          </div>
+        {/if}
+      </div>
+      <button class="fungee-btn announce" style="width: 100%; margin: 0 0 0.75rem; padding: 1rem; background: #ffd700; color: #333; border-color: #ffd700;" on:click={() => (showAnnouncementModal = true)}>ANNOUNCE</button>
       <a class="fungee-btn" data-tour="print-link" style="width: 100%; margin: 0; padding: 1rem;" href="/gm/{gameId}/print" target="_blank" rel="noreferrer">PRINT TASKS & RULES</a>
 
       <section class="side-card controls-card" data-tour="game-controls">
         <h3 class="fungee-section-title" style="font-size: 1rem; margin: 0;">Game Controls</h3>
         <p class="status" style="margin: 0.25rem 0 0;">● {game.status}</p>
         {#if remainingStr}<p class="timer" style="margin: 0 0 0.5rem;">{remainingStr}</p>{/if}
-        <p class="code" style="font-size: 1.1rem; letter-spacing: 0.15rem; margin: 0;">{game.code}</p>
+        <div class="code" style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0 0.5rem;">
+          <p style="font-size: 1.1rem; letter-spacing: 0.15rem; margin: 0;">{game.code}</p>
+          <button class="fungee-btn" data-tour="copy-link" style="width: auto; padding: 0.4rem 0.75rem; font-size: 0.85rem;" on:click={() => navigator.clipboard.writeText(game.code)}>COPY</button>
+        </div>
         <div class="join" style="display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0 0.75rem; flex-wrap: wrap;">
           <a href={game.joinUrl} target="_blank" rel="noreferrer" style="font-size: 0.95rem; word-break: break-all;">{game.joinUrl}</a>
-          <button class="fungee-btn" data-tour="copy-link" style="width: auto; padding: 0.4rem 0.75rem; font-size: 0.85rem;" on:click={() => navigator.clipboard.writeText(game.joinUrl)}>COPY</button>
         </div>
         <div class="controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <button class="fungee-btn" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => (showSpectatorModal = true)}>SPECTATOR</button>
           <button class="fungee-btn success" data-tour="start-game" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('LIVE')} disabled={game.status !== 'NOT_STARTED'}>START</button>
           <button class="fungee-btn danger" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('COMPLETED')} disabled={game.status !== 'LIVE'}>END</button>
           {#if game.status === 'COMPLETED'}
@@ -476,6 +537,44 @@
       <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
         <button type="button" on:click={() => (showSpectatorModal = false)}>Cancel</button>
         <button class="fungee-btn" type="button" on:click={pairSpectator}>Connect</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if showAnnouncementModal}
+  <div class="modal-backdrop" on:click={() => (showAnnouncementModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }} style="max-width: 28rem; width: 100%;">
+      <h3>Send Announcement</h3>
+      <textarea
+        class="fungee-textarea"
+        bind:value={announcementMessage}
+        placeholder="Type your message..."
+        rows="4"
+        style="width: 100%; margin-bottom: 0.75rem;"
+      ></textarea>
+      <label class="fungee-check" style="margin-bottom: 0.5rem;">
+        <input type="checkbox" bind:checked={announcementCaptainsOnly} />
+        Captains only
+      </label>
+      <label class="fungee-check" style="margin-bottom: 0.75rem;">
+        <input type="checkbox" bind:checked={announcementAll} />
+        All teams
+      </label>
+      {#if !announcementAll && teams.length}
+        <p style="margin: 0 0 0.5rem; font-weight: 600;">Select teams</p>
+        <div style="max-height: 12rem; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem; margin-bottom: 1rem;">
+          {#each teams as team (team.id)}
+            <label class="fungee-check" style="margin: 0.25rem 0;">
+              <input type="checkbox" value={team.id} bind:group={announcementTeamIds} />
+              {team.name ?? 'Unnamed team'}
+            </label>
+          {/each}
+        </div>
+      {/if}
+      <div class="actions" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+        <button type="button" on:click={() => (showAnnouncementModal = false)}>Cancel</button>
+        <button class="fungee-btn" type="button" on:click={sendAnnouncement} disabled={!announcementMessage.trim()}>Send</button>
       </div>
     </div>
   </div>
