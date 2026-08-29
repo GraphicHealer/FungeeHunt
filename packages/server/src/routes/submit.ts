@@ -1,9 +1,26 @@
+import { execFile } from 'node:child_process';
+import path from 'node:path';
 import { Router } from 'express';
 import { db } from '../db/client';
+import { config } from '../config';
 import { playerAuth } from '../middleware/playerAuth';
 import { upload } from '../lib/uploads';
 
 const router = Router({ mergeParams: true });
+
+function generateVideoThumb(input: string, output: string) {
+  return new Promise<void>((resolve, reject) => {
+    execFile('ffmpeg', [
+      '-y',
+      '-ss', '00:00:00.250',
+      '-i', input,
+      '-vf', 'scale=480:480:force_original_aspect_ratio=decrease',
+      '-frames:v', '1',
+      '-q:v', '2',
+      output,
+    ], (err) => (err ? reject(err) : resolve()));
+  });
+}
 
 router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: any) => {
   const { taskId } = req.params;
@@ -40,6 +57,18 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
     }
     if (task.proofType === 'PHOTOS' && !allPhotos) {
       return res.status(400).json({ error: 'This task requires one or more photos' });
+    }
+
+    for (const f of files) {
+      if (f.mimetype.startsWith('video/')) {
+        const input = path.join(config.UPLOAD_DIR, f.filename);
+        const output = path.join(config.UPLOAD_DIR, `${f.filename}.thumb.jpg`);
+        try {
+          await generateVideoThumb(input, output);
+        } catch (err) {
+          console.error('video thumbnail failed', { input, err });
+        }
+      }
     }
 
     const existing = await db.submission.findUnique({

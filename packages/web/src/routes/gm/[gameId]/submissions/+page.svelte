@@ -77,7 +77,7 @@
         <div class="thumb">
           {#if sub.proofUrl}
             {#if sub.task?.proofType === 'VIDEO' || sub.proofUrl?.endsWith('.mp4') || sub.proofUrl?.endsWith('.mov')}
-              <video src={sub.proofUrl} muted playsinline preload="metadata" />
+              <img src={`${sub.proofUrl}.thumb.jpg`} alt="Video thumbnail" />
             {:else}
               <img src={sub.proofUrl} alt="Submission" />
             {/if}
@@ -159,8 +159,7 @@
     box-shadow: 0 0 0 1px var(--danger);
   }
 
-  .thumb img,
-  .thumb video {
+  .thumb img {
     width: 6rem;
     height: 4rem;
     object-fit: cover;
