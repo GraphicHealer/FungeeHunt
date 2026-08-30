@@ -52,8 +52,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           provenance: false
           sbom: false
-          outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=FungeeHunt,oci-mediatypes=false
+          outputs: type=registry,oci-mediatypes=false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
