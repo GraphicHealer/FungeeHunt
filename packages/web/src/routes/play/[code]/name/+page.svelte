@@ -1,11 +1,19 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
 
   const code = $page.params.code;
   let displayName = '';
   let carValue = '';
   let error = '';
+
+  onMount(async () => {
+    const res = await fetch(`/api/join/${code}`);
+    if (!res.ok) {
+      goto('/?notfound=1');
+    }
+  });
 
   async function join() {
     error = '';

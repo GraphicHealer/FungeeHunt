@@ -4,6 +4,18 @@ import { createPlayerToken } from '../lib/auth';
 
 const router = Router();
 
+router.get('/:code', async (req, res) => {
+  const { code } = req.params;
+  try {
+    const game = await db.game.findUnique({ where: { code: (code ?? '').toUpperCase() } });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+    res.json({ exists: true, status: game.status });
+  } catch (err) {
+    console.error('check game failed', err);
+    res.status(500).json({ error: 'Could not check game' });
+  }
+});
+
 router.post('/', async (req, res) => {
   const { code, displayName, hasCar } = req.body ?? {};
   const trimmed = displayName ? displayName.trim() : '';

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { formatPoints } from '$lib/format';
+  import { io } from 'socket.io-client';
 
   const code = $page.params.code;
   const token = $page.url.searchParams.get('token');
@@ -12,6 +13,7 @@
   let selectedTeamId: string | null = null;
   let loading = true;
   let myTeamId: string | null = null;
+  let socket: any;
 
   function filenameFromUrl(url: string) {
     return url.split('/').pop() ?? url;
@@ -23,6 +25,14 @@
   }
 
   onMount(async () => {
+    socket = io({ transports: ['websocket', 'polling'] });
+    socket.on(`game:${code.toUpperCase()}`, (payload: any) => {
+      if (payload?.type === 'deleted') {
+        localStorage.removeItem(`token:${code}`);
+        goto('/');
+      }
+    });
+
     const res = await fetch(`/api/archive/${code}`);
     if (res.ok) {
       const data = await res.json();
@@ -32,6 +42,9 @@
         await loadMyTeam();
         return;
       }
+    } else if (res.status === 404) {
+      goto('/?notfound=1');
+      return;
     }
 
     if (token) {
@@ -42,6 +55,10 @@
     } else {
       goto(`/play/${code}/name`);
     }
+  });
+
+  onDestroy(() => {
+    if (socket) socket.disconnect();
   });
 
   async function loadMyTeam() {
@@ -75,6 +92,8 @@
       } else {
         goto(`/play/${code}/lobby`);
       }
+    } else if (res.status === 404) {
+      goto('/?notfound=1');
     } else {
       goto(`/play/${code}/name`);
     }

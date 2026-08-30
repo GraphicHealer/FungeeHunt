@@ -1,11 +1,21 @@
 <script lang="ts">
+  import { page } from '$app/stores';
   import { goto } from '$app/navigation';
 
   let code = '';
+  let error = $page.url.searchParams.get('notfound') === '1'
+    ? 'That game does not exist. Please check the code and try again.'
+    : '';
 
-  function join() {
-    if (code.trim()) {
-      goto(`/play/${code.trim()}/name`);
+  async function join() {
+    const trimmed = code.trim().toUpperCase();
+    if (!trimmed) return;
+    error = '';
+    const res = await fetch(`/api/join/${trimmed}`);
+    if (res.ok) {
+      goto(`/play/${trimmed}/name`);
+    } else {
+      error = 'That game does not exist. Please check the code and try again.';
     }
   }
 </script>
@@ -35,6 +45,7 @@
       maxlength="8"
     />
 
+    {#if error}<p class="fungee-error" style="margin-top: 1rem;">{error}</p>{/if}
     <button class="fungee-btn" on:click={join} disabled={!code.trim()}>JOIN GAME</button>
   </div>
 </main>

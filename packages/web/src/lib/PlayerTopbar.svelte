@@ -45,6 +45,9 @@
     if (res.ok) {
       state = await res.json();
       remainingStr = remaining();
+    } else if (res.status === 404) {
+      localStorage.removeItem(`token:${code}`);
+      goto('/?notfound=1');
     }
   }
 

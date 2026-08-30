@@ -37,6 +37,9 @@
       }
       status = state.team ? (state.game?.status === 'LIVE' ? 'You have not been assigned to a team yet' : 'Game not started yet') : 'Waiting for the Game Master to assign you to a team…';
       newName = state.team?.name ?? '';
+    } else if (res.status === 404) {
+      goto('/?notfound=1');
+      return;
     } else {
       const data = await res.json().catch(() => ({}));
       status = data.error ?? 'Could not load game state.';

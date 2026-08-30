@@ -173,6 +173,8 @@
       data = next;
       setupTimers();
       addToQueue(next.recent ?? []);
+    } else if (res.status === 404) {
+      goto('/?notfound=1');
     } else {
       error = 'Could not load viewer';
     }
