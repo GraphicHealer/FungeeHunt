@@ -57,10 +57,10 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 
 ## Quick start on Unraid
 
-Copy `fungee-hunt.xml` into the Unraid Docker user templates folder:
+Copy `my-fungee-hunt.xml` into the Unraid Docker user templates folder:
 
 ```text
-/boot/config/plugins/dockerMan/templates-user/fungee-hunt.xml
+/boot/config/plugins/dockerMan/templates-user/my-fungee-hunt.xml
 ```
 
 After placing the file, refresh the Docker page in the Unraid web UI. Fungee-Hunt will appear under **User Templates**. You can then add it and fill in the `PG_*` variables to point at your Postgres container.
