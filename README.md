@@ -17,8 +17,10 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 4. When the Game Master starts the game, the clock starts and Team Captains see a quick instruction popup.
 5. Teams fan out, complete tasks, and submit photo or video proof. Multi-photo tasks are supported for challenges that need more than one image.
 6. The Game Master reviews submissions from a grid dashboard unless the game is set to automatic approval.
-7. The public viewer (`/view/{code}`) shows a live leaderboard and the latest photos as they come in.
-8. After the game ends, the same player link (`/play/{code}`) becomes a public archive where anyone can browse teams and download their submissions.
+7. The public viewer (`/view/{code}`) shows a live leaderboard and the latest photos as they come in. Pair a TV or projector from the GM dashboard with a 6-digit spectator code.
+8. Game Masters can send pop-up announcements to all teams, specific teams, or captains only.
+9. After the game ends, the same player link (`/play/{code}`) becomes a public archive where anyone can browse team results and download submissions.
+10. The GM can also render an auto-generated recap video of the game.
 
 ## Screenshots
 
@@ -39,14 +41,17 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 - Mobile-first player and captain experience
 - Real-time leaderboard, submissions, and viewer feed
 - Photo, video, and multi-photo task proof
-- Random, category-balanced task selection for each game
+- Random, category-balanced task selection from a default task library
 - A guaranteed `Team Photo` task that always starts the list
 - Driver tracking and auto-team creation with captain/driver balance
 - Optional return-time bonus and food-drive bonus
 - CSV import/export for task lists
-- Bulk task editing and drag-to-reorder for the Game Master
+- Bulk task editing, drag-to-reorder, and one-click "Save to Database" for the Game Master
+- Send pop-up announcements to all teams, selected teams, or captains only
+- One-click spectator pairing and public viewer at `/view/{CODE}`
+- Post-game archive at `/play/{CODE}` with per-team results and downloads
+- Auto-generated recap video with music and transitions
 - Animated, modern UI
-- Post-game archive at `/play/{CODE}` where anyone can download each team\'s submissions
 - One Docker image with the app and a Compose file that includes PostgreSQL
 - Recap video music by **Kevin MacLeod** (incompetech.com) — **do not redistribute the music from this repo; get it from https://incompetech.com/music/royalty-free/music.html**
 
@@ -86,8 +91,11 @@ docker run -p 3000:3000 `
 3. Build your task list manually, import a CSV, or select from the default library.
 4. Add or import players, then open **Teams** and click **AUTO-CREATE TEAMS**. Every team will get one Team Captain and one driver.
 5. When you are ready, click **START** on the dashboard. The clock starts, the code goes live, and Team Captains see a quick welcome.
-6. Review incoming submissions from the dashboard grid and approve or reject them. If the game is in automatic approval mode, submissions are accepted as soon as they arrive.
-7. Click **END** when the time is up.
+6. Use the **SPECTATOR** dropdown in the dashboard top bar to pair a TV or projector, or open the public viewer.
+7. Use the **ANNOUNCE** button to send pop-up messages to teams or captains during the game.
+8. Review incoming submissions from the dashboard grid and approve or reject them. If the game is in automatic approval mode, submissions are accepted as soon as they arrive.
+9. Click **END** when the time is up.
+10. After the game, you can render a recap video and browse the archive.
 
 ### As a player
 
@@ -103,11 +111,11 @@ When the game starts, the app will show you a quick popup explaining your role. 
 
 ### As a spectator
 
-Open `/view/{CODE}` to see the live scoreboard and the most recent photos. It is designed for TVs and projectors.
+Open `/spectator` on the display to get a 6-digit pairing code, then have the Game Master pair it from the dashboard. Once paired, `/view/{CODE}` shows the live scoreboard, countdown, and the most recent photos for that game. It is designed for TVs and projectors.
 
 ## Customizing the task list
 
-Default tasks can be managed in **System Settings**. You can download the current list as a CSV, edit it in any spreadsheet, and upload it back. For a single game, use **Import Tasks** on the GM dashboard or in the GM Tasks page.
+Default tasks can be managed in **System Settings**. You can download the current list as a CSV, edit it in any spreadsheet, and upload it back. For a single game, use **Import Tasks** on the GM dashboard or in the GM Tasks page. You can also save any task from the GM task editor back to the default library with the **Save to Database** button.
 
 The CSV columns are:
 
