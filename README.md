@@ -20,6 +20,20 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 7. The public viewer (`/view/{code}`) shows a live leaderboard and the latest photos as they come in.
 8. After the game ends, the same player link (`/play/{code}`) becomes a public archive where anyone can browse teams and download their submissions.
 
+## Screenshots
+
+### Game Master dashboard
+
+![GM Dashboard](docs/screenshots/gm-dashboard.png)
+
+### Public viewer
+
+![Viewer](docs/screenshots/viewer.png)
+
+### Player / Team Captain
+
+![Player](docs/screenshots/player.png)
+
 ## Key features
 
 - Mobile-first player and captain experience
