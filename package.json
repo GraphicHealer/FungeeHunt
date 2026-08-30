@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "db:migrate": "node packages/server/src/scripts/migrate.js",
+    "db:migrate": "node packages/server/src/scripts/migrate.cjs",
     "db:generate": "npx prisma generate --schema=packages/server/src/db/schema.prisma"
   },
   "engines": {
