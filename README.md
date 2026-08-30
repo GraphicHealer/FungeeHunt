@@ -32,7 +32,7 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 
 ### Player / Team Captain
 
-<img src="docs/screenshots/player.png" alt="Player" width="600" />
+<img src="docs/screenshots/player.png" alt="Player" width="400" />
 
 ## Key features
 
