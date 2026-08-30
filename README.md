@@ -73,7 +73,10 @@ You can also run the pre-built image directly if you already have a Postgres dat
 docker run -p 3000:3000 `
   -e GM_PASSPHRASE=changeme `
   -e SESSION_SECRET=changeme `
-  -e DATABASE_URL=postgresql://fungeehunt:changeme@host.docker.internal:5432/fungeehunt `
+  -e PG_USER=fungeehunt `
+  -e PG_PASS=changeme `
+  -e PG_HOST=host.docker.internal `
+  -e PG_DATABASE=fungeehunt `
   -e WEB_UI=3000 `
   -e UPLOAD_DIR=/data/uploads `
   -e LOG_LEVEL=debug `
@@ -149,7 +152,10 @@ Edit `.env` for local dev:
 ```text
 GM_PASSPHRASE=your-secret-gm-passphrase
 SESSION_SECRET=any-long-random-string
-DATABASE_URL=postgresql://fungeehunt:your-local-postgres-password@localhost:5432/fungeehunt
+PG_USER=fungeehunt
+PG_PASS=your-local-postgres-password
+PG_HOST=localhost
+PG_DATABASE=fungeehunt
 WEB_UI=3000
 UPLOAD_DIR=./uploads
 ```
@@ -221,7 +227,11 @@ npm run build --workspace=@fungeehunt/web
 | --- | --- |
 | `GM_PASSPHRASE` | Passphrase used to log in as Game Master |
 | `SESSION_SECRET` | Secret for GM JWT signing |
-| `DATABASE_URL` | PostgreSQL connection string |
+| `PG_USER` | PostgreSQL user |
+| `PG_PASS` | PostgreSQL password |
+| `PG_HOST` | PostgreSQL host |
+| `PG_PORT` | PostgreSQL port (defaults to 5432) |
+| `PG_DATABASE` | PostgreSQL database name |
 | `UPLOAD_DIR` | Where player uploads are stored |
 | `WEB_UI` | Port the server listens on |
 

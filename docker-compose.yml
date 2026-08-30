@@ -21,7 +21,10 @@ services:
     environment:
       GM_PASSPHRASE: changeme
       SESSION_SECRET: changeme
-      DATABASE_URL: postgresql://fungeehunt:changeme@postgres:5432/fungeehunt
+      PG_USER: fungeehunt
+      PG_PASS: changeme
+      PG_HOST: postgres
+      PG_DATABASE: fungeehunt
       WEB_UI: 3000
       UPLOAD_DIR: /data/uploads
       LOG_LEVEL: debug

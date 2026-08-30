@@ -1,6 +1,19 @@
 import 'dotenv/config';
 import { z } from 'zod';
 
+if (!process.env.DATABASE_URL) {
+  const {
+    PG_USER,
+    PG_PASS,
+    PG_HOST,
+    PG_PORT,
+    PG_DATABASE,
+  } = process.env;
+  if (PG_USER && PG_PASS && PG_HOST && PG_DATABASE) {
+    process.env.DATABASE_URL = `postgresql://${PG_USER}:${encodeURIComponent(PG_PASS)}@${PG_HOST}:${PG_PORT || '5432'}/${PG_DATABASE}`;
+  }
+}
+
 const envSchema = z.object({
   GM_PASSPHRASE: z.string().min(1),
   DATABASE_URL: z.string().min(1),
