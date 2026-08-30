@@ -6,7 +6,10 @@
   "workspaces": [
     "packages/*"
   ],
-  "scripts": {},
+  "scripts": {
+    "db:migrate": "node packages/server/src/scripts/migrate.js",
+    "db:generate": "npx prisma generate --schema=packages/server/src/db/schema.prisma"
+  },
   "engines": {
     "node": ">=20"
   }

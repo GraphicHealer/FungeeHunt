@@ -73,6 +73,12 @@ Review the defaults in `docker-compose.yml`, then run:
 docker compose up
 ```
 
+On first run, deploy the Prisma migrations:
+
+```powershell
+docker compose exec fungee-hunt npm run db:migrate
+```
+
 The app will be available at `http://localhost:3000`.
 
 To log in as the Game Master, use the `GM_PASSPHRASE` value (default is `changeme`).
@@ -178,9 +184,11 @@ mkdir uploads
 
 ### 3. Run Prisma migrations
 
+The `PG_*` variables are used to build the connection string automatically.
+
 ```powershell
-npx prisma migrate dev --schema packages/server/src/db/schema.prisma
-npx prisma generate --schema packages/server/src/db/schema.prisma
+npm run db:migrate
+npm run db:generate
 ```
 
 ### 4. Start the server
@@ -205,10 +213,10 @@ The Vite dev server runs on `http://localhost:5173` and proxies `/api` and `/soc
 
 ```powershell
 # Run Prisma migrations
-dotenv -e .env -- npx prisma migrate dev --schema packages/server/src/db/schema.prisma
+npm run db:migrate
 
 # Generate Prisma client
-npx prisma generate --schema packages/server/src/db/schema.prisma
+npm run db:generate
 
 # Start the server for local development
 npm run dev --workspace=@fungeehunt/server
