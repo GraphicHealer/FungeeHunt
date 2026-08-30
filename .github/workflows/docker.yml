@@ -56,3 +56,4 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
+          outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=FungeeHunt,oci-mediatypes=false
