@@ -28,11 +28,11 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 
 ### Public viewer
 
-<img src="docs/screenshots/viewer.png" alt="Viewer" width="600" />
+![Viewer](docs/screenshots/viewer.png)
 
 ### Player / Team Captain
 
-![Player](docs/screenshots/player.png)
+<img src="docs/screenshots/player.png" alt="Player" width="600" />
 
 ## Key features
 
