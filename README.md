@@ -28,7 +28,7 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 
 ### Public viewer
 
-![Viewer](docs/screenshots/viewer.png)
+<img src="docs/screenshots/viewer.png" alt="Viewer" width="600" />
 
 ### Player / Team Captain
 
