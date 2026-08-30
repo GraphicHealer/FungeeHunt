@@ -13,6 +13,8 @@ RUN npm install
 
 COPY . .
 
+ENV DATABASE_URL=postgresql://placeholder:placeholder@placeholder:5432/placeholder
+
 RUN npx prisma generate --schema=packages/server/src/db/schema.prisma
 RUN npm run build --workspace=@fungeehunt/web
 
@@ -20,4 +22,4 @@ ENV FRONTEND_BUILD_DIR=/app/packages/web/build
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=packages/server/src/db/schema.prisma && npx tsx packages/server/src/index.ts"]
+CMD ["sh", "-c", "npm run db:migrate && npx tsx packages/server/src/index.ts"]
