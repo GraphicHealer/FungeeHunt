@@ -5,8 +5,8 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 ## Who it is for
 
 - **Game Master** — creates the game, sets the rules, picks the tasks, manages players and teams, then starts the clock and reviews submissions.
-- **Players** — join on their phones with a game code, see their team's tasks, and submit proof.
-- **Team Captains** — app players who lead a team and can see the team's shared task list.
+- **Players** — join on their phones with a game code and see their team's tasks.
+- **Team Captains** — app players who lead a team, see the team's shared task list, and submit proof.
 - **Spectators** — anyone watching the public scoreboard and photo feed on a TV or projector.
 
 ## What a game looks like
@@ -15,7 +15,7 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 2. Players join with the code, pick a name, and say whether they can drive.
 3. The Game Master builds or imports a task list, then auto-creates balanced teams. Each team gets a Team Captain and at least one driver.
 4. When the Game Master starts the game, the clock starts and Team Captains see a quick instruction popup.
-5. Teams fan out, complete tasks, and submit photo or video proof. Multi-photo tasks are supported for challenges that need more than one image.
+5. Teams fan out and complete tasks. The Team Captain submits photo or video proof. Multi-photo tasks are supported for challenges that need more than one image.
 6. The Game Master reviews submissions from a grid dashboard unless the game is set to automatic approval.
 7. The public viewer (`/view/{code}`) shows a live leaderboard and the latest photos as they come in. Pair a TV or projector from the GM dashboard with a 6-digit spectator code.
 8. Game Masters can send pop-up announcements to all teams, specific teams, or captains only.
@@ -102,7 +102,7 @@ docker run -p 3000:3000 `
 1. Open `/play/{CODE}` (or the join link).
 2. Enter your display name and whether you have a car.
 3. Wait for the Game Master to start the game.
-4. Browse your task list, complete challenges, and submit proof. The first task is always the `Team Photo`.
+4. Browse your task list and complete challenges. The first task is always the `Team Photo`.
 5. Watch the public viewer to see how your team is doing.
 
 ### As a Team Captain
