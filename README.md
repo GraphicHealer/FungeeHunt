@@ -55,6 +55,16 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 - One Docker image with the app and a Compose file that includes PostgreSQL
 - Recap video music by **Kevin MacLeod** (incompetech.com) — **do not redistribute the music from this repo; get it from https://incompetech.com/music/royalty-free/music.html**
 
+## Quick start on Unraid
+
+Copy `fungee-hunt.xml` into the Unraid Docker user templates folder:
+
+```text
+/boot/config/plugins/dockerMan/templates-user/fungee-hunt.xml
+```
+
+After placing the file, refresh the Docker page in the Unraid web UI. Fungee-Hunt will appear under **User Templates**. You can then add it and fill in the `PG_*` variables to point at your Postgres container.
+
 ## Quick start with Docker
 
 Review the defaults in `docker-compose.yml`, then run:
