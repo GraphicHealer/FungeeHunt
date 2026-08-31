@@ -24,17 +24,25 @@ router.get('/', async (req, res) => {
       : [];
 
     const byTask = new Map(submissions.map((s: any) => [s.taskId, s]));
-    const tasksWithStatus = tasks.map((task: any) => ({
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      points: task.points,
-      proofType: task.proofType,
-      photoCount: task.photoCount,
-      delayMinutes: task.delayMinutes,
-      order: task.order,
-      submission: byTask.get(task.id) ?? null,
-    }));
+    const now = Date.now();
+    const tasksWithStatus = tasks
+      .filter((task: any) => !task.isBonus || (
+        game.bonusStart && game.bonusEnd &&
+        now >= new Date(game.bonusStart).getTime() &&
+        now <= new Date(game.bonusEnd).getTime()
+      ))
+      .map((task: any) => ({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        points: task.points,
+        proofType: task.proofType,
+        photoCount: task.photoCount,
+        delayMinutes: task.delayMinutes,
+        isBonus: task.isBonus,
+        order: task.order,
+        submission: byTask.get(task.id) ?? null,
+      }));
 
     const team = player.team;
     const completedScore = submissions

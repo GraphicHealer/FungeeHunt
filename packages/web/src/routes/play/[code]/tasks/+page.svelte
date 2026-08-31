@@ -230,9 +230,9 @@
 
         <ul class="fungee-list">
           {#each state.tasks as task (task.id)}
-            <li class="fungee-accordion" class:incomplete={task.submission?.status === 'INCOMPLETE'}>
+            <li class="fungee-accordion" class:incomplete={task.submission?.status === 'INCOMPLETE'} class:bonus={task.isBonus}>
               <button class="fungee-accordion-header" on:click={() => (expanded = expanded === task.id ? '' : task.id)}>
-                <span class="fungee-section-title" style="margin: 0;">{task.order}. {task.title}</span>
+                <span class="fungee-section-title" style="margin: 0;">{#if task.isBonus}<span class="mdi mdi-star" style="color: #ffd700;"></span> {/if}{task.order}. {task.title}</span>
                 <span style="display: flex; align-items: center; gap: 0.75rem;">
                   <span>+{formatPoints(task.points)}</span>
                   {#if task.submission}
@@ -245,6 +245,11 @@
 
               {#if expanded === task.id}
                 <div class="fungee-accordion-body">
+                  {#if task.isBonus}
+                    <p class="bonus-notice" style="margin: 0 0 0.5rem; padding: 0.5rem; background: #332200; color: #ffd700; border-radius: 0.35rem; font-weight: 700;">
+                      <span class="mdi mdi-star"></span> Limited-time bonus task! Submit before the window ends for extra points.
+                    </p>
+                  {/if}
                   <p style="margin: 0 0 0.5rem; white-space: pre-line;">{task.description || 'No description'}</p>
                   <p style="margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem;">Proof: {task.proofType}{#if photoHint(task)} — {photoHint(task)}{/if}</p>
 
@@ -383,6 +388,11 @@
   .fungee-accordion.incomplete {
     border-color: var(--danger);
     box-shadow: 0 0 0 1px var(--danger);
+  }
+
+  .fungee-accordion.bonus {
+    border-color: #ffd700;
+    box-shadow: 0 0 0 1px #ffd700;
   }
 
   .submit-row {

@@ -39,12 +39,19 @@
   let foodDrivePermissible = '';
   let foodDriveSuggested = '';
 
+  let bonusEnabled = true;
+  let bonusStartTime = '';
+  let bonusEndTime = '';
+  let bonusTaskIndex = 0;
+
   let error = '';
 
   $: startAt = `${date}T${startTime}`;
   $: endAt = `${date}T${endTime}`;
   $: returnStart = date && returnStartTime ? `${date}T${returnStartTime}` : '';
   $: returnEnd = date && returnEndTime ? `${date}T${returnEndTime}` : '';
+  $: bonusStart = date && bonusStartTime ? `${date}T${bonusStartTime}` : '';
+  $: bonusEnd = date && bonusEndTime ? `${date}T${bonusEndTime}` : '';
 
   $: if (date && returnStartTime && returnBonusWindowMinutes) {
     const start = fromInputValue(returnStart);
@@ -122,6 +129,17 @@
     returnBonusWindowMinutes = fallbackWindow;
   }
 
+  function regenerateBonus() {
+    if (!date || !startTime || !endTime || !availableTasks.length) return;
+    const start = fromInputValue(startAt);
+    const end = fromInputValue(endAt);
+    const mid = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2 - 10 * 60 * 1000);
+    const bonusEnd = new Date(mid.getTime() + 20 * 60 * 1000);
+    bonusStartTime = toInputValue(mid).slice(11, 16);
+    bonusEndTime = toInputValue(bonusEnd).slice(11, 16);
+    bonusTaskIndex = Math.floor(Math.random() * availableTasks.length);
+  }
+
   async function createGame() {
     error = '';
     const res = await fetch('/api/gm/games', {
@@ -140,6 +158,9 @@
         returnEnd,
         returnPoints,
         taskCount,
+        bonusStart: bonusEnabled ? bonusStart : null,
+        bonusEnd: bonusEnabled ? bonusEnd : null,
+        bonusTask: bonusEnabled ? availableTasks[bonusTaskIndex] : null,
         foodDriveEnabled,
         foodDrivePointsPerItem,
         foodDrivePermissible,
@@ -246,8 +267,42 @@
           </div>
         </form>
       {:else if step === 4}
+        <form on:submit|preventDefault={() => step = 5}>
+          <h2 class="fungee-section-title">4. Bonus Task</h2>
+          <label class="fungee-check">
+            <input type="checkbox" bind:checked={bonusEnabled} />
+            Enable limited-time bonus task
+          </label>
+
+          {#if bonusEnabled}
+            <p style="margin: 0.25rem 0 1rem; color: var(--muted); font-size: 0.9rem;">
+              A golden bonus task will appear for captains only during this window.
+            </p>
+
+            <label class="fungee-label" for="bs">Window Start Time</label>
+            <input class="fungee-input" id="bs" type="time" bind:value={bonusStartTime} />
+
+            <label class="fungee-label" for="be">Window End Time</label>
+            <input class="fungee-input" id="be" type="time" bind:value={bonusEndTime} />
+
+            <label class="fungee-label" for="bt">Bonus Task</label>
+            <select class="fungee-select" id="bt" bind:value={bonusTaskIndex}>
+              {#each availableTasks as t, i}
+                <option value={i}>{t.title} (+{t.points} pts)</option>
+              {/each}
+            </select>
+
+            <button class="fungee-btn secondary" type="button" on:click={regenerateBonus} style="width: auto; margin: 0;">RANDOMIZE</button>
+          {/if}
+
+          <div class="fungee-btn-row">
+            <button class="fungee-btn secondary" type="button" on:click={() => step = 3}>BACK</button>
+            <button class="fungee-btn" type="submit" data-tour="step4-next" disabled={bonusEnabled && (!bonusTask || !bonusStartTime || !bonusEndTime)}>NEXT</button>
+          </div>
+        </form>
+      {:else if step === 5}
         <form on:submit|preventDefault={createGame}>
-          <h2 class="fungee-section-title">4. Food Drive</h2>
+          <h2 class="fungee-section-title">5. Food Drive</h2>
           <label class="fungee-check">
             <input type="checkbox" bind:checked={foodDriveEnabled} />
             Enable food drive bonus
@@ -264,7 +319,7 @@
           {#if error}<p class="fungee-error">{error}</p>{/if}
 
           <div class="fungee-btn-row">
-            <button class="fungee-btn secondary" type="button" on:click={() => step = 3}>BACK</button>
+            <button class="fungee-btn secondary" type="button" on:click={() => step = 4}>BACK</button>
             <button class="fungee-btn" type="submit" data-tour="create-game">CREATE GAME</button>
           </div>
         </form>

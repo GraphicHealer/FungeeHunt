@@ -111,6 +111,7 @@ const defaultTasks = [
     description: `Collect a photo of each of the other teams' vehicles or gathering spots.`,
     points: 50,
     proofType: 'PHOTOS',
+    delayMinutes: 15,
     category: 'Vehicles',
 
   },
@@ -607,7 +608,11 @@ const defaultRules = [
   },
   {
     title: 'Obey the Law',
-    body: 'All participants must obey all applicable federal, state, and local laws, regulations, and policies while participating in the Hunt. Do not trespass, break laws, damage property, harass people, or otherwise violate the rules of a location in order to complete a Challenge.',
+    body: 'All participants must obey all applicable federal, state, and local laws and regulations while participating in the Hunt. Do not trespass, break laws, damage property, harass people, or otherwise violate the rules of a location in order to complete a Challenge.',
+  },
+  {
+    title: 'Drivers',
+    body: 'No reckless driving. Also, obey speed limits. See "Obey the Law."',
   },
   {
     title: 'Respect People and Places',
@@ -639,7 +644,7 @@ const defaultRules = [
   },
   {
     title: 'RETURN TIME BONUS',
-    body: 'Teams that return to the finish during the return window will receive the return bonus points. The Game Master must confirm your return.',
+    body: 'Teams that return to the finish during the return window will receive the return bonus points. The Game Master must confirm your return. No team may hinder another team from returning on time.',
   },
 ];
 

@@ -71,6 +71,12 @@ function buildGameData(body: any, partial = false) {
   if (body.captainCanUpdateFoodDrive !== undefined || !partial) {
     data.captainCanUpdateFoodDrive = asBool(body.captainCanUpdateFoodDrive);
   }
+  if (body.bonusStart !== undefined || !partial) {
+    data.bonusStart = asDate(body.bonusStart);
+  }
+  if (body.bonusEnd !== undefined || !partial) {
+    data.bonusEnd = asDate(body.bonusEnd);
+  }
 
   return data;
 }
@@ -221,9 +227,13 @@ router.post('/', async (req: any, res: any) => {
     const defaultTasks = settings.defaultTasks ? JSON.parse(settings.defaultTasks) : [];
     const defaultRules = settings.defaultRules ? JSON.parse(settings.defaultRules) : [];
 
-    const taskCount = Math.min(asInt(body.taskCount) || 20, defaultTasks.length || 20);
+    const bonusTask = body.bonusTask;
+    const withoutBonus = bonusTask
+      ? defaultTasks.filter((t: any) => (t.title ?? '').trim().toLowerCase() !== (bonusTask.title ?? '').trim().toLowerCase())
+      : defaultTasks;
+    const taskCount = Math.min(asInt(body.taskCount) || 20, withoutBonus.length || 20);
 
-    const selectedTasks = selectTasks(defaultTasks, taskCount);
+    const selectedTasks = selectTasks(withoutBonus, taskCount);
     if (selectedTasks.length) {
       await db.task.createMany({
         data: selectedTasks.map((t: any, i: number) => ({
@@ -236,6 +246,22 @@ router.post('/', async (req: any, res: any) => {
           category: t.category ?? 'General',
           order: t.order ?? i + 1,
         })),
+      });
+    }
+
+    if (bonusTask) {
+      await db.task.create({
+        data: {
+          gameId: game.id,
+          title: (bonusTask.title ?? 'Bonus task').trim(),
+          description: bonusTask.description ?? '',
+          points: Number(bonusTask.points) || 0,
+          proofType: ['PHOTO', 'VIDEO', 'PHOTOS'].includes(bonusTask.proofType) ? bonusTask.proofType : 'PHOTO',
+          photoCount: bonusTask.photoCount ? Number(bonusTask.photoCount) : null,
+          category: bonusTask.category ?? 'Bonus',
+          isBonus: true,
+          order: (selectedTasks.length + 1) || 999,
+        },
       });
     }
 

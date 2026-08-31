@@ -103,7 +103,7 @@ router.post('/batch', async (req: any, res: any) => {
 
 router.patch('/:taskId', async (req: any, res: any) => {
   const { gameId, taskId } = req.params;
-  const { title, description, points, proofType, photoCount, order, category, delayMinutes } = req.body ?? {};
+  const { title, description, points, proofType, photoCount, order, category, delayMinutes, isBonus } = req.body ?? {};
   try {
     const data: any = {};
     if (title !== undefined) data.title = title.trim();
@@ -114,6 +114,7 @@ router.patch('/:taskId', async (req: any, res: any) => {
     }
     if (photoCount !== undefined) data.photoCount = photoCount ? Number(photoCount) : null;
     if (delayMinutes !== undefined) data.delayMinutes = delayMinutes ? Number(delayMinutes) : null;
+    if (isBonus !== undefined) data.isBonus = !!isBonus;
     if (order !== undefined) data.order = Number(order);
     if (category !== undefined) data.category = category ?? undefined;
 

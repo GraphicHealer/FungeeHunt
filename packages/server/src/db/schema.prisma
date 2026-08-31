@@ -20,6 +20,8 @@ model Game {
   returnStart            DateTime?
   returnEnd              DateTime?
   returnPoints           Float          @default(0)
+  bonusStart             DateTime?
+  bonusEnd               DateTime?
   foodDriveEnabled            Boolean        @default(false)
   foodDrivePointsPerItem      Float          @default(0)
   foodDrivePermissible        String?
@@ -72,6 +74,7 @@ model Task {
   proofType   ProofType
   photoCount   Int?
   delayMinutes Int?
+  isBonus      Boolean      @default(false)
   category     String?
   order        Int
   game        Game         @relation(fields: [gameId], references: [id])

@@ -6,7 +6,7 @@
   const gameId = $page.params.gameId;
 
   let game: any = null;
-  let modal: 'return' | 'food' | null = null;
+  let modal: 'return' | 'food' | 'bonus' | null = null;
   let saving = false;
   let error = '';
 
@@ -18,6 +18,12 @@
   let fdPoints = 1;
   let fdPermissible = '';
   let fdSuggested = '';
+
+  let allTasks: any[] = [];
+  let bonusEnabled = false;
+  let bonusStart = '';
+  let bonusEnd = '';
+  let bonusTaskId = '';
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -48,6 +54,11 @@
     if (res.ok) game = await res.json();
   }
 
+  async function loadTasks() {
+    const res = await fetch(`/api/gm/games/${gameId}/tasks`, { headers: { Authorization: `Bearer ${token()}` } });
+    if (res.ok) allTasks = await res.json();
+  }
+
   function openReturn() {
     if (!game) return;
     modal = 'return';
@@ -71,6 +82,52 @@
     fdPoints = game.foodDrivePointsPerItem ?? 1;
     fdPermissible = game.foodDrivePermissible ?? '';
     fdSuggested = game.foodDriveSuggested ?? '';
+  }
+
+  async function openBonus() {
+    if (!game) return;
+    await loadTasks();
+    modal = 'bonus';
+    bonusEnabled = !!game.bonusStart && !!game.bonusEnd;
+    bonusStart = game.bonusStart ? toInputValue(new Date(game.bonusStart)) : '';
+    bonusEnd = game.bonusEnd ? toInputValue(new Date(game.bonusEnd)) : '';
+    bonusTaskId = allTasks.find((t: any) => t.isBonus)?.id ?? '';
+  }
+
+  async function saveBonus() {
+    saving = true;
+    error = '';
+
+    const patchGame: any = { bonusStart: bonusEnabled ? bonusStart : null, bonusEnd: bonusEnabled ? bonusEnd : null };
+    const res = await fetch(`/api/gm/games/${gameId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify(patchGame),
+    });
+    if (!res.ok) {
+      saving = false;
+      const data = await res.json();
+      error = data.error ?? 'Could not save bonus window';
+      return;
+    }
+
+    for (const t of allTasks) {
+      await fetch(`/api/gm/games/${gameId}/tasks/${t.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token()}`,
+        },
+        body: JSON.stringify({ isBonus: t.id === bonusTaskId }),
+      });
+    }
+
+    saving = false;
+    close();
+    await load();
   }
 
   function close() {
@@ -185,6 +242,16 @@
       {/if}
       <p class="hint">Click to edit</p>
     </button>
+
+    <button class="section-card" on:click={openBonus}>
+      <h3 class="fungee-section-title" style="margin: 0;"><span class="mdi mdi-star"></span> Bonus Task</h3>
+      {#if game.bonusStart && game.bonusEnd}
+        <p class="window">Window: {fmtTime(game.bonusStart)} — {fmtTime(game.bonusEnd)}</p>
+      {:else}
+        <p class="window">No limited-time bonus task is set for this game.</p>
+      {/if}
+      <p class="hint">Click to edit</p>
+    </button>
   {/if}
 </div>
 
@@ -209,6 +276,43 @@
 
           <label class="fungee-label" for="rp">Points</label>
           <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={retPoints} min="0" />
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+{#if modal === 'bonus'}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveBonus}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;"><span class="mdi mdi-star"></span> Bonus Task</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={bonusEnabled} />
+          Enable limited-time bonus task
+        </label>
+
+        {#if bonusEnabled}
+          <label class="fungee-label" for="bts">Window Start</label>
+          <input class="fungee-input" id="bts" type="datetime-local" bind:value={bonusStart} />
+
+          <label class="fungee-label" for="bte">Window End</label>
+          <input class="fungee-input" id="bte" type="datetime-local" bind:value={bonusEnd} />
+
+          <label class="fungee-label" for="bt">Bonus Task</label>
+          <select class="fungee-input" id="bt" bind:value={bonusTaskId}>
+            <option value="">Select a task</option>
+            {#each allTasks as t}
+              <option value={t.id}>{t.order}. {t.title}</option>
+            {/each}
+          </select>
         {/if}
 
         {#if error}<p class="fungee-error">{error}</p>{/if}
