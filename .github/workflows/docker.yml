@@ -52,5 +52,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
+          provenance: false
+          sbom: false
+          outputs: type=registry,oci-mediatypes=false
           cache-from: type=gha
           cache-to: type=gha,mode=max
