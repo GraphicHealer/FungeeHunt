@@ -31,6 +31,7 @@ router.get('/', async (req, res) => {
       points: task.points,
       proofType: task.proofType,
       photoCount: task.photoCount,
+      delayMinutes: task.delayMinutes,
       order: task.order,
       submission: byTask.get(task.id) ?? null,
     }));

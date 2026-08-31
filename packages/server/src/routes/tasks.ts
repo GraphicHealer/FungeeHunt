@@ -20,7 +20,7 @@ router.get('/', async (req: any, res: any) => {
 
 router.post('/', async (req: any, res: any) => {
   const { gameId } = req.params;
-  const { title, description, points, proofType, photoCount, order, category } = req.body ?? {};
+  const { title, description, points, proofType, photoCount, order, category, delayMinutes } = req.body ?? {};
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -41,6 +41,7 @@ router.post('/', async (req: any, res: any) => {
         points: Number(points) || 0,
         proofType: ['PHOTO', 'VIDEO', 'PHOTOS'].includes(proofType) ? proofType : 'PHOTO',
         photoCount: photoCount ? Number(photoCount) : null,
+        delayMinutes: delayMinutes !== undefined ? (delayMinutes ? Number(delayMinutes) : null) : null,
         category: category ?? undefined,
         order: Number(order) || 0,
       },
@@ -102,7 +103,7 @@ router.post('/batch', async (req: any, res: any) => {
 
 router.patch('/:taskId', async (req: any, res: any) => {
   const { gameId, taskId } = req.params;
-  const { title, description, points, proofType, photoCount, order, category } = req.body ?? {};
+  const { title, description, points, proofType, photoCount, order, category, delayMinutes } = req.body ?? {};
   try {
     const data: any = {};
     if (title !== undefined) data.title = title.trim();
@@ -112,6 +113,7 @@ router.patch('/:taskId', async (req: any, res: any) => {
       data.proofType = proofType;
     }
     if (photoCount !== undefined) data.photoCount = photoCount ? Number(photoCount) : null;
+    if (delayMinutes !== undefined) data.delayMinutes = delayMinutes ? Number(delayMinutes) : null;
     if (order !== undefined) data.order = Number(order);
     if (category !== undefined) data.category = category ?? undefined;
 

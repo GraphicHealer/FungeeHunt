@@ -70,9 +70,10 @@ model Task {
   description String
   points      Float
   proofType   ProofType
-  photoCount  Int?
-  category    String?
-  order       Int
+  photoCount   Int?
+  delayMinutes Int?
+  category     String?
+  order        Int
   game        Game         @relation(fields: [gameId], references: [id])
   submissions Submission[]
 }

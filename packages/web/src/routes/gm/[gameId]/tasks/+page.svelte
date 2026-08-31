@@ -17,6 +17,8 @@
   let points = 0;
   let proofType = 'PHOTO';
   let photoCount: number | null = null;
+  let delayEnabled = false;
+  let delayMinutes = 10;
   let order = 0;
 
   let showAddMenu = false;
@@ -52,6 +54,8 @@
     points = 0;
     proofType = 'PHOTO';
     photoCount = null;
+    delayEnabled = false;
+    delayMinutes = 10;
     order = tasks.length + 1;
     error = '';
   }
@@ -176,6 +180,8 @@
     points = task.points;
     proofType = task.proofType;
     photoCount = task.photoCount ?? null;
+    delayEnabled = !!task.delayMinutes;
+    delayMinutes = task.delayMinutes ?? 10;
     order = task.order;
     error = '';
     showModal = true;
@@ -201,6 +207,7 @@
           points,
           proofType,
           photoCount: proofType === 'PHOTOS' ? photoCount : null,
+          delayMinutes: delayEnabled ? Number(delayMinutes) || null : null,
         },
       }),
     });
@@ -226,7 +233,15 @@
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token()}`,
       },
-      body: JSON.stringify({ title, description, points, proofType, photoCount: proofType === 'PHOTOS' ? photoCount : null, order }),
+      body: JSON.stringify({
+        title,
+        description,
+        points,
+        proofType,
+        photoCount: proofType === 'PHOTOS' ? photoCount : null,
+        delayMinutes: delayEnabled ? Number(delayMinutes) || null : null,
+        order,
+      }),
     });
     if (res.ok) {
       showModal = false;
@@ -534,6 +549,16 @@
         {#if proofType === 'PHOTOS'}
           <label for="photoCount">Number of Photos (optional)</label>
           <input id="photoCount" type="number" min="1" bind:value={photoCount} placeholder="e.g., number of other teams" />
+        {/if}
+
+        <label class="fungee-check" style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" bind:checked={delayEnabled} />
+          Delay this task after game start
+        </label>
+
+        {#if delayEnabled}
+          <label for="delayMinutes">Delay (minutes)</label>
+          <input id="delayMinutes" type="number" min="1" bind:value={delayMinutes} />
         {/if}
 
         <label for="order">Order</label>

@@ -17,6 +17,8 @@
   let showManagerInfo = false;
   let socket: any;
   let foodDriveCount = 0;
+  let now = Date.now();
+  let nowTimer: ReturnType<typeof setInterval> | null = null;
 
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
@@ -52,6 +54,19 @@
     if (task.proofType === 'VIDEO') return 'Take Video...';
     if (task.proofType === 'PHOTOS') return 'Take Photos...';
     return 'Take Photo/Video...';
+  }
+
+  function delayMs(task: any) {
+    if (!task.delayMinutes || !state?.game?.startAt) return 0;
+    const start = new Date(state.game.startAt).getTime();
+    return Math.max(0, start + task.delayMinutes * 60 * 1000 - now);
+  }
+
+  function formatDelay(ms: number) {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
   }
 
   function photoHint(task: any) {
@@ -177,10 +192,14 @@
     load();
     socket = io({ transports: ['websocket', 'polling'] });
     socket.on(`game:${code.toUpperCase()}`, load);
+    nowTimer = setInterval(() => {
+      now = Date.now();
+    }, 1000);
   });
 
   onDestroy(() => {
     if (socket) socket.disconnect();
+    if (nowTimer) clearInterval(nowTimer);
   });
 </script>
 
@@ -234,45 +253,51 @@
                   {/if}
 
                   {#if isManager() && state.game.status === 'LIVE' && (!task.submission || task.submission.status === 'INCOMPLETE')}
-                    <div class="submit-row">
-                      {#if !uploading[task.id]}
-                        {#each (selected[task.id] ?? initialSlots(task)) as file, i (i)}
-                          <div class="slot">
-                            <input
-                              id="proof-{task.id}-{i}"
-                              class="file-input"
-                              type="file"
-                              accept={accept(task)}
-                              capture={capture(task)}
-                              on:change={(e) => handleFile(task.id, i, e)}
-                              disabled={uploading[task.id]}
-                            />
-                            <label for="proof-{task.id}-{i}" class="fungee-btn take-btn" class:ready={file}>
-                              {#if file}
-                                {task.proofType === 'VIDEO' ? 'Video loaded' : (task.proofType === 'PHOTOS' ? `Photo ${i + 1} loaded` : 'Photo loaded')}
-                              {:else}
-                                {task.proofType === 'PHOTOS' ? `Photo ${i + 1}` : proofLabel(task)}
-                              {/if}
-                            </label>
+                    {#if delayMs(task) > 0}
+                      <div class="delay-notice" style="margin: 0.75rem 0; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 0.5rem; text-align: center; font-weight: 600; color: var(--brand);">
+                        You must wait {formatDelay(delayMs(task))} before you can do this task.
+                      </div>
+                    {:else}
+                      <div class="submit-row">
+                        {#if !uploading[task.id]}
+                          {#each (selected[task.id] ?? initialSlots(task)) as file, i (i)}
+                            <div class="slot">
+                              <input
+                                id="proof-{task.id}-{i}"
+                                class="file-input"
+                                type="file"
+                                accept={accept(task)}
+                                capture={capture(task)}
+                                on:change={(e) => handleFile(task.id, i, e)}
+                                disabled={uploading[task.id]}
+                              />
+                              <label for="proof-{task.id}-{i}" class="fungee-btn take-btn" class:ready={file}>
+                                {#if file}
+                                  {task.proofType === 'VIDEO' ? 'Video loaded' : (task.proofType === 'PHOTOS' ? `Photo ${i + 1} loaded` : 'Photo loaded')}
+                                {:else}
+                                  {task.proofType === 'PHOTOS' ? `Photo ${i + 1}` : proofLabel(task)}
+                                {/if}
+                              </label>
+                            </div>
+                          {/each}
+
+                          {#if task.proofType === 'PHOTOS' && !task.photoCount}
+                            <button class="fungee-btn secondary" style="margin: 0; width: auto;" on:click={() => addPhotoSlot(task)}>+ Add Photo</button>
+                          {/if}
+
+                          <button
+                            class="fungee-btn"
+                            style="margin: 0; width: auto;"
+                            on:click={() => submitTask(task.id)}
+                            disabled={!((selected[task.id] ?? initialSlots(task)).some(Boolean))}
+                          >Submit</button>
+                        {:else}
+                          <div class="fungee-btn take-btn uploading" style="--progress: {uploadProgress[task.id] ?? 0}%">
+                            <span class="uploading-text">Uploading... {Math.round(uploadProgress[task.id] ?? 0)}%</span>
                           </div>
-                        {/each}
-
-                        {#if task.proofType === 'PHOTOS' && !task.photoCount}
-                          <button class="fungee-btn secondary" style="margin: 0; width: auto;" on:click={() => addPhotoSlot(task)}>+ Add Photo</button>
                         {/if}
-
-                        <button
-                          class="fungee-btn"
-                          style="margin: 0; width: auto;"
-                          on:click={() => submitTask(task.id)}
-                          disabled={!((selected[task.id] ?? initialSlots(task)).some(Boolean))}
-                        >Submit</button>
-                      {:else}
-                        <div class="fungee-btn take-btn uploading" style="--progress: {uploadProgress[task.id] ?? 0}%">
-                          <span class="uploading-text">Uploading... {Math.round(uploadProgress[task.id] ?? 0)}%</span>
-                        </div>
-                      {/if}
-                    </div>
+                      </div>
+                    {/if}
                   {/if}
                 </div>
               {/if}
