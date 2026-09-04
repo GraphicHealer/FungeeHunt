@@ -6,6 +6,7 @@ import { generateGameCode } from '../lib/gameCode';
 import { getSystemSettings } from '../lib/defaults';
 import { getBaseUrl } from '../lib/urls';
 import { sendPushToCaptains, sendPushToTeams } from '../lib/push';
+import { scheduleBonusPushForGame } from '../lib/pushSweep';
 import { config } from '../config';
 
 const router = Router();
@@ -404,6 +405,10 @@ router.patch('/:gameId', async (req: any, res: any) => {
     });
 
     await syncAutoRuleSections(game);
+
+    if (game.status === 'LIVE' && game.bonusStart && game.bonusEnd) {
+      void scheduleBonusPushForGame(game.id);
+    }
 
     const io = req.app.get('io') as any;
     io.emit(`game:${game.code}`, { type: 'game' });

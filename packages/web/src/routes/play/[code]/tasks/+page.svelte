@@ -15,6 +15,7 @@
   let uploadProgress: Record<string, number> = {};
   let expanded = '';
   let showManagerInfo = false;
+  let showPushPrompt = false;
   let socket: any;
   let foodDriveCount = 0;
   let vapidPublicKey: string | null = null;
@@ -80,6 +81,19 @@
         localStorage.setItem(key, 'true');
       }
     }
+  }
+
+  function askPushPermission() {
+    if (!vapidPublicKey) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!('isSecureContext' in window) || !window.isSecureContext) return;
+    const promptKey = `pushPrompt:${code}`;
+    if (localStorage.getItem(promptKey)) return;
+    if (Notification.permission === 'granted' || Notification.permission === 'denied') {
+      localStorage.setItem(promptKey, 'true');
+      return;
+    }
+    showPushPrompt = true;
   }
 
   function accept(task: any) {
@@ -279,7 +293,7 @@
         </header>
 
         <ul class="fungee-list">
-          {#each [...(state.bonusTask && (state.bonusTask.submission?.status === 'COMPLETED' || !state.game.bonusEnd || now <= new Date(state.game.bonusEnd).getTime()) ? [state.bonusTask] : []), ...(state.tasks ?? [])] as task (task.id)}
+          {#each [...(state.bonusTask && (state.bonusTask.submission?.status === 'COMPLETED' || !state.game.bonusEnd || now < new Date(state.game.bonusEnd).getTime()) ? [state.bonusTask] : []), ...(state.tasks ?? [])] as task (task.id)}
             <li class="fungee-accordion" class:incomplete={task.submission?.status === 'INCOMPLETE'} class:bonus={task.isBonus}>
               <button class="fungee-accordion-header" on:click={() => (expanded = expanded === task.id ? '' : task.id)}>
                 <span class="fungee-section-title" style="margin: 0;">{#if task.isBonus}<span class="mdi mdi-star" style="color: #ffd700;"></span> {/if}{task.isBonus ? '' : `${task.order}. `}{task.title}</span>
@@ -297,7 +311,7 @@
                 <div class="fungee-accordion-body">
                   {#if task.isBonus}
                     <p class="bonus-notice" style="margin: 0 0 0.5rem; padding: 0.5rem; background: #332200; color: #ffd700; border-radius: 0.35rem; font-weight: 700;">
-                      <span class="mdi mdi-star"></span> Limited-time bonus task! {state.game.bonusEnd ? `Time left: ${formatDelay(Math.max(0, new Date(state.game.bonusEnd).getTime() - now))}` : 'Submit before the window ends.'}
+                      <span class="mdi mdi-star"></span> Limited Time Bonus Task! {state.game.bonusEnd && new Date(state.game.bonusEnd).getTime() > now ? `Time Left: ${formatDelay(Math.max(0, new Date(state.game.bonusEnd).getTime() - now))}` : ''}
                     </p>
                   {/if}
                   <p style="margin: 0 0 0.5rem; white-space: pre-line;">{task.description || 'No description'}</p>
@@ -405,7 +419,22 @@
       <p style="font-size: 1.25rem; font-weight: 700; color: var(--brand); text-align: center; margin: 0 0 1rem;">
         After taking a photo, tap <strong>Submit</strong>!
       </p>
-      <button class="fungee-btn" style="width: 100%;" on:click={() => { showManagerInfo = false; subscribePush(); }}>GOT IT</button>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showManagerInfo = false; askPushPermission(); }}>GOT IT</button>
+    </div>
+  </div>
+{/if}
+
+{#if showPushPrompt}
+  <div class="modal-backdrop" transition:fade={{ duration: 180 }} on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Enable Notifications?</h3>
+      <p>
+        Fungee-Hunt can send your phone a notification when a bonus task appears or if a submission is rejected, even when the game is in the background.
+      </p>
+      <p>
+        Tap <strong>OK</strong> below and then allow notifications when your browser asks.
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>OK</button>
     </div>
   </div>
 {/if}
