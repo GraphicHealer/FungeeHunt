@@ -19,6 +19,7 @@
   let foodDriveCount = 0;
   let now = Date.now();
   let nowTimer: ReturnType<typeof setInterval> | null = null;
+  let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
@@ -195,11 +196,15 @@
     nowTimer = setInterval(() => {
       now = Date.now();
     }, 1000);
+    refreshTimer = setInterval(() => {
+      load();
+    }, 60 * 1000);
   });
 
   onDestroy(() => {
     if (socket) socket.disconnect();
     if (nowTimer) clearInterval(nowTimer);
+    if (refreshTimer) clearInterval(refreshTimer);
   });
 </script>
 
