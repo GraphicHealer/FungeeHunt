@@ -132,7 +132,8 @@
   function regenerateBonus() {
     if (!date || !startTime || !endTime || !availableTasks.length) return;
     const start = fromInputValue(startAt);
-    const end = fromInputValue(endAt);
+    let end = fromInputValue(endAt);
+    if (end <= start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
     const mid = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2 - 10 * 60 * 1000);
     const bonusEnd = new Date(mid.getTime() + 20 * 60 * 1000);
     bonusStartTime = toInputValue(mid).slice(11, 16);
