@@ -1,0 +1,1 @@
+ALTER TABLE "Game" ADD COLUMN "bonusPushSent" BOOLEAN NOT NULL DEFAULT false;

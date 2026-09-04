@@ -3,6 +3,8 @@ import { unlinkSync } from 'fs';
 import { join } from 'path';
 import { db } from '../db/client';
 import { config } from '../config';
+import { sendPushToPlayer } from '../lib/push';
+import { getBaseUrl } from '../lib/urls';
 
 const router = Router({ mergeParams: true });
 
@@ -105,6 +107,20 @@ router.patch('/:submissionId', async (req: any, res: any) => {
 
     const io = req.app.get('io') as any;
     io.emit(`game:${game.code}`, { type: 'submission' });
+
+    if (hasStatus && status === 'INCOMPLETE') {
+      const team = await db.team.findUnique({ where: { id: current.teamId }, include: { manager: { select: { id: true } } } });
+      if (team?.manager?.id) {
+        const task = await db.task.findUnique({ where: { id: current.taskId }, select: { title: true } });
+        const pushUrl = `${getBaseUrl(req)}/play/${game.code}`;
+        await sendPushToPlayer(
+          team.manager.id,
+          'Submission rejected',
+          task ? `"${task.title}" was rejected${reason ? `: ${reason}` : ''}` : 'A submission was rejected',
+          pushUrl,
+        );
+      }
+    }
 
     res.json(submission);
   } catch (err) {

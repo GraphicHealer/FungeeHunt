@@ -22,6 +22,7 @@ import settingsRoute from './routes/settings';
 import recapRoute from './routes/recap';
 import { seedSystemSettings, seedStyleProfiles } from './lib/defaults';
 import { logger } from './lib/logger';
+import { startPushSweep } from './lib/pushSweep';
 import { gmAuth } from './middleware/gmAuth';
 
 const app = express();
@@ -76,6 +77,7 @@ console.log(`Starting Fungee-Hunt with LOG_LEVEL=${config.LOG_LEVEL}`);
 seedSystemSettings()
   .then(() => seedStyleProfiles())
   .then(() => {
+    startPushSweep();
     server.listen(config.WEB_UI, () => {
       logger.info(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
     });

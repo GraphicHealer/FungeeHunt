@@ -13,6 +13,7 @@ router.get('/', async (_req, res) => {
       tourStep: settings.tourStep,
       tourDone: settings.tourDone,
       defaultPassphrase: config.GM_PASSPHRASE === 'changeme',
+      vapidPublicKey: settings.vapidPublicKey ?? null,
     });
   } catch (err) {
     console.error('get config failed', err);

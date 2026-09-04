@@ -168,4 +168,23 @@ router.patch('/food-drive', async (req, res) => {
   }
 });
 
+router.post('/push-subscribe', async (req, res) => {
+  const player = (res.locals as any).player;
+  const { endpoint, keys } = req.body ?? {};
+  if (!endpoint || !keys?.p256dh || !keys?.auth) {
+    return res.status(400).json({ error: 'Invalid subscription' });
+  }
+  try {
+    await db.pushSubscription.upsert({
+      where: { endpoint },
+      update: { playerId: player.id, p256dh: keys.p256dh, auth: keys.auth },
+      create: { playerId: player.id, endpoint, p256dh: keys.p256dh, auth: keys.auth },
+    });
+    res.status(204).end();
+  } catch (err) {
+    console.error('push subscribe failed', err);
+    res.status(500).json({ error: 'Could not save push subscription' });
+  }
+});
+
 export default router;

@@ -5,6 +5,7 @@ import { db } from '../db/client';
 import { generateGameCode } from '../lib/gameCode';
 import { getSystemSettings } from '../lib/defaults';
 import { getBaseUrl } from '../lib/urls';
+import { sendPushToCaptains, sendPushToTeams } from '../lib/push';
 import { config } from '../config';
 
 const router = Router();
@@ -76,6 +77,9 @@ function buildGameData(body: any, partial = false) {
   }
   if (body.bonusEnd !== undefined || !partial) {
     data.bonusEnd = asDate(body.bonusEnd);
+  }
+  if (body.bonusStart !== undefined || body.bonusEnd !== undefined) {
+    data.bonusPushSent = false;
   }
 
   return data;
@@ -427,6 +431,18 @@ router.post('/:gameId/announce', async (req: any, res: any) => {
     };
     const io = req.app.get('io') as any;
     io.emit(`game:${game.code.toUpperCase()}`, payload);
+
+    const pushTitle = 'New announcement';
+    const pushBody = message;
+    const pushUrl = `${getBaseUrl(req)}/play/${game.code}`;
+    if (teamIds === 'all' && captainsOnly) {
+      await sendPushToCaptains(gameId, pushTitle, pushBody, pushUrl);
+    } else if (Array.isArray(teamIds) && teamIds.length) {
+      await sendPushToTeams(gameId, teamIds, pushTitle, pushBody, pushUrl);
+    } else if (teamIds === 'all') {
+      await sendPushToCaptains(gameId, pushTitle, pushBody, pushUrl);
+    }
+
     res.json({ sent: true });
   } catch (err) {
     console.error('announce failed', err);

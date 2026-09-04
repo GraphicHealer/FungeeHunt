@@ -25,3 +25,21 @@ self.addEventListener('fetch', () => {
   // Do not intercept any requests. The previous cache-everything policy
   // was breaking SvelteKit's immutable JS chunks.
 });
+
+self.addEventListener('push', (event: any) => {
+  const data = event.data?.json() ?? {};
+  event.waitUntil(
+    (self as any).registration.showNotification(data.title ?? 'Fungee-Hunt', {
+      body: data.body ?? '',
+      icon: '/favicon.png',
+      data: { url: data.url ?? '/' },
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (event: any) => {
+  event.notification.close();
+  event.waitUntil(
+    (self as any).clients.openWindow(event.notification.data?.url ?? '/'),
+  );
+});

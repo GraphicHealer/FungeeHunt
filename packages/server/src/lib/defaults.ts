@@ -1,5 +1,6 @@
 import { db } from '../db/client';
 import { logger } from './logger';
+import webpush from 'web-push';
 
 const defaultTasks = [
   {
@@ -695,10 +696,18 @@ export const defaultSystemSettings = {
 
 export async function seedSystemSettings() {
   try {
-    const existing = await db.systemSettings.findFirst();
-    if (!existing) {
-      await db.systemSettings.create({ data: defaultSystemSettings });
+    let settings = await db.systemSettings.findFirst();
+    if (!settings) {
+      settings = await db.systemSettings.create({ data: defaultSystemSettings });
       logger.info('Seeded default system settings');
+    }
+    if (!settings.vapidPublicKey || !settings.vapidPrivateKey) {
+      const keys = webpush.generateVAPIDKeys();
+      await db.systemSettings.update({
+        where: { id: settings.id },
+        data: { vapidPublicKey: keys.publicKey, vapidPrivateKey: keys.privateKey },
+      });
+      logger.info('Generated VAPID keypair');
     }
   } catch (err) {
     logger.error('Could not seed system settings', err);

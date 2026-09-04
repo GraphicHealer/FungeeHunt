@@ -23,6 +23,7 @@ model Game {
   returnPoints           Float          @default(0)
   bonusStart             DateTime?
   bonusEnd               DateTime?
+  bonusPushSent          Boolean        @default(false)
   foodDriveEnabled            Boolean        @default(false)
   foodDrivePointsPerItem      Float          @default(0)
   foodDrivePermissible        String?
@@ -38,17 +39,18 @@ model Game {
 }
 
 model Player {
-  id           String     @id @default(cuid())
-  gameId       String
-  displayName  String
-  type         PlayerType
-  hasCar       Boolean    @default(false)
-  sessionToken String?    @unique
-  joinedAt     DateTime   @default(now())
-  game         Game       @relation(fields: [gameId], references: [id])
-  team         Team?      @relation(fields: [teamId], references: [id])
-  teamId       String?
-  managerOf    Team?      @relation("TeamManager")
+  id               String             @id @default(cuid())
+  gameId           String
+  displayName      String
+  type             PlayerType
+  hasCar           Boolean            @default(false)
+  sessionToken     String?            @unique
+  joinedAt         DateTime           @default(now())
+  game             Game               @relation(fields: [gameId], references: [id])
+  team             Team?              @relation(fields: [teamId], references: [id])
+  teamId           String?
+  managerOf        Team?              @relation("TeamManager")
+  pushSubscriptions PushSubscription[]
 }
 
 model Team {
@@ -108,6 +110,17 @@ model SpectatorSession {
   game      Game?    @relation(fields: [gameId], references: [id])
 }
 
+model PushSubscription {
+  id        String   @id @default(cuid())
+  playerId  String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
 model RuleSection {
   id     String @id @default(cuid())
   gameId String
@@ -145,6 +158,8 @@ model SystemSettings {
   defaultRules             String?
   defaultTasks             String?
   taskCategories           String?
+  vapidPublicKey           String?
+  vapidPrivateKey          String?
 }
 
 enum GameStatus {

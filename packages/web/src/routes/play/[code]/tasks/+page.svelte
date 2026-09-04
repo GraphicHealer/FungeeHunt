@@ -17,12 +17,51 @@
   let showManagerInfo = false;
   let socket: any;
   let foodDriveCount = 0;
+  let vapidPublicKey: string | null = null;
   let now = Date.now();
   let nowTimer: ReturnType<typeof setInterval> | null = null;
   let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
+  }
+
+  async function loadConfig() {
+    const res = await fetch('/api/config');
+    if (res.ok) {
+      const data = await res.json();
+      vapidPublicKey = data.vapidPublicKey ?? null;
+    }
+  }
+
+  async function subscribePush() {
+    if (!vapidPublicKey || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return;
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      });
+      await fetch(`/api/play/${code}/push-subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token()}`,
+        },
+        body: JSON.stringify({ endpoint: sub.endpoint, keys: sub.toJSON().keys }),
+      });
+    } catch (e) {
+      console.error('push subscribe failed', e);
+    }
+  }
+
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const raw = (globalThis as any).atob(base64);
+    return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
   }
 
   function isManager() {
@@ -57,11 +96,11 @@
     return 'Take Photo/Video...';
   }
 
-  function delayMs(task: any) {
+  function delayMs(task: any, nowTime = now) {
     if (!task.delayMinutes || !state?.game) return 0;
     const start = state.game.liveAt ?? state.game.startAt;
     if (!start) return 0;
-    return Math.max(0, new Date(start).getTime() + task.delayMinutes * 60 * 1000 - now);
+    return Math.max(0, new Date(start).getTime() + task.delayMinutes * 60 * 1000 - nowTime);
   }
 
   function formatDelay(ms: number) {
@@ -192,6 +231,7 @@
 
   onMount(() => {
     load();
+    loadConfig();
     socket = io({ transports: ['websocket', 'polling'] });
     socket.on(`game:${code.toUpperCase()}`, load);
     nowTimer = setInterval(() => {
@@ -264,9 +304,9 @@
                   {/if}
 
                   {#if isManager() && state.game.status === 'LIVE' && (!task.submission || task.submission.status === 'INCOMPLETE')}
-                    {#if delayMs(task) > 0}
+                    {#if delayMs(task, now) > 0}
                       <div class="delay-notice" style="margin: 0.75rem 0; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 0.5rem; text-align: center; font-weight: 600; color: var(--brand);">
-                        You must wait {formatDelay(delayMs(task))} before you can do this task.
+                        You must wait {formatDelay(delayMs(task, now))} before you can do this task.
                       </div>
                     {:else}
                       <div class="submit-row">
@@ -361,7 +401,7 @@
       <p style="font-size: 1.25rem; font-weight: 700; color: var(--brand); text-align: center; margin: 0 0 1rem;">
         After taking a photo, tap <strong>Submit</strong>!
       </p>
-      <button class="fungee-btn" style="width: 100%;" on:click={() => (showManagerInfo = false)}>GOT IT</button>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showManagerInfo = false; subscribePush(); }}>GOT IT</button>
     </div>
   </div>
 {/if}
