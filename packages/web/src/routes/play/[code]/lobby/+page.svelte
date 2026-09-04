@@ -12,6 +12,8 @@
   let newName = '';
   let error = '';
   let socket: any;
+  let showAnnouncement = false;
+  let announcementMessage = '';
 
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
@@ -19,6 +21,21 @@
 
   function isManager() {
     return state && state.team && state.player.id === state.team.managerId;
+  }
+
+  function checkAnnouncement() {
+    if (state?.announcement?.message) {
+      announcementMessage = state.announcement.message;
+      showAnnouncement = true;
+    }
+  }
+
+  async function markAnnouncementRead() {
+    showAnnouncement = false;
+    await fetch(`/api/play/${code}/announce-read`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token()}` },
+    });
   }
 
   async function load() {
@@ -37,6 +54,7 @@
       }
       status = state.team ? (state.game?.status === 'LIVE' ? 'You have not been assigned to a team yet' : 'Game not started yet') : 'Waiting for the Game Master to assign you to a team…';
       newName = state.team?.name ?? '';
+      checkAnnouncement();
     } else if (res.status === 404) {
       goto('/?notfound=1');
       return;
@@ -132,7 +150,39 @@
   </div>
 </main>
 
+{#if showAnnouncement}
+  <div class="modal-backdrop" on:click={markAnnouncementRead} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Announcement</h3>
+      <p style="white-space: pre-wrap;">{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
+    </div>
+  </div>
+{/if}
+
 <style>
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    max-width: 24rem;
+    width: 100%;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+
   .team-name {
     display: flex;
     align-items: center;
