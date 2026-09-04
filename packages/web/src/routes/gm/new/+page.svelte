@@ -297,7 +297,7 @@
 
           <div class="fungee-btn-row">
             <button class="fungee-btn secondary" type="button" on:click={() => step = 3}>BACK</button>
-            <button class="fungee-btn" type="submit" data-tour="step4-next" disabled={bonusEnabled && (!bonusTask || !bonusStartTime || !bonusEndTime)}>NEXT</button>
+            <button class="fungee-btn" type="submit" data-tour="step4-next" disabled={bonusEnabled && (!availableTasks[bonusTaskIndex] || !bonusStartTime || !bonusEndTime)}>NEXT</button>
           </div>
         </form>
       {:else if step === 5}
