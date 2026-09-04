@@ -20,10 +20,18 @@
   let fdSuggested = '';
 
   let allTasks: any[] = [];
+  let defaultTasks: any[] = [];
   let bonusEnabled = false;
   let bonusStart = '';
   let bonusEnd = '';
+  let bonusMode: 'built-in' | 'custom' = 'built-in';
+  let bonusBuiltInIndex = 0;
   let bonusTaskId = '';
+  let customTitle = '';
+  let customDescription = '';
+  let customPoints = 10;
+  let customProofType = 'PHOTO';
+  let customPhotoCount: number | null = null;
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -56,7 +64,15 @@
 
   async function loadTasks() {
     const res = await fetch(`/api/gm/games/${gameId}/tasks`, { headers: { Authorization: `Bearer ${token()}` } });
-    if (res.ok) allTasks = await res.json();
+    if (res.ok) allTasks = (await res.json()).filter((t: any) => t.isBonus || !t.isBonus);
+  }
+
+  async function loadDefaults() {
+    const res = await fetch('/api/gm/settings', { headers: { Authorization: `Bearer ${token()}` } });
+    if (res.ok) {
+      const s = await res.json();
+      defaultTasks = s.defaultTasks ?? [];
+    }
   }
 
   function openReturn() {
@@ -86,12 +102,37 @@
 
   async function openBonus() {
     if (!game) return;
-    await loadTasks();
+    await Promise.all([loadTasks(), loadDefaults()]);
     modal = 'bonus';
     bonusEnabled = !!game.bonusStart && !!game.bonusEnd;
     bonusStart = game.bonusStart ? toInputValue(new Date(game.bonusStart)).slice(11, 16) : '';
     bonusEnd = game.bonusEnd ? toInputValue(new Date(game.bonusEnd)).slice(11, 16) : '';
-    bonusTaskId = allTasks.find((t: any) => t.isBonus)?.id ?? '';
+
+    const existing = allTasks.find((t: any) => t.isBonus);
+    if (existing) {
+      bonusTaskId = existing.id;
+      const match = defaultTasks.findIndex((t: any) => t.title.trim().toLowerCase() === existing.title.trim().toLowerCase());
+      if (match >= 0) {
+        bonusMode = 'built-in';
+        bonusBuiltInIndex = match;
+      } else {
+        bonusMode = 'custom';
+        customTitle = existing.title;
+        customDescription = existing.description ?? '';
+        customPoints = existing.points;
+        customProofType = existing.proofType;
+        customPhotoCount = existing.photoCount ?? null;
+      }
+    } else {
+      bonusMode = 'built-in';
+      bonusBuiltInIndex = 0;
+      bonusTaskId = '';
+      customTitle = '';
+      customDescription = '';
+      customPoints = 10;
+      customProofType = 'PHOTO';
+      customPhotoCount = null;
+    }
   }
 
   async function saveBonus() {
@@ -101,14 +142,13 @@
     const date = gameDate();
     const start = bonusEnabled && date && bonusStart ? toInputValue(fromInputValue(`${date}T${bonusStart}`)) : null;
     const end = bonusEnabled && date && bonusEnd ? toInputValue(fromInputValue(`${date}T${bonusEnd}`)) : null;
-    const patchGame: any = { bonusStart: start, bonusEnd: end };
     const res = await fetch(`/api/gm/games/${gameId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token()}`,
       },
-      body: JSON.stringify(patchGame),
+      body: JSON.stringify({ bonusStart: start, bonusEnd: end }),
     });
     if (!res.ok) {
       saving = false;
@@ -117,15 +157,54 @@
       return;
     }
 
-    for (const t of allTasks) {
-      await fetch(`/api/gm/games/${gameId}/tasks/${t.id}`, {
-        method: 'PATCH',
+    if (bonusEnabled) {
+      const existingIds = allTasks.filter((t: any) => t.isBonus).map((t: any) => t.id);
+      for (const id of existingIds) {
+        await fetch(`/api/gm/games/${gameId}/tasks/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
+      }
+
+      const builtIn = defaultTasks[bonusBuiltInIndex];
+      const body = bonusMode === 'built-in' && builtIn
+        ? {
+            title: builtIn.title,
+            description: builtIn.description ?? '',
+            points: Number(builtIn.points) || 0,
+            proofType: builtIn.proofType ?? 'PHOTO',
+            photoCount: builtIn.photoCount ?? null,
+            category: 'Bonus',
+            isBonus: true,
+            order: 0,
+          }
+        : {
+            title: customTitle.trim() || 'Bonus task',
+            description: customDescription,
+            points: Number(customPoints) || 0,
+            proofType: customProofType,
+            photoCount: customProofType === 'PHOTOS' ? customPhotoCount : null,
+            category: 'Bonus',
+            isBonus: true,
+            order: 0,
+          };
+
+      const createRes = await fetch(`/api/gm/games/${gameId}/tasks`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token()}`,
         },
-        body: JSON.stringify({ isBonus: t.id === bonusTaskId }),
+        body: JSON.stringify(body),
       });
+      if (!createRes.ok) {
+        saving = false;
+        const data = await createRes.json();
+        error = data.error ?? 'Could not create bonus task';
+        return;
+      }
+    } else {
+      const existingIds = allTasks.filter((t: any) => t.isBonus).map((t: any) => t.id);
+      for (const id of existingIds) {
+        await fetch(`/api/gm/games/${gameId}/tasks/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
+      }
     }
 
     saving = false;
@@ -309,13 +388,45 @@
           <label class="fungee-label" for="bte">Window End</label>
           <input class="fungee-input" id="bte" type="time" bind:value={bonusEnd} />
 
-          <label class="fungee-label" for="bt">Bonus Task</label>
-          <select class="fungee-input" id="bt" bind:value={bonusTaskId}>
-            <option value="">Select a task</option>
-            {#each allTasks as t}
-              <option value={t.id}>{t.order}. {t.title}</option>
-            {/each}
-          </select>
+          <label class="fungee-label">Task Source</label>
+          <div style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="built-in" bind:group={bonusMode} /> Built-in
+            </label>
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="custom" bind:group={bonusMode} /> Custom
+            </label>
+          </div>
+
+          {#if bonusMode === 'built-in'}
+            <label class="fungee-label" for="bt">Choose a default task</label>
+            <select class="fungee-input" id="bt" bind:value={bonusBuiltInIndex}>
+              {#each defaultTasks as t, i}
+                <option value={i}>{t.title} (+{t.points} pts)</option>
+              {/each}
+            </select>
+          {:else}
+            <label class="fungee-label" for="ct">Title</label>
+            <input class="fungee-input" id="ct" type="text" bind:value={customTitle} placeholder="Title" />
+
+            <label class="fungee-label" for="cd">Description</label>
+            <textarea class="fungee-textarea" id="cd" bind:value={customDescription} placeholder="Description"></textarea>
+
+            <label class="fungee-label" for="cp">Points</label>
+            <input class="fungee-input" id="cp" type="number" step="0.1" bind:value={customPoints} />
+
+            <label class="fungee-label" for="cpt">Proof Type</label>
+            <select class="fungee-input" id="cpt" bind:value={customProofType}>
+              <option value="PHOTO">Photo</option>
+              <option value="VIDEO">Video</option>
+              <option value="PHOTOS">Photos</option>
+            </select>
+
+            {#if customProofType === 'PHOTOS'}
+              <label class="fungee-label" for="cpc">Number of Photos (optional)</label>
+              <input class="fungee-input" id="cpc" type="number" min="1" bind:value={customPhotoCount} placeholder="e.g., number of other teams" />
+            {/if}
+          {/if}
         {/if}
 
         {#if error}<p class="fungee-error">{error}</p>{/if}

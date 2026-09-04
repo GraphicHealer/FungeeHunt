@@ -58,9 +58,10 @@
   }
 
   function delayMs(task: any) {
-    if (!task.delayMinutes || !state?.game?.startAt) return 0;
-    const start = new Date(state.game.startAt).getTime();
-    return Math.max(0, start + task.delayMinutes * 60 * 1000 - now);
+    if (!task.delayMinutes || !state?.game) return 0;
+    const start = state.game.liveAt ?? state.game.startAt;
+    if (!start) return 0;
+    return Math.max(0, new Date(start).getTime() + task.delayMinutes * 60 * 1000 - now);
   }
 
   function formatDelay(ms: number) {
@@ -234,10 +235,10 @@
         </header>
 
         <ul class="fungee-list">
-          {#each state.tasks as task (task.id)}
+          {#each [...(state.bonusTask ? [state.bonusTask] : []), ...(state.tasks ?? [])] as task (task.id)}
             <li class="fungee-accordion" class:incomplete={task.submission?.status === 'INCOMPLETE'} class:bonus={task.isBonus}>
               <button class="fungee-accordion-header" on:click={() => (expanded = expanded === task.id ? '' : task.id)}>
-                <span class="fungee-section-title" style="margin: 0;">{#if task.isBonus}<span class="mdi mdi-star" style="color: #ffd700;"></span> {/if}{task.order}. {task.title}</span>
+                <span class="fungee-section-title" style="margin: 0;">{#if task.isBonus}<span class="mdi mdi-star" style="color: #ffd700;"></span> {/if}{task.isBonus ? '' : `${task.order}. `}{task.title}</span>
                 <span style="display: flex; align-items: center; gap: 0.75rem;">
                   <span>+{formatPoints(task.points)}</span>
                   {#if task.submission}

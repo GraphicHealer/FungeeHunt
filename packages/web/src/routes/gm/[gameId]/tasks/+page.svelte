@@ -44,7 +44,7 @@
     const res = await fetch(`/api/gm/games/${gameId}/tasks`, {
       headers: { Authorization: `Bearer ${token()}` },
     });
-    if (res.ok) tasks = await res.json();
+    if (res.ok) tasks = (await res.json()).filter((t: any) => !t.isBonus);
   }
 
   function resetForm() {

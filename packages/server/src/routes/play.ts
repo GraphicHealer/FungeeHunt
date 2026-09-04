@@ -25,12 +25,28 @@ router.get('/', async (req, res) => {
 
     const byTask = new Map(submissions.map((s: any) => [s.taskId, s]));
     const now = Date.now();
+    const bonusActive = game.bonusStart && game.bonusEnd &&
+      now >= new Date(game.bonusStart).getTime() &&
+      now <= new Date(game.bonusEnd).getTime();
+
+    const bonusTask = tasks.find((task: any) => task.isBonus);
+    const bonusWithStatus = bonusActive && bonusTask
+      ? {
+          id: bonusTask.id,
+          title: bonusTask.title,
+          description: bonusTask.description,
+          points: bonusTask.points,
+          proofType: bonusTask.proofType,
+          photoCount: bonusTask.photoCount,
+          delayMinutes: null,
+          isBonus: true,
+          order: 0,
+          submission: byTask.get(bonusTask.id) ?? null,
+        }
+      : null;
+
     const tasksWithStatus = tasks
-      .filter((task: any) => !task.isBonus || (
-        game.bonusStart && game.bonusEnd &&
-        now >= new Date(game.bonusStart).getTime() &&
-        now <= new Date(game.bonusEnd).getTime()
-      ))
+      .filter((task: any) => !task.isBonus)
       .map((task: any) => ({
         id: task.id,
         title: task.title,
@@ -39,7 +55,7 @@ router.get('/', async (req, res) => {
         proofType: task.proofType,
         photoCount: task.photoCount,
         delayMinutes: task.delayMinutes,
-        isBonus: task.isBonus,
+        isBonus: false,
         order: task.order,
         submission: byTask.get(task.id) ?? null,
       }));
@@ -63,12 +79,16 @@ router.get('/', async (req, res) => {
         id: game.id,
         name: game.name,
         status: game.status,
+        startAt: game.startAt,
+        liveAt: game.liveAt,
+        endAt: game.endAt,
         foodDriveEnabled: game.foodDriveEnabled,
         foodDrivePointsPerItem: game.foodDrivePointsPerItem,
         foodDrivePermissible: game.foodDrivePermissible,
         foodDriveSuggested: game.foodDriveSuggested,
         captainCanUpdateFoodDrive: game.captainCanUpdateFoodDrive,
       },
+      bonusTask: bonusWithStatus,
       tasks: tasksWithStatus,
     });
   } catch (err) {

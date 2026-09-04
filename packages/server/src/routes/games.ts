@@ -359,6 +359,7 @@ router.patch('/:gameId', async (req: any, res: any) => {
     const updates = buildGameData(req.body ?? {}, true);
 
     if (updates.status === 'LIVE') {
+      updates.liveAt = new Date();
       const teams = await db.team.findMany({
         where: { gameId },
         include: { manager: true },

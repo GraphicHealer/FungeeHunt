@@ -14,6 +14,7 @@ model Game {
   status                 GameStatus     @default(NOT_STARTED)
   startAt                DateTime?
   endAt                  DateTime?
+  liveAt                 DateTime?
   submissionMode         SubmissionMode @default(AUTOMATIC)
   viewerEnabled          Boolean        @default(false)
   returnBonusEnabled     Boolean        @default(false)

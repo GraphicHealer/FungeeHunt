@@ -20,7 +20,7 @@ router.get('/', async (req: any, res: any) => {
 
 router.post('/', async (req: any, res: any) => {
   const { gameId } = req.params;
-  const { title, description, points, proofType, photoCount, order, category, delayMinutes } = req.body ?? {};
+  const { title, description, points, proofType, photoCount, order, category, delayMinutes, isBonus } = req.body ?? {};
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -42,6 +42,7 @@ router.post('/', async (req: any, res: any) => {
         proofType: ['PHOTO', 'VIDEO', 'PHOTOS'].includes(proofType) ? proofType : 'PHOTO',
         photoCount: photoCount ? Number(photoCount) : null,
         delayMinutes: delayMinutes !== undefined ? (delayMinutes ? Number(delayMinutes) : null) : null,
+        isBonus: !!isBonus,
         category: category ?? undefined,
         order: Number(order) || 0,
       },
