@@ -141,6 +141,10 @@
     bonusTaskIndex = Math.floor(Math.random() * availableTasks.length);
   }
 
+  $: if (step === 4 && bonusEnabled && !bonusStartTime) {
+    regenerateBonus();
+  }
+
   async function createGame() {
     error = '';
     const res = await fetch('/api/gm/games', {

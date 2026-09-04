@@ -36,6 +36,10 @@
 
   async function subscribePush() {
     if (!vapidPublicKey || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!('isSecureContext' in window) || !window.isSecureContext) {
+      console.warn('Push notifications require HTTPS or localhost');
+      return;
+    }
     try {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') return;
@@ -293,7 +297,7 @@
                 <div class="fungee-accordion-body">
                   {#if task.isBonus}
                     <p class="bonus-notice" style="margin: 0 0 0.5rem; padding: 0.5rem; background: #332200; color: #ffd700; border-radius: 0.35rem; font-weight: 700;">
-                      <span class="mdi mdi-star"></span> Limited-time bonus task! Submit before the window ends for extra points.
+                      <span class="mdi mdi-star"></span> Limited-time bonus task! {state.game.bonusEnd ? `Time left: ${formatDelay(Math.max(0, new Date(state.game.bonusEnd).getTime() - now))}` : 'Submit before the window ends.'}
                     </p>
                   {/if}
                   <p style="margin: 0 0 0.5rem; white-space: pre-line;">{task.description || 'No description'}</p>

@@ -82,6 +82,8 @@ router.get('/', async (req, res) => {
         startAt: game.startAt,
         liveAt: game.liveAt,
         endAt: game.endAt,
+        bonusStart: game.bonusStart,
+        bonusEnd: game.bonusEnd,
         foodDriveEnabled: game.foodDriveEnabled,
         foodDrivePointsPerItem: game.foodDrivePointsPerItem,
         foodDrivePermissible: game.foodDrivePermissible,
