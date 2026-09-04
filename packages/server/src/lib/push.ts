@@ -44,24 +44,11 @@ export async function sendPushToPlayer(playerId: string, title: string, body: st
 }
 
 export async function sendPushToCaptains(gameId: string, title: string, body: string, url?: string) {
-  const managers = await db.player.findMany({
-    where: {
-      gameId,
-      managerOf: { isNot: null },
-    },
-    select: { id: true },
-  });
-  await Promise.all(managers.map((p: any) => sendPushToPlayer(p.id, title, body, url)));
+  const teams = await db.team.findMany({ where: { gameId, managerId: { not: null } }, select: { managerId: true } });
+  await Promise.all(teams.map((t: any) => sendPushToPlayer(t.managerId, title, body, url)));
 }
 
 export async function sendPushToTeams(gameId: string, teamIds: string[], title: string, body: string, url?: string) {
-  const players = await db.player.findMany({
-    where: {
-      gameId,
-      teamId: { in: teamIds },
-      managerOf: { isNot: null },
-    },
-    select: { id: true },
-  });
-  await Promise.all(players.map((p: any) => sendPushToPlayer(p.id, title, body, url)));
+  const teams = await db.team.findMany({ where: { gameId, id: { in: teamIds }, managerId: { not: null } }, select: { managerId: true } });
+  await Promise.all(teams.map((t: any) => sendPushToPlayer(t.managerId, title, body, url)));
 }

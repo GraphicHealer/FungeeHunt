@@ -14,6 +14,14 @@
   let showAnnouncement = false;
   let announcementMessage = '';
 
+  async function markAnnouncementRead() {
+    showAnnouncement = false;
+    await fetch(`/api/play/${code}/announce-read`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token()}` },
+    });
+  }
+
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
   }
@@ -45,6 +53,10 @@
     if (res.ok) {
       state = await res.json();
       remainingStr = remaining();
+      if (state?.announcement && state.announcement.message) {
+        announcementMessage = state.announcement.message;
+        showAnnouncement = true;
+      }
     } else if (res.status === 404) {
       localStorage.removeItem(`token:${code}`);
       goto('/?notfound=1');
@@ -92,11 +104,11 @@
 {/if}
 
 {#if showAnnouncement}
-  <div class="announcement-backdrop" on:click={() => (showAnnouncement = false)}>
+  <div class="announcement-backdrop" on:click={markAnnouncementRead}>
     <div class="announcement-modal" on:click|stopPropagation>
       <h3>Announcement</h3>
       <p>{announcementMessage}</p>
-      <button class="fungee-btn" style="width: 100%;" on:click={() => (showAnnouncement = false)}>OK</button>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
     </div>
   </div>
 {/if}

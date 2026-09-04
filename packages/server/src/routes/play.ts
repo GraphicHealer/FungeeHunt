@@ -74,6 +74,19 @@ router.get('/', async (req, res) => {
       ? (team.foodDriveItems ?? 0) * game.foodDrivePointsPerItem
       : 0;
 
+    let announcement = null;
+    if (game.lastAnnouncement && game.lastAnnouncementAt) {
+      const readAt = player.lastAnnouncementReadAt ? new Date(player.lastAnnouncementReadAt).getTime() : 0;
+      const sentAt = new Date(game.lastAnnouncementAt).getTime();
+      const a = game.lastAnnouncement as any;
+      const matchAll = !a.teamIds || a.teamIds === 'all' || (Array.isArray(a.teamIds) && a.teamIds.length === 0);
+      const matchTeam = team && Array.isArray(a.teamIds) && a.teamIds.includes(team.id);
+      const matchCaptain = !a.captainsOnly || player.id === team?.managerId;
+      if (sentAt > readAt && matchCaptain && (matchAll || matchTeam)) {
+        announcement = { message: a.message, sentAt: game.lastAnnouncementAt };
+      }
+    }
+
     res.json({
       player,
       team: team ? { ...team, foodDriveItems: team.foodDriveItems ?? 0, score: completedScore + returnBonus + foodDriveBonus } : null,
@@ -94,6 +107,7 @@ router.get('/', async (req, res) => {
       },
       bonusTask: bonusWithStatus,
       tasks: tasksWithStatus,
+      announcement,
     });
   } catch (err) {
     console.error('play state failed', err);
@@ -188,6 +202,20 @@ router.post('/push-subscribe', async (req, res) => {
   } catch (err) {
     console.error('push subscribe failed', err);
     res.status(500).json({ error: 'Could not save push subscription' });
+  }
+});
+
+router.post('/announce-read', async (req, res) => {
+  const player = (res.locals as any).player;
+  try {
+    await db.player.update({
+      where: { id: player.id },
+      data: { lastAnnouncementReadAt: new Date() },
+    });
+    res.status(204).end();
+  } catch (err) {
+    console.error('mark announcement read failed', err);
+    res.status(500).json({ error: 'Could not mark read' });
   }
 });
 

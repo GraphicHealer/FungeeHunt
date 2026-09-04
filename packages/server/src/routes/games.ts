@@ -448,6 +448,14 @@ router.post('/:gameId/announce', async (req: any, res: any) => {
       await sendPushToCaptains(gameId, pushTitle, pushBody, pushUrl);
     }
 
+    await db.game.update({
+      where: { id: gameId },
+      data: {
+        lastAnnouncement: payload,
+        lastAnnouncementAt: new Date(),
+      },
+    });
+
     res.json({ sent: true });
   } catch (err) {
     console.error('announce failed', err);

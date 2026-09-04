@@ -24,6 +24,8 @@ model Game {
   bonusStart             DateTime?
   bonusEnd               DateTime?
   bonusPushSent          Boolean        @default(false)
+  lastAnnouncement       Json?
+  lastAnnouncementAt     DateTime?
   foodDriveEnabled            Boolean        @default(false)
   foodDrivePointsPerItem      Float          @default(0)
   foodDrivePermissible        String?
@@ -48,9 +50,10 @@ model Player {
   joinedAt         DateTime           @default(now())
   game             Game               @relation(fields: [gameId], references: [id])
   team             Team?              @relation(fields: [teamId], references: [id])
-  teamId           String?
-  managerOf        Team?              @relation("TeamManager")
-  pushSubscriptions PushSubscription[]
+  teamId                String?
+  lastAnnouncementReadAt DateTime?
+  managerOf              Team?              @relation("TeamManager")
+  pushSubscriptions      PushSubscription[]
 }
 
 model Team {
