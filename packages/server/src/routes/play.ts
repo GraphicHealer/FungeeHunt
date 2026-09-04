@@ -25,12 +25,14 @@ router.get('/', async (req, res) => {
 
     const byTask = new Map(submissions.map((s: any) => [s.taskId, s]));
     const now = Date.now();
-    const bonusActive = game.bonusStart && game.bonusEnd &&
+    const bonusTask = tasks.find((task: any) => task.isBonus);
+    const bonusSubmission = bonusTask ? (byTask.get(bonusTask.id) ?? null) : null;
+    const bonusActive = bonusTask && game.bonusStart && game.bonusEnd &&
       now >= new Date(game.bonusStart).getTime() &&
       now <= new Date(game.bonusEnd).getTime();
+    const bonusCompleted = bonusSubmission?.status === 'COMPLETED';
 
-    const bonusTask = tasks.find((task: any) => task.isBonus);
-    const bonusWithStatus = bonusActive && bonusTask
+    const bonusWithStatus = bonusTask && (bonusActive || bonusCompleted)
       ? {
           id: bonusTask.id,
           title: bonusTask.title,
@@ -41,7 +43,7 @@ router.get('/', async (req, res) => {
           delayMinutes: null,
           isBonus: true,
           order: 0,
-          submission: byTask.get(bonusTask.id) ?? null,
+          submission: bonusSubmission,
         }
       : null;
 
