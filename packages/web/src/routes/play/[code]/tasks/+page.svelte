@@ -279,7 +279,7 @@
         </header>
 
         <ul class="fungee-list">
-          {#each [...(state.bonusTask ? [state.bonusTask] : []), ...(state.tasks ?? [])] as task (task.id)}
+          {#each [...(state.bonusTask && (!state.game.bonusEnd || now <= new Date(state.game.bonusEnd).getTime()) ? [state.bonusTask] : []), ...(state.tasks ?? [])] as task (task.id)}
             <li class="fungee-accordion" class:incomplete={task.submission?.status === 'INCOMPLETE'} class:bonus={task.isBonus}>
               <button class="fungee-accordion-header" on:click={() => (expanded = expanded === task.id ? '' : task.id)}>
                 <span class="fungee-section-title" style="margin: 0;">{#if task.isBonus}<span class="mdi mdi-star" style="color: #ffd700;"></span> {/if}{task.isBonus ? '' : `${task.order}. `}{task.title}</span>

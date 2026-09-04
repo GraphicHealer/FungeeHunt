@@ -32,14 +32,15 @@ self.addEventListener('push', (event: any) => {
     (self as any).registration.showNotification(data.title ?? 'Fungee-Hunt', {
       body: data.body ?? '',
       icon: '/favicon.png',
-      data: { url: data.url ?? '/' },
+      data: { url: data.url || '/' },
     }),
   );
 });
 
 self.addEventListener('notificationclick', (event: any) => {
   event.notification.close();
+  const url = event.notification.data?.url || '/';
   event.waitUntil(
-    (self as any).clients.openWindow(event.notification.data?.url ?? '/'),
+    (self as any).clients.openWindow(url),
   );
 });

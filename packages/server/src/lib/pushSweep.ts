@@ -21,7 +21,7 @@ export function startPushSweep() {
             game.id,
             'Bonus task available!',
             'A limited-time bonus task has appeared. Open the app to claim it.',
-            '',
+            `/play/${game.code}`,
           );
           await db.game.update({ where: { id: game.id }, data: { bonusPushSent: true } });
         } catch (err) {
