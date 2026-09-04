@@ -89,8 +89,8 @@
     await loadTasks();
     modal = 'bonus';
     bonusEnabled = !!game.bonusStart && !!game.bonusEnd;
-    bonusStart = game.bonusStart ? toInputValue(new Date(game.bonusStart)) : '';
-    bonusEnd = game.bonusEnd ? toInputValue(new Date(game.bonusEnd)) : '';
+    bonusStart = game.bonusStart ? toInputValue(new Date(game.bonusStart)).slice(11, 16) : '';
+    bonusEnd = game.bonusEnd ? toInputValue(new Date(game.bonusEnd)).slice(11, 16) : '';
     bonusTaskId = allTasks.find((t: any) => t.isBonus)?.id ?? '';
   }
 
@@ -98,7 +98,10 @@
     saving = true;
     error = '';
 
-    const patchGame: any = { bonusStart: bonusEnabled ? bonusStart : null, bonusEnd: bonusEnabled ? bonusEnd : null };
+    const date = gameDate();
+    const start = bonusEnabled && date && bonusStart ? toInputValue(fromInputValue(`${date}T${bonusStart}`)) : null;
+    const end = bonusEnabled && date && bonusEnd ? toInputValue(fromInputValue(`${date}T${bonusEnd}`)) : null;
+    const patchGame: any = { bonusStart: start, bonusEnd: end };
     const res = await fetch(`/api/gm/games/${gameId}`, {
       method: 'PATCH',
       headers: {
@@ -301,10 +304,10 @@
 
         {#if bonusEnabled}
           <label class="fungee-label" for="bts">Window Start</label>
-          <input class="fungee-input" id="bts" type="datetime-local" bind:value={bonusStart} />
+          <input class="fungee-input" id="bts" type="time" bind:value={bonusStart} />
 
           <label class="fungee-label" for="bte">Window End</label>
-          <input class="fungee-input" id="bte" type="datetime-local" bind:value={bonusEnd} />
+          <input class="fungee-input" id="bte" type="time" bind:value={bonusEnd} />
 
           <label class="fungee-label" for="bt">Bonus Task</label>
           <select class="fungee-input" id="bt" bind:value={bonusTaskId}>
