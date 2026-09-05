@@ -3,6 +3,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
+  import ChatWidget from '$lib/ChatWidget.svelte';
 
   const gameId = $page.params.gameId;
 
@@ -160,6 +161,8 @@
     </div>
   </main>
 </div>
+
+<ChatWidget />
 
 {#if showSpectatorModal}
   <div class="modal-backdrop" on:click={() => (showSpectatorModal = false)} transition:fade={{ duration: 180 }}>

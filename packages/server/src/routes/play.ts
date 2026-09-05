@@ -219,4 +219,69 @@ router.post('/announce-read', async (req, res) => {
   }
 });
 
+router.get('/chat', async (req, res) => {
+  const player = (res.locals as any).player;
+  const game = (res.locals as any).game;
+  const team = player.team;
+  if (!team) return res.status(400).json({ error: 'Not on a team' });
+  try {
+    const messages = await db.message.findMany({
+      where: { gameId: game.id, teamId: team.id },
+      orderBy: { createdAt: 'asc' },
+    });
+    res.json(messages);
+  } catch (err) {
+    console.error('load chat failed', err);
+    res.status(500).json({ error: 'Could not load chat' });
+  }
+});
+
+router.post('/chat', async (req, res) => {
+  const player = (res.locals as any).player;
+  const game = (res.locals as any).game;
+  const team = player.team;
+  const { content } = req.body ?? {};
+  if (!team) return res.status(400).json({ error: 'Not on a team' });
+  if (!content?.trim()) return res.status(400).json({ error: 'Message is empty' });
+  try {
+    const msg = await db.message.create({
+      data: {
+        gameId: game.id,
+        teamId: team.id,
+        sender: 'CAPTAIN',
+        content: content.trim(),
+      },
+    });
+    const io = (req as any).app.get('io') as any;
+    io?.emit(`game:${game.code.toUpperCase()}:chat:${team.id}`, { type: 'message', message: msg });
+    io?.emit(`gm:${game.id}:chat`, { type: 'message', teamId: team.id, message: msg });
+    io?.emit(`game:${game.code.toUpperCase()}`, { type: 'chat' });
+    res.status(201).json(msg);
+  } catch (err) {
+    console.error('send chat failed', err);
+    res.status(500).json({ error: 'Could not send message' });
+  }
+});
+
+router.post('/chat/read', async (req, res) => {
+  const player = (res.locals as any).player;
+  const game = (res.locals as any).game;
+  const team = player.team;
+  if (!team) return res.status(400).json({ error: 'Not on a team' });
+  try {
+    await db.message.updateMany({
+      where: { gameId: game.id, teamId: team.id, sender: 'GM', readAt: null },
+      data: { readAt: new Date() },
+    });
+    const io = (req as any).app.get('io') as any;
+    io?.emit(`game:${game.code.toUpperCase()}:chat:${team.id}`, { type: 'read' });
+    io?.emit(`gm:${game.id}:chat`, { type: 'read', teamId: team.id });
+    io?.emit(`game:${game.code.toUpperCase()}`, { type: 'chat' });
+    res.status(204).end();
+  } catch (err) {
+    console.error('mark chat read failed', err);
+    res.status(500).json({ error: 'Could not mark read' });
+  }
+});
+
 export default router;

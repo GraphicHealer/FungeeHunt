@@ -36,6 +36,7 @@ model Game {
   players                Player[]
   teams                  Team[]
   tasks                  Task[]
+  messages               Message[]
   rulesSections          RuleSection[]
   spectatorSessions      SpectatorSession[]
 }
@@ -64,11 +65,27 @@ model Team {
   manager               Player?      @relation("TeamManager", fields: [managerId], references: [id])
   members               Player[]
   submissions           Submission[]
+  messages              Message[]
   game                  Game         @relation(fields: [gameId], references: [id])
   returnedAt            DateTime?
   returnBonusAwarded    Boolean      @default(false)
   foodDriveItems        Int          @default(0)
   foodDriveBonusAwarded Boolean      @default(false)
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  gameId    String
+  teamId    String
+  sender    String
+  content   String
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([gameId, teamId, createdAt])
 }
 
 model Task {

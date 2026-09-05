@@ -463,4 +463,85 @@ router.post('/:gameId/announce', async (req: any, res: any) => {
   }
 });
 
+router.get('/:gameId/chat/unread', async (req: any, res: any) => {
+  const { gameId } = req.params;
+  try {
+    const counts = await db.message.groupBy({
+      by: ['teamId'],
+      where: { gameId, sender: 'CAPTAIN', readAt: null },
+      _count: { teamId: true },
+    });
+    const result: Record<string, number> = {};
+    for (const c of counts as any) result[c.teamId] = c._count.teamId;
+    res.json(result);
+  } catch (err) {
+    console.error('chat unread failed', err);
+    res.status(500).json({ error: 'Could not load unread counts' });
+  }
+});
+
+router.get('/:gameId/chat/:teamId', async (req: any, res: any) => {
+  const { gameId, teamId } = req.params;
+  try {
+    const game = await db.game.findUnique({ where: { id: gameId } });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+    const team = await db.team.findFirst({ where: { id: teamId, gameId } });
+    if (!team) return res.status(404).json({ error: 'Team not found' });
+    const messages = await db.message.findMany({
+      where: { gameId, teamId },
+      orderBy: { createdAt: 'asc' },
+    });
+    res.json(messages);
+  } catch (err) {
+    console.error('load gm chat failed', err);
+    res.status(500).json({ error: 'Could not load chat' });
+  }
+});
+
+router.post('/:gameId/chat/:teamId', async (req: any, res: any) => {
+  const { gameId, teamId } = req.params;
+  const { content } = req.body ?? {};
+  if (!content?.trim()) return res.status(400).json({ error: 'Message is empty' });
+  try {
+    const game = await db.game.findUnique({ where: { id: gameId } });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+    const team = await db.team.findFirst({ where: { id: teamId, gameId }, include: { manager: { select: { id: true } } } });
+    if (!team) return res.status(404).json({ error: 'Team not found' });
+    const msg = await db.message.create({
+      data: { gameId, teamId, sender: 'GM', content: content.trim() },
+    });
+    const io = req.app.get('io') as any;
+    io?.emit(`game:${game.code.toUpperCase()}:chat:${teamId}`, { type: 'message', message: msg });
+    io?.emit(`gm:${gameId}:chat`, { type: 'message', teamId, message: msg });
+    io?.emit(`game:${game.code.toUpperCase()}`, { type: 'chat' });
+    if (team.manager?.id) {
+      await sendPushToPlayer(team.manager.id, `Message from Game Master`, msg.content, `${getBaseUrl(req)}/play/${game.code}/tasks`);
+    }
+    res.status(201).json(msg);
+  } catch (err) {
+    console.error('send gm chat failed', err);
+    res.status(500).json({ error: 'Could not send message' });
+  }
+});
+
+router.post('/:gameId/chat/:teamId/read', async (req: any, res: any) => {
+  const { gameId, teamId } = req.params;
+  try {
+    const game = await db.game.findUnique({ where: { id: gameId } });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+    await db.message.updateMany({
+      where: { gameId, teamId, sender: 'CAPTAIN', readAt: null },
+      data: { readAt: new Date() },
+    });
+    const io = req.app.get('io') as any;
+    io?.emit(`game:${game.code.toUpperCase()}:chat:${teamId}`, { type: 'read' });
+    io?.emit(`gm:${gameId}:chat`, { type: 'read', teamId });
+    io?.emit(`game:${game.code.toUpperCase()}`, { type: 'chat' });
+    res.status(204).end();
+  } catch (err) {
+    console.error('mark gm chat read failed', err);
+    res.status(500).json({ error: 'Could not mark read' });
+  }
+});
+
 export default router;
