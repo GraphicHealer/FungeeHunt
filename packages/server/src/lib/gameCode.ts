@@ -1,11 +1,12 @@
+import { randomInt } from 'node:crypto';
 import { db } from '../db/client';
 
-const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
 function randomCode(length = 6): string {
   let s = '';
   for (let i = 0; i < length; i++) {
-    s += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+    s += ALPHABET[randomInt(0, ALPHABET.length)];
   }
   return s;
 }
