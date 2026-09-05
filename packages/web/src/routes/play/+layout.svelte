@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import ThemeToggle from '$lib/ThemeToggle.svelte';
   import PlayerNav from '$lib/PlayerNav.svelte';
   import PlayerTopbar from '$lib/PlayerTopbar.svelte';
 
@@ -14,7 +13,4 @@
 <slot />
 {#if showNav}
   <PlayerNav />
-  <ThemeToggle style="bottom: 5.5rem;" />
-{:else}
-  <ThemeToggle />
 {/if}

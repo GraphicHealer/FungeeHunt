@@ -7,24 +7,19 @@ function getSystemTheme(): Theme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-function loadSavedTheme(): Theme {
-  if (typeof window === 'undefined') return 'light';
-  const saved = localStorage.getItem('fungee-theme');
-  if (saved === 'dark' || saved === 'light') return saved;
-  return getSystemTheme();
-}
-
 function apply(theme: Theme) {
   if (typeof document !== 'undefined') {
     document.documentElement.dataset.theme = theme;
-    localStorage.setItem('fungee-theme', theme);
   }
 }
 
-export const theme = writable<Theme>(loadSavedTheme());
+export const theme = writable<Theme>(getSystemTheme());
 
 theme.subscribe((value) => apply(value));
 
-export function toggleTheme() {
-  theme.update((t) => (t === 'light' ? 'dark' : 'light'));
+if (typeof window !== 'undefined') {
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  media.addEventListener('change', (e) => {
+    theme.set(e.matches ? 'dark' : 'light');
+  });
 }

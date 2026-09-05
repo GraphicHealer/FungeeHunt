@@ -1,6 +1,5 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import ThemeToggle from '$lib/ThemeToggle.svelte';
 
   let passphrase = '';
   let error = '';
@@ -27,7 +26,6 @@
 </script>
 
 <main class="fungee-page">
-  <ThemeToggle />
   <form class="fungee-card" on:submit|preventDefault={login}>
     <h1 class="fungee-title">Game Master Log In</h1>
     <p class="fungee-subtitle">Enter the passphrase to access the Game Master board.</p>
