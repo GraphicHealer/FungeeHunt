@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { fade, scale } from 'svelte/transition';
+  import { gmToken } from '$lib/gmToken';
 
   const gameId = $page.params.gameId;
 
@@ -19,7 +20,7 @@
   let selectedMembers: string[] = [];
 
   function token() {
-    return localStorage.getItem('gmToken') ?? '';
+    return gmToken(gameId);
   }
 
   async function load() {

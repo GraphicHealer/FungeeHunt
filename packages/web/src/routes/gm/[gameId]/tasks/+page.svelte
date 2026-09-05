@@ -5,6 +5,7 @@
   import { formatPoints } from '$lib/format';
   import { toast } from '$lib/toast';
   import { downloadTemplate } from '$lib/taskCsv';
+  import { gmToken } from '$lib/gmToken';
 
   const gameId = $page.params.gameId;
 
@@ -37,7 +38,7 @@
   let expandedDefault: string | null = null;
 
   function token() {
-    return localStorage.getItem('gmToken') ?? '';
+    return gmToken(gameId);
   }
 
   async function load() {

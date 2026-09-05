@@ -4,6 +4,7 @@
   import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
   import ChatWidget from '$lib/ChatWidget.svelte';
+  import { gmToken } from '$lib/gmToken';
 
   const gameId = $page.params.gameId;
 
@@ -28,7 +29,7 @@
   ];
 
   function token() {
-    return localStorage.getItem('gmToken') ?? '';
+    return gmToken(gameId);
   }
 
   async function pairSpectator() {
@@ -60,7 +61,11 @@
     const res = await fetch(`/api/gm/games/${gameId}`, {
       headers: { Authorization: `Bearer ${token()}` },
     });
-    if (res.ok) game = await res.json();
+    if (res.ok) {
+      game = await res.json();
+    } else if (res.status === 401 || res.status === 403) {
+      goto('/login');
+    }
   }
 
   function remaining() {

@@ -3,8 +3,9 @@ import { config } from '../config';
 
 const SEP = '.';
 
-export function createGmToken(): string {
-  const payload = { role: 'gm', iat: Date.now() };
+export function createGmToken(gameId?: string): string {
+  const payload: any = { role: 'gm', iat: Date.now() };
+  if (gameId) payload.gameId = gameId;
   const p = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const sig = createHmac('sha256', config.SESSION_SECRET).update(p).digest('base64url');
   return `${p}${SEP}${sig}`;

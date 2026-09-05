@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { toast } from './toast';
+  import { gmToken } from './gmToken';
 
   export let gameId: string;
   export let sub: any;
@@ -12,7 +13,7 @@
   let rejecting = false;
 
   function token() {
-    return localStorage.getItem('gmToken') ?? '';
+    return gmToken(gameId);
   }
 
   async function review(status: string) {

@@ -1,10 +1,8 @@
 import { execFile } from 'node:child_process';
-import path from 'node:path';
 import { Router } from 'express';
 import { db } from '../db/client';
-import { config } from '../config';
 import { playerAuth } from '../middleware/playerAuth';
-import { upload } from '../lib/uploads';
+import { upload, uploadPath } from '../lib/uploads';
 
 const router = Router({ mergeParams: true });
 
@@ -42,7 +40,7 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
     });
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
-    const urls = files.map((f) => `/uploads/${f.filename}`);
+    const urls = files.map((f) => `/uploads/${game.id}/${f.filename}`);
     const isPhoto = (f: any) => f.mimetype.startsWith('image/');
     const isVideo = (f: any) => f.mimetype.startsWith('video/');
 
@@ -59,10 +57,11 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
       return res.status(400).json({ error: 'This task requires one or more photos' });
     }
 
-    for (const f of files) {
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
       if (f.mimetype.startsWith('video/')) {
-        const input = path.join(config.UPLOAD_DIR, f.filename);
-        const output = path.join(config.UPLOAD_DIR, `${f.filename}.thumb.jpg`);
+        const input = uploadPath(urls[i]);
+        const output = uploadPath(`/uploads/${game.id}/${f.filename}.thumb.jpg`);
         try {
           await generateVideoThumb(input, output);
         } catch (err) {

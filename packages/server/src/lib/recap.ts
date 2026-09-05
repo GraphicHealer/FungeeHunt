@@ -6,6 +6,7 @@ import { db } from '../db/client';
 import { config } from '../config';
 import { logger } from './logger';
 import { getRandomAudioFile, specialAudioFolders } from './audio';
+import { uploadPath } from './uploads';
 
 export interface RecapPlan {
   game: {
@@ -55,8 +56,7 @@ function proofUrlsFor(sub: any) {
 }
 
 function localPath(proofUrl: string) {
-  const filename = path.basename(proofUrl);
-  return path.join(config.UPLOAD_DIR, filename);
+  return uploadPath(proofUrl);
 }
 
 function escapeText(text: string) {
@@ -537,7 +537,9 @@ export async function renderRecap(gameId: string, plan: RecapPlan) {
 
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fungee-recap-'));
   const outputName = `recap_${gameId}.mp4`;
-  const outputPath = path.join(config.UPLOAD_DIR, outputName);
+  const outputDir = path.join(config.UPLOAD_DIR, gameId);
+  fs.mkdirSync(outputDir, { recursive: true });
+  const outputPath = path.join(outputDir, outputName);
 
   const totalSteps = (plan.highlights.length ? 1 : 0) + plan.segments.length + 2;
   let completedSteps = 0;
@@ -674,7 +676,7 @@ export async function renderRecap(gameId: string, plan: RecapPlan) {
 
     logger.info('Recap complete', { outputPath });
     setRecapProgress(gameId, 100);
-    await updateRecapStatus(gameId, 'READY', `/uploads/${outputName}`);
+    await updateRecapStatus(gameId, 'READY', `/uploads/${gameId}/${outputName}`);
   } catch (err: any) {
     logger.error('Recap render failed', { gameId, error: err.message });
     throw err;

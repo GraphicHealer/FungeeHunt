@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
+  import { setGmToken } from '$lib/gmToken';
 
   function toInputValue(d: Date) {
     const pad = (n: number) => n.toString().padStart(2, '0');
@@ -174,6 +175,7 @@
     });
     const data = await res.json();
     if (res.ok) {
+      if (data.gmToken) setGmToken(data.id, data.gmToken);
       try {
         await fetch('/api/config', {
           method: 'PATCH',

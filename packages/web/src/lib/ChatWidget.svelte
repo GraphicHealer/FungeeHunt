@@ -3,6 +3,7 @@
   import { onMount, onDestroy, tick } from 'svelte';
   import { io } from 'socket.io-client';
   import { fade, scale } from 'svelte/transition';
+  import { gmToken } from './gmToken';
 
   $: code = $page.params.code;
   $: gameId = $page.params.gameId;
@@ -227,7 +228,7 @@
 
   onMount(() => {
     if (isPlayer) token = localStorage.getItem(`token:${code}`) ?? '';
-    else token = localStorage.getItem('gmToken') ?? '';
+    else token = gmToken(gameId);
 
     socket = io({ transports: ['websocket', 'polling'] });
 

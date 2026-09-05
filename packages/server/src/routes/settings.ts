@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db/client';
 import { parseCsv, parseTaskRows } from '../lib/taskCsv';
+import { gmAuth } from '../middleware/gmAuth';
 
 const router = Router();
 
@@ -19,6 +20,8 @@ router.get('/', async (_req, res) => {
     res.status(500).json({ error: 'Could not load settings' });
   }
 });
+
+router.use(gmAuth);
 
 router.patch('/', async (req, res) => {
   const {

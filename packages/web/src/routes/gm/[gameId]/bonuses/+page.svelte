@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { fade, scale } from 'svelte/transition';
+  import { gmToken } from '$lib/gmToken';
 
   const gameId = $page.params.gameId;
 
@@ -34,7 +35,7 @@
   let customPhotoCount: number | null = null;
 
   function token() {
-    return localStorage.getItem('gmToken') ?? '';
+    return gmToken(gameId);
   }
 
   function toInputValue(d: Date) {

@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { unlinkSync } from 'fs';
-import { join } from 'path';
+import { rmSync } from 'fs';
 import { db } from '../db/client';
-import { config } from '../config';
 import { sendPushToPlayer } from '../lib/push';
 import { getBaseUrl } from '../lib/urls';
+import { uploadPath } from '../lib/uploads';
 
 const router = Router({ mergeParams: true });
 
@@ -71,12 +70,14 @@ router.patch('/:submissionId', async (req: any, res: any) => {
         updateData.reviewedAt = null;
         updateData.isHighlight = false;
         for (const url of new Set([current.proofUrl, ...(current.proofUrls ?? [])])) {
-          if (!url) continue;
-          const filename = url.replace('/uploads/', '');
-          try {
-            unlinkSync(join(config.UPLOAD_DIR, filename));
-          } catch (e) {
-            console.warn('could not delete denied file', url, e);
+          for (const toRemove of [url, `${url}.thumb.jpg`]) {
+            const p = uploadPath(toRemove);
+            if (!p) continue;
+            try {
+              rmSync(p, { force: true });
+            } catch (e) {
+              console.warn('could not delete denied file', toRemove, e);
+            }
           }
         }
       } else if (status === 'COMPLETED') {

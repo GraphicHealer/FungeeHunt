@@ -27,7 +27,7 @@
   </div>
   <div class="topbar-actions">
     <button class="spectator" on:click={() => goto('/spectator')}>SPECTATOR</button>
-    <button class="login" data-tour="login" on:click={() => goto('/login')}>LOG IN</button>
+    <button class="login" data-tour="create-game" on:click={() => goto('/gm/new')}>CREATE GAME</button>
   </div>
 </header>
 

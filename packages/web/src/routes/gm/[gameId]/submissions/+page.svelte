@@ -3,6 +3,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { toast } from '$lib/toast';
   import { io } from 'socket.io-client';
+  import { gmToken } from '$lib/gmToken';
   import SubmissionReview from '$lib/SubmissionReview.svelte';
 
   const gameId = $page.params.gameId;
@@ -13,7 +14,7 @@
   let socket: any;
 
   function token() {
-    return localStorage.getItem('gmToken') ?? '';
+    return gmToken(gameId);
   }
 
   async function loadGame() {

@@ -17,11 +17,11 @@
 
   const steps = [
     {
-      title: 'Log In as Game Master',
-      body: 'Click the LOG IN button at the top right to reach the Game Master password screen.',
+      title: 'Create a Game',
+      body: 'Click the CREATE GAME button at the top right to start the setup wizard. No password needed.',
       route: /^\/$/,
       nextPath: null,
-      target: '[data-tour="login"]',
+      target: '[data-tour="create-game"]',
       placement: 'bottom',
       hideNext: true,
     },

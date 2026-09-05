@@ -49,7 +49,7 @@ app.use('/api/play/:code', playRoute);
 app.use('/api/play/:code/tasks/:taskId/submit', submitRoute);
 app.use('/api/view/:code', viewRoute);
 app.use('/api/spectator', spectatorRoute);
-app.use('/api/gm/games', gmAuth, gamesRoute);
+app.use('/api/gm/games', gamesRoute);
 app.use('/api/gm/games/:gameId/submissions', gmAuth, submissionsRoute);
 app.use('/api/gm/games/:gameId/tasks', gmAuth, tasksRoute);
 app.use('/api/gm/games/:gameId/teams', gmAuth, teamsRoute);
@@ -57,7 +57,7 @@ app.use('/api/gm/games/:gameId/players', gmAuth, playersRoute);
 app.use('/api/gm/games/:gameId/bonuses', gmAuth, bonusesRoute);
 app.use('/api/gm/games/:gameId/rules', gmAuth, rulesRoute);
 app.use('/api/gm/games/:gameId/recap', gmAuth, recapRoute);
-app.use('/api/gm/settings', gmAuth, settingsRoute);
+app.use('/api/gm/settings', settingsRoute);
 
 app.use(express.static(config.FRONTEND_BUILD_DIR));
 app.get('*', (_req, res) => {

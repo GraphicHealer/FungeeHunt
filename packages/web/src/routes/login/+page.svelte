@@ -18,7 +18,7 @@
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem('gmToken', data.token);
-      goto('/gm');
+      goto('/admin');
     } else {
       error = data.error ?? 'Login failed';
     }
@@ -27,8 +27,8 @@
 
 <main class="fungee-page">
   <form class="fungee-card" on:submit|preventDefault={login}>
-    <h1 class="fungee-title">Game Master Log In</h1>
-    <p class="fungee-subtitle">Enter the passphrase to access the Game Master board.</p>
+    <h1 class="fungee-title">Admin Log In</h1>
+    <p class="fungee-subtitle">Enter the passphrase to access the admin dashboard.</p>
 
     <label class="fungee-label" for="passphrase">Passphrase</label>
     <input class="fungee-input" id="passphrase" type="password" bind:value={passphrase} use:focus />

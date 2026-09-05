@@ -1,13 +1,18 @@
 import { createHash } from 'node:crypto';
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
+import path from 'node:path';
 import multer from 'multer';
 import { config } from '../config';
 
 mkdirSync(config.UPLOAD_DIR, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, config.UPLOAD_DIR);
+  destination: (req: any, _file, cb) => {
+    const gameId = req.gameId as string | undefined;
+    if (!gameId) return cb(new Error('gameId not set on request'), '');
+    const dir = path.join(config.UPLOAD_DIR, gameId);
+    mkdirSync(dir, { recursive: true });
+    cb(null, dir);
   },
   filename: (_req, file, cb) => {
     const ext = file.originalname.split('.').pop() ?? 'bin';
@@ -22,3 +27,15 @@ function fileFilter(_req: any, file: Express.Multer.File, cb: multer.FileFilterC
 }
 
 export const upload = multer({ storage, fileFilter });
+
+export function uploadPath(proofUrl: string) {
+  if (!proofUrl) return '';
+  const relative = proofUrl.replace(/^\/uploads\//, '').replace(/^\//, '');
+  if (!relative) return '';
+  return path.join(config.UPLOAD_DIR, relative);
+}
+
+export function uploadExists(proofUrl: string) {
+  const p = uploadPath(proofUrl);
+  return p ? existsSync(p) : false;
+}

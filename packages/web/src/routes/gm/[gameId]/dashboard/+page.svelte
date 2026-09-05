@@ -6,6 +6,7 @@
   import { io } from 'socket.io-client';
   import { formatPoints } from '$lib/format';
   import { downloadTemplate } from '$lib/taskCsv';
+  import { gmToken } from '$lib/gmToken';
   import SubmissionReview from '$lib/SubmissionReview.svelte';
 
   const gameId = $page.params.gameId;
@@ -27,7 +28,7 @@
   let announcementCaptainsOnly = false;
 
   function token() {
-    return localStorage.getItem('gmToken') ?? '';
+    return gmToken(gameId);
   }
 
   async function sendAnnouncement() {

@@ -25,6 +25,7 @@ export async function playerAuth(req: Request, res: Response, next: NextFunction
     });
     if (!player) throw new Error('player not found');
 
+    (req as any).gameId = game.id;
     (res.locals as any).player = { ...toSafePlayer(player), team: player.team ? toSafeTeam(player.team) : null };
     (res.locals as any).game = game;
     next();

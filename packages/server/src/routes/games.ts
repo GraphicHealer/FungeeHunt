@@ -8,6 +8,9 @@ import { getBaseUrl } from '../lib/urls';
 import { sendPushToCaptains, sendPushToTeams, sendPushToPlayer } from '../lib/push';
 import { scheduleBonusPushForGame } from '../lib/pushSweep';
 import { config } from '../config';
+import { gmAuth } from '../middleware/gmAuth';
+import { createGmToken } from '../lib/auth';
+import { uploadPath } from '../lib/uploads';
 
 const router = Router();
 
@@ -284,17 +287,81 @@ router.post('/', async (req: any, res: any) => {
 
     await syncAutoRuleSections(game);
 
-    res.json(withJoinUrl(getBaseUrl(req), game));
+    const gmToken = createGmToken(game.id);
+    res.json({ ...withJoinUrl(getBaseUrl(req), game), gmToken });
   } catch (err) {
     console.error('create game failed', err);
     res.status(500).json({ error: 'Could not create game' });
   }
 });
 
+router.use(gmAuth);
+
+function storageForSubmissions(submissions: any[]) {
+  let total = 0;
+  const seen = new Set<string>();
+  for (const s of submissions) {
+    const urls: string[] = s.proofUrls?.length ? s.proofUrls : [s.proofUrl];
+    for (const u of [...urls, ...urls.map((u: string) => `${u}.thumb.jpg`)]) {
+      const p = uploadPath(u);
+      if (!p || seen.has(p)) continue;
+      seen.add(p);
+      try {
+        total += fs.statSync(p).size;
+      } catch {
+        // file missing, ignore
+      }
+    }
+  }
+  return total;
+}
+
+function formatBytes(bytes: number) {
+  if (bytes === 0) return '0 B';
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log2(bytes) / 10);
+  const size = sizes[Math.min(i, sizes.length - 1)];
+  const value = bytes / Math.pow(1024, Math.min(i, sizes.length - 1));
+  return `${value.toFixed(i === 0 ? 0 : 1)} ${size}`;
+}
+
 router.get('/', async (req: any, res: any) => {
   try {
     const games = await db.game.findMany({ orderBy: { startAt: 'asc' } });
-    res.json(games.map((game: any) => withJoinUrl(getBaseUrl(req), game)));
+    const base = getBaseUrl(req);
+    const stats = await Promise.all(
+      games.map(async (game: any) => {
+        const [teamCount, playerCount, submissionCount, submissions] = await Promise.all([
+          db.team.count({ where: { gameId: game.id } }),
+          db.player.count({ where: { gameId: game.id, type: 'APP', sessionToken: { not: null } } }),
+          db.submission.count({ where: { task: { gameId: game.id } } }),
+          db.submission.findMany({
+            where: { task: { gameId: game.id } },
+            select: { proofUrl: true, proofUrls: true },
+          }),
+        ]);
+        let storageBytes = storageForSubmissions(submissions);
+        if (game.recapVideoUrl) {
+          const p = uploadPath(game.recapVideoUrl);
+          if (p) {
+            try {
+              storageBytes += fs.statSync(p).size;
+            } catch {
+              // missing recap, ignore
+            }
+          }
+        }
+        return {
+          ...withJoinUrl(base, game),
+          teamCount,
+          playerCount,
+          submissionCount,
+          storageSize: formatBytes(storageBytes),
+          gmUrl: `${base}/gm/${game.id}/dashboard`,
+        };
+      }),
+    );
+    res.json(stats);
   } catch (err) {
     console.error('list games failed', err);
     res.status(500).json({ error: 'Could not list games' });
@@ -313,6 +380,9 @@ router.get('/:gameId', async (req: any, res: any) => {
 });
 
 router.delete('/:gameId', async (req: any, res: any) => {
+  if ((res.locals as any).gm?.gameId) {
+    return res.status(403).json({ error: 'Only admin can delete games' });
+  }
   try {
     const { gameId } = req.params;
     const game = await db.game.findUnique({ where: { id: gameId } });
@@ -330,13 +400,21 @@ router.delete('/:gameId', async (req: any, res: any) => {
     }
 
     for (const u of urls) {
-      const file = path.basename(u);
-      if (!file) continue;
-      try {
-        fs.rmSync(path.join(config.UPLOAD_DIR, file), { force: true });
-      } catch (err) {
-        console.error('could not remove upload', file, err);
+      for (const toRemove of [u, `${u}.thumb.jpg`]) {
+        const p = uploadPath(toRemove);
+        if (!p) continue;
+        try {
+          fs.rmSync(p, { force: true });
+        } catch (err) {
+          console.error('could not remove upload', p, err);
+        }
       }
+    }
+
+    try {
+      fs.rmSync(path.join(config.UPLOAD_DIR, gameId), { recursive: true, force: true });
+    } catch {
+      // folder may not exist
     }
 
     await db.$transaction(async (tx: any) => {

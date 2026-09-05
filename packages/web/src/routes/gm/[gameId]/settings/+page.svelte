@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { toast } from '$lib/toast';
   import { goto } from '$app/navigation';
+  import { gmToken } from '$lib/gmToken';
 
   const gameId = $page.params.gameId;
 
@@ -19,7 +20,7 @@
   let returnOffsetEnd = 0;
 
   function token() {
-    return localStorage.getItem('gmToken') ?? '';
+    return gmToken(gameId);
   }
 
   function toInputValue(d: Date) {
