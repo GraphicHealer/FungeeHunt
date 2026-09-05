@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount, onDestroy } from 'svelte';
+  import { goto } from '$app/navigation';
   import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
   import ChatWidget from '$lib/ChatWidget.svelte';
