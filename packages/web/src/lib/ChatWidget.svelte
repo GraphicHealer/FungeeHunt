@@ -9,6 +9,8 @@
   $: isPlayer = !!code;
   $: isGm = !!gameId && !code;
 
+  export let style = '';
+
   let token = '';
   let playerState: any = null;
   let teams: any[] = [];
@@ -23,6 +25,7 @@
   let selectedTeamId = '';
   let selectedTeamName = '';
   let scrollEl: HTMLDivElement;
+  let chatInput: HTMLInputElement;
 
   const commonEmojis = ['😀','😂','😍','🤔','👍','👎','🎉','🔥','❤️','👏','🙌','😎','🤯','😭','😡','👌','🎊','⭐','💯','🍕','🚀','⚠️','✅','❌'];
 
@@ -71,8 +74,6 @@
   async function send() {
     const text = input.trim();
     if (!text) return;
-    input = '';
-    pickerOpen = false;
     let res;
     if (isGm && selectedTeamId) {
       res = await fetch(`/api/gm/games/${gameId}/chat/${selectedTeamId}`, {
@@ -87,7 +88,13 @@
         body: JSON.stringify({ content: text }),
       });
     }
-    if (res && !res.ok) input = text;
+    if (res?.ok) {
+      input = '';
+      pickerOpen = false;
+      if (chatInput) chatInput.value = '';
+    } else {
+      input = text;
+    }
   }
 
   async function markRead(teamId: string) {
@@ -165,7 +172,6 @@
       if (isGm) {
         if (selectedTeamId && msg.teamId === selectedTeamId) {
           messages = [...messages, msg];
-          if (panelOpen) markRead(selectedTeamId);
         } else if (msg.teamId) {
           teamUnread[msg.teamId] = (teamUnread[msg.teamId] ?? 0) + 1;
           teamUnread = { ...teamUnread };
@@ -174,8 +180,7 @@
         updateUnreadFromMessages();
       } else if (msg.teamId === playerTeamId) {
         messages = [...messages, msg];
-        if (panelOpen) markRead(playerTeamId);
-        else updateUnreadFromMessages();
+        updateUnreadFromMessages();
       }
       tick().then(scrollToBottom);
     } else if (payload.type === 'read') {
@@ -222,7 +227,7 @@
 </script>
 
 {#if visible}
-  <div class="chat-bubble" on:click={openPanel} class:dot={unread > 0} transition:fade={{ duration: 180 }}>
+  <div class="chat-bubble" on:click={openPanel} class:dot={unread > 0} transition:fade={{ duration: 180 }} style={style}>
     <span class="mdi mdi-message-text"></span>
   </div>
 {/if}
@@ -275,7 +280,7 @@
             </div>
           {/if}
           <button type="button" class="emoji-toggle" on:click={() => (pickerOpen = !pickerOpen)}><span class="mdi mdi-emoticon-happy-outline"></span></button>
-          <input class="chat-input" type="text" bind:value={input} placeholder="Type a message…" />
+          <input class="chat-input" type="text" bind:value={input} bind:this={chatInput} placeholder="Type a message…" />
           <button class="chat-send" type="submit"><span class="mdi mdi-send"></span></button>
         </form>
       {/if}

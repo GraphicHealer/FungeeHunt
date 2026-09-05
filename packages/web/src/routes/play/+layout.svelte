@@ -12,7 +12,7 @@
   <PlayerTopbar />
 {/if}
 <slot />
-<ChatWidget />
+<ChatWidget style={showNav ? 'bottom: 5rem;' : ''} />
 {#if showNav}
   <PlayerNav />
 {/if}
