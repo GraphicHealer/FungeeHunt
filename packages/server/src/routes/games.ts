@@ -5,7 +5,7 @@ import { db } from '../db/client';
 import { generateGameCode } from '../lib/gameCode';
 import { getSystemSettings } from '../lib/defaults';
 import { getBaseUrl } from '../lib/urls';
-import { sendPushToCaptains, sendPushToTeams } from '../lib/push';
+import { sendPushToCaptains, sendPushToTeams, sendPushToPlayer } from '../lib/push';
 import { scheduleBonusPushForGame } from '../lib/pushSweep';
 import { config } from '../config';
 
