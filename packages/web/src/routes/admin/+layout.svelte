@@ -2,20 +2,9 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import Toast from '$lib/Toast.svelte';
+  import { isAdminToken } from '$lib/gmToken';
 
   let ready = false;
-
-  function isAdminToken(t: string) {
-    try {
-      let payload = t.split('.')[0].replace(/-/g, '+').replace(/_/g, '/');
-      const pad = payload.length % 4;
-      if (pad) payload += '='.repeat(4 - pad);
-      const json = JSON.parse(atob(payload));
-      return !json.gameId;
-    } catch {
-      return false;
-    }
-  }
 
   onMount(() => {
     const token = localStorage.getItem('gmToken') ?? '';

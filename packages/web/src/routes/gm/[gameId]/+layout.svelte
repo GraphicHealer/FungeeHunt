@@ -6,7 +6,8 @@
   import ChatWidget from '$lib/ChatWidget.svelte';
   import { gmToken } from '$lib/gmToken';
 
-  const gameId = $page.params.gameId;
+  let gameId = $page.params.gameId;
+  $: gameId = $page.params.gameId;
 
   let game: any = null;
   let socket: any;

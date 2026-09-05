@@ -59,8 +59,28 @@ app.use('/api/gm/games/:gameId/rules', gmAuth, rulesRoute);
 app.use('/api/gm/games/:gameId/recap', gmAuth, recapRoute);
 app.use('/api/gm/settings', settingsRoute);
 
-app.use(express.static(config.FRONTEND_BUILD_DIR));
-app.get('*', (_req, res) => {
+app.use(
+  express.static(config.FRONTEND_BUILD_DIR, {
+    setHeaders: (res, filePath) => {
+      const normalized = filePath.replace(/\\/g, '/');
+      if (normalized.includes('/_app/')) {
+        res.set('Cache-Control', 'public, max-age=31536000, immutable');
+      } else if (normalized.endsWith('/index.html') || normalized.endsWith('/200.html')) {
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    },
+  }),
+);
+
+app.get('*', (req, res) => {
+  const reqPath = req.path.toLowerCase();
+  if (reqPath.startsWith('/_app/') || reqPath.startsWith('/uploads/')) {
+    return res.status(404).end();
+  }
+  if (/\.[^/]+$/.test(req.path) && !reqPath.endsWith('.html')) {
+    return res.status(404).end();
+  }
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.sendFile(path.join(config.FRONTEND_BUILD_DIR, '200.html'));
 });
 
