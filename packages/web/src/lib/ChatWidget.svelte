@@ -26,6 +26,7 @@
   let selectedTeamName = '';
   let scrollEl: HTMLDivElement;
   let chatInput: HTMLInputElement;
+  let chatRoom = '';
 
   const commonEmojis = ['😀','😂','😍','🤔','👍','👎','🎉','🔥','❤️','👏','🙌','😎','🤯','😭','😡','👌','🎊','⭐','💯','🍕','🚀','⚠️','✅','❌'];
 
@@ -127,6 +128,15 @@
     }
   }
 
+  function closePanel() {
+    panelOpen = false;
+    if (isGm) {
+      selectedTeamId = '';
+      selectedTeamName = '';
+      messages = [];
+    }
+  }
+
   async function openPanel() {
     panelOpen = true;
     if (isGm) {
@@ -200,6 +210,21 @@
     }
   }
 
+  function joinChatRoom(tid: string) {
+    if (!socket || chatRoom === tid) return;
+    if (chatRoom) socket.off(`game:${code.toUpperCase()}:chat:${chatRoom}`, handleIncoming);
+    chatRoom = tid;
+    socket.on(`game:${code.toUpperCase()}:chat:${tid}`, handleIncoming);
+    loadMessages(tid).then(() => updateUnreadFromMessages(tid));
+  }
+
+  async function refreshPlayerState() {
+    if (!isPlayer || !code) return;
+    await loadPlayerState();
+    const tid = playerState?.team?.id;
+    if (tid) joinChatRoom(tid);
+  }
+
   onMount(() => {
     if (isPlayer) token = localStorage.getItem(`token:${code}`) ?? '';
     else token = localStorage.getItem('gmToken') ?? '';
@@ -207,13 +232,8 @@
     socket = io({ transports: ['websocket', 'polling'] });
 
     if (isPlayer && code) {
-      loadPlayerState().then(() => {
-        if (playerState?.team?.id) {
-          const tid = playerState.team.id;
-          socket.on(`game:${code.toUpperCase()}:chat:${tid}`, handleIncoming);
-          loadMessages(tid).then(() => updateUnreadFromMessages(tid));
-        }
-      });
+      socket.on(`game:${code.toUpperCase()}`, refreshPlayerState);
+      refreshPlayerState();
     } else if (isGm && gameId) {
       socket.on(`gm:${gameId}:chat`, handleIncoming);
       loadTeams();
@@ -233,14 +253,14 @@
 {/if}
 
 {#if panelOpen}
-  <div class="chat-backdrop" on:click={() => (panelOpen = false)} transition:fade={{ duration: 180 }}>
+  <div class="chat-backdrop" on:click={closePanel} transition:fade={{ duration: 180 }}>
     <div class="chat-panel" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <div class="chat-header">
         {#if isGm && selectedTeamId}
           <button class="chat-back" on:click={backToTeams}><span class="mdi mdi-arrow-left"></span></button>
         {/if}
         <span class="chat-title">{isGm ? (selectedTeamName || 'Select a team') : selectedTeamName}</span>
-        <button class="chat-close" on:click={() => (panelOpen = false)}><span class="mdi mdi-close"></span></button>
+        <button class="chat-close" on:click={closePanel}><span class="mdi mdi-close"></span></button>
       </div>
 
       <div class="chat-body" bind:this={scrollEl}>
@@ -316,6 +336,7 @@
     background: #ff4444;
     border-radius: 50%;
     border: 2px solid var(--brand);
+    animation: chat-pulse 1.2s infinite;
   }
   .chat-backdrop {
     position: fixed;
@@ -384,6 +405,13 @@
     padding: 0.1rem 0.4rem;
     font-size: 0.75rem;
     font-weight: 700;
+    animation: chat-pulse 1.2s infinite;
+  }
+
+  @keyframes chat-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 0.5rem rgba(255, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
   }
   .chat-msg {
     display: flex;
