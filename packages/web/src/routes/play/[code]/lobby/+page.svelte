@@ -2,9 +2,10 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { onMount, onDestroy } from 'svelte';
+  import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
 
-  const code = $page.params.code;
+  const code = $page.params.code ?? '';
 
   let state: any = null;
   let status = 'Checking game state…';

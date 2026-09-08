@@ -6,7 +6,7 @@
   import { gmToken } from '$lib/gmToken';
   import SubmissionReview from '$lib/SubmissionReview.svelte';
 
-  const gameId = $page.params.gameId;
+  const gameId = $page.params.gameId ?? '';
 
   let submissions: any[] = [];
   let reviewing: any = null;

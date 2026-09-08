@@ -10,7 +10,7 @@
   import SubmissionReview from '$lib/SubmissionReview.svelte';
   import GmTour from '$lib/GmTour.svelte';
 
-  const gameId = $page.params.gameId;
+  const gameId = $page.params.gameId ?? '';
 
   let game: any = null;
   let submissions: any[] = [];
@@ -53,9 +53,9 @@
       announcementMessage = '';
       announcementTeamIds = [];
       showAnnouncementModal = false;
-      toast.success('Announcement sent');
+      toast.add('Announcement sent', 'success');
     } else {
-      toast.error('Could not send announcement');
+      toast.add('Could not send announcement', 'error');
     }
   }
 

@@ -6,25 +6,27 @@
   let error = '';
   let polling: ReturnType<typeof setInterval> | null = null;
 
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/spectator', { method: 'POST' });
-      if (!res.ok) throw new Error('Could not create session');
-      const data = await res.json();
-      code = data.code;
-      polling = setInterval(async () => {
-        const check = await fetch(`/api/spectator/${code}`);
-        if (check.ok) {
-          const state = await check.json();
-          if (state.gameCode) {
-            if (polling) clearInterval(polling);
-            goto(`/view/${state.gameCode}`);
+  onMount(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/spectator', { method: 'POST' });
+        if (!res.ok) throw new Error('Could not create session');
+        const data = await res.json();
+        code = data.code;
+        polling = setInterval(async () => {
+          const check = await fetch(`/api/spectator/${code}`);
+          if (check.ok) {
+            const state = await check.json();
+            if (state.gameCode) {
+              if (polling) clearInterval(polling);
+              goto(`/view/${state.gameCode}`);
+            }
           }
-        }
-      }, 2500);
-    } catch (err: any) {
-      error = err.message || 'Could not start spectator mode';
-    }
+        }, 2500);
+      } catch (err: any) {
+        error = err.message || 'Could not start spectator mode';
+      }
+    })();
     return () => {
       if (polling) clearInterval(polling);
     };

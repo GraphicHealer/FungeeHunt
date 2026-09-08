@@ -15,6 +15,10 @@ function apply(theme: Theme) {
 
 export const theme = writable<Theme>(getSystemTheme());
 
+export function toggleTheme() {
+  theme.update((t) => (t === 'light' ? 'dark' : 'light'));
+}
+
 theme.subscribe((value) => apply(value));
 
 if (typeof window !== 'undefined') {

@@ -5,7 +5,7 @@
   import { io } from 'socket.io-client';
   import { formatPoints } from '$lib/format';
 
-  const code = $page.params.code;
+  const code = $page.params.code ?? '';
 
   let data: any = null;
   let error = '';
@@ -418,7 +418,7 @@
                 <span class="completion">{myTeam.completed} / {data.tasks.length} completed</span>
                 {#if myTeam.completed < data.tasks.length}
                   <span class="missed">
-                    Missed: {data.tasks.filter((t) => !(myTeam.completedTaskIds ?? []).includes(t.id)).map((t) => t.title).join(', ')}
+                    Missed: {data.tasks.filter((t: any) => !(myTeam.completedTaskIds ?? []).includes(t.id)).map((t: any) => t.title).join(', ')}
                   </span>
                 {:else}
                   <span class="missed all-done">Completed every challenge!</span>
