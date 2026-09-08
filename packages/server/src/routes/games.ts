@@ -1,16 +1,15 @@
 import { Router } from 'express';
 import fs from 'fs';
-import path from 'path';
 import { db } from '../db/client';
 import { generateGameCode } from '../lib/gameCode';
 import { getSystemSettings } from '../lib/defaults';
 import { getBaseUrl } from '../lib/urls';
 import { sendPushToCaptains, sendPushToTeams, sendPushToPlayer } from '../lib/push';
 import { scheduleBonusPushForGame } from '../lib/pushSweep';
-import { config } from '../config';
 import { gmAuth } from '../middleware/gmAuth';
 import { createGmToken } from '../lib/auth';
 import { uploadPath } from '../lib/uploads';
+import { deleteGame } from '../lib/deleteGame';
 
 const router = Router();
 
@@ -384,51 +383,8 @@ router.delete('/:gameId', async (req: any, res: any) => {
     return res.status(403).json({ error: 'Only admin can delete games' });
   }
   try {
-    const { gameId } = req.params;
-    const game = await db.game.findUnique({ where: { id: gameId } });
-    if (!game) return res.status(404).json({ error: 'Game not found' });
-
-    const submissions = await db.submission.findMany({
-      where: { task: { gameId } },
-      select: { proofUrl: true, proofUrls: true },
-    });
-
-    const urls = new Set<string>();
-    for (const s of submissions) {
-      if (s.proofUrl) urls.add(s.proofUrl);
-      for (const u of s.proofUrls ?? []) urls.add(u);
-    }
-
-    for (const u of urls) {
-      for (const toRemove of [u, `${u}.thumb.jpg`]) {
-        const p = uploadPath(toRemove);
-        if (!p) continue;
-        try {
-          fs.rmSync(p, { force: true });
-        } catch (err) {
-          console.error('could not remove upload', p, err);
-        }
-      }
-    }
-
-    try {
-      fs.rmSync(path.join(config.UPLOAD_DIR, gameId), { recursive: true, force: true });
-    } catch {
-      // folder may not exist
-    }
-
-    await db.$transaction(async (tx: any) => {
-      await tx.submission.deleteMany({ where: { task: { gameId } } });
-      await tx.task.deleteMany({ where: { gameId } });
-      await tx.ruleSection.deleteMany({ where: { gameId } });
-      await tx.team.deleteMany({ where: { gameId } });
-      await tx.player.deleteMany({ where: { gameId } });
-      await tx.game.delete({ where: { id: gameId } });
-    });
-
-    const io = req.app.get('io') as any;
-    io?.emit(`game:${game.code.toUpperCase()}`, { type: 'deleted' });
-
+    const deleted = await deleteGame(req.params.gameId, req.app.get('io'));
+    if (!deleted) return res.status(404).json({ error: 'Game not found' });
     res.status(204).end();
   } catch (err) {
     console.error('delete game failed', err);

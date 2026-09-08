@@ -23,6 +23,7 @@ import recapRoute from './routes/recap';
 import { seedSystemSettings, seedStyleProfiles } from './lib/defaults';
 import { logger } from './lib/logger';
 import { startPushSweep } from './lib/pushSweep';
+import { startAutoDeleteSweep } from './lib/autoDelete';
 import { gmAuth } from './middleware/gmAuth';
 import { gmLoginLimiter, createGameLimiter, codeLookupLimiter } from './middleware/rateLimit';
 import { loadSessionSecret } from './lib/auth';
@@ -108,6 +109,7 @@ seedSystemSettings()
   .then(() => seedStyleProfiles())
   .then(() => {
     startPushSweep();
+    startAutoDeleteSweep(io);
     server.listen(config.WEB_UI, () => {
       logger.info(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
     });
