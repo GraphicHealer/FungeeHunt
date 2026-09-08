@@ -76,7 +76,8 @@
   $: myTeam = myTeamId ? archive?.teams?.find((t: any) => t.id === myTeamId) : null;
   $: completedTaskIds = myTeam ? new Set(myTeam.submissions.filter((s: any) => s.status === 'COMPLETED').map((s: any) => s.taskId)) : new Set<string>();
   $: completedCount = completedTaskIds.size;
-  $: allTasks: any[] = archive?.tasks ?? [];
+  let allTasks: any[] = [];
+  $: allTasks = archive?.tasks ?? [];
   $: missedTasks = allTasks.filter((t: any) => !completedTaskIds.has(t.id));
 
   async function loadAndGo() {
