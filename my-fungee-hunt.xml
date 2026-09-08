@@ -29,7 +29,8 @@
   <Config Name="PG_PORT" Target="PG_PORT" Default="5432" Mode="" Description="PostgreSQL port" Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
   <Config Name="PG_DATABASE" Target="PG_DATABASE" Default="fungeehunt" Mode="" Description="PostgreSQL database name" Type="Variable" Display="always" Required="true" Mask="false">fungeehunt</Config>
   <Config Name="GM_PASSPHRASE" Target="GM_PASSPHRASE" Default="changeme" Mode="" Description="Passphrase used to log in as Game Master" Type="Variable" Display="always" Required="true" Mask="false">changeme</Config>
-  <Config Name="SESSION_SECRET" Target="SESSION_SECRET" Default="changeme" Mode="" Description="Secret for GM JWT signing" Type="Variable" Display="always" Required="true" Mask="true">changeme</Config>
+  <Config Name="SESSION_SECRET" Target="SESSION_SECRET" Default="" Mode="" Description="Optional token-signing secret. Leave blank to auto-generate one on first boot (stored in the database)." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="TRUST_PROXY" Target="TRUST_PROXY" Default="0" Mode="" Description="Number of reverse proxies in front of the app (so rate limiting sees real client IPs)." Type="Variable" Display="advanced" Required="false" Mask="false">0</Config>
   <Config Name="WEB_UI" Target="WEB_UI" Default="3000" Mode="" Description="Port the server listens on" Type="Variable" Display="advanced" Required="false" Mask="false">3000</Config>
   <Config Name="UPLOAD_DIR" Target="UPLOAD_DIR" Default="/data/uploads" Mode="" Description="Upload directory inside the container" Type="Variable" Display="advanced" Required="false" Mask="false">/data/uploads</Config>
   <Config Name="LOG_LEVEL" Target="LOG_LEVEL" Default="info" Mode="" Description="Log level (debug, info, warn, error)" Type="Variable" Display="advanced" Required="false" Mask="false">info</Config>
