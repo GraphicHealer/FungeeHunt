@@ -1,20 +1,26 @@
 import { Router } from 'express';
+import type { SystemSettings } from '@prisma/client';
 import { db } from '../db/client';
 import { parseCsv, parseTaskRows } from '../lib/taskCsv';
 import { gmAuth } from '../middleware/gmAuth';
 
 const router = Router();
 
+function publicSettings(settings: SystemSettings) {
+  const { sessionSecret: _secret, vapidPrivateKey: _vapid, ...rest } = settings;
+  return {
+    ...rest,
+    defaultRules: rest.defaultRules ? JSON.parse(rest.defaultRules) : [],
+    defaultTasks: rest.defaultTasks ? JSON.parse(rest.defaultTasks) : [],
+    taskCategories: rest.taskCategories ? JSON.parse(rest.taskCategories) : [],
+  };
+}
+
 router.get('/', async (_req, res) => {
   try {
     const settings = await db.systemSettings.findFirst();
     if (!settings) return res.status(404).json({ error: 'Settings not found' });
-    res.json({
-      ...settings,
-      defaultRules: settings.defaultRules ? JSON.parse(settings.defaultRules) : [],
-      defaultTasks: settings.defaultTasks ? JSON.parse(settings.defaultTasks) : [],
-      taskCategories: settings.taskCategories ? JSON.parse(settings.taskCategories) : [],
-    });
+    res.json(publicSettings(settings));
   } catch (err) {
     console.error('get settings failed', err);
     res.status(500).json({ error: 'Could not load settings' });
@@ -62,12 +68,7 @@ router.patch('/', async (req, res) => {
       data,
     });
 
-    res.json({
-      ...updated,
-      defaultRules: updated.defaultRules ? JSON.parse(updated.defaultRules) : [],
-      defaultTasks: updated.defaultTasks ? JSON.parse(updated.defaultTasks) : [],
-      taskCategories: updated.taskCategories ? JSON.parse(updated.taskCategories) : [],
-    });
+    res.json(publicSettings(updated));
   } catch (err) {
     console.error('update settings failed', err);
     res.status(500).json({ error: 'Could not update settings' });

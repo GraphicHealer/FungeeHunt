@@ -88,7 +88,6 @@ You can also run the pre-built image directly if you already have a Postgres dat
 ```powershell
 docker run -p 3000:3000 `
   -e GM_PASSPHRASE=changeme `
-  -e SESSION_SECRET=changeme `
   -e PG_USER=fungeehunt `
   -e PG_PASS=changeme `
   -e PG_HOST=host.docker.internal `
@@ -167,7 +166,6 @@ Edit `.env` for local dev:
 
 ```text
 GM_PASSPHRASE=your-secret-gm-passphrase
-SESSION_SECRET=any-long-random-string
 PG_USER=fungeehunt
 PG_PASS=your-local-postgres-password
 PG_HOST=localhost
@@ -244,7 +242,8 @@ npm run build --workspace=@fungeehunt/web
 | Variable | Purpose |
 | --- | --- |
 | `GM_PASSPHRASE` | Passphrase used to log in as Game Master |
-| `SESSION_SECRET` | Secret for GM JWT signing |
+| `SESSION_SECRET` | Optional. Secret for signing GM/player tokens; leave unset to auto-generate one on first boot (stored in the database) |
+| `TRUST_PROXY` | Optional. Number of reverse proxies in front of the app so rate limiting sees real client IPs (defaults to 0) |
 | `PG_USER` | PostgreSQL user |
 | `PG_PASS` | PostgreSQL password |
 | `PG_HOST` | PostgreSQL host |

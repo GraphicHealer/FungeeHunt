@@ -180,6 +180,7 @@ model SystemSettings {
   taskCategories           String?
   vapidPublicKey           String?
   vapidPrivateKey          String?
+  sessionSecret            String?
 }
 
 enum GameStatus {

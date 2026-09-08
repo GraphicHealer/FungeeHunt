@@ -16,7 +16,8 @@ if (PG_USER && PG_PASS && PG_HOST && PG_DATABASE) {
 const envSchema = z.object({
   GM_PASSPHRASE: z.string().min(1),
   DATABASE_URL: z.string().min(1),
-  SESSION_SECRET: z.string().min(1),
+  SESSION_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+  TRUST_PROXY: z.coerce.number().int().min(0).default(0),
   WEB_UI: z.coerce.number().int().positive().default(3000),
   FRONTEND_BUILD_DIR: z.string().min(1).default('/app/packages/web/build'),
   UPLOAD_DIR: z.string().min(1),
