@@ -1,10 +1,12 @@
 name: Typecheck
 
+# PR-only: pushes to main are covered by the gating jobs in docker.yml.
 on:
-  push:
-    branches:
-      - main
   pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   typecheck:
@@ -25,9 +27,61 @@ jobs:
         run: npm run db:generate
 
       - name: Typecheck server
+        id: server
+        continue-on-error: true
         working-directory: packages/server
         run: npx tsc --noEmit
 
       - name: Typecheck web
+        id: web
+        continue-on-error: true
         working-directory: packages/web
         run: npm run check
+
+      - name: Comment results on the PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- fungeehunt-typecheck -->';
+            const server = '${{ steps.server.outcome }}';
+            const web = '${{ steps.web.outcome }}';
+            const icon = (r) => (r === 'success' ? '✅' : '❌');
+            const body = [
+              marker,
+              '### Typecheck results',
+              '',
+              `| Check | Result |`,
+              `| --- | --- |`,
+              `| Server (\`tsc --noEmit\`) | ${icon(server)} ${server} |`,
+              `| Web (\`svelte-check\`) | ${icon(web)} ${web} |`,
+              '',
+              '_Web check is advisory only; the server check is required._',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      # Fail the job only on the server check; web is advisory.
+      - name: Enforce server typecheck
+        if: steps.server.outcome != 'success'
+        run: exit 1

@@ -374,7 +374,7 @@ router.get('/', async (req: any, res: any) => {
 
 router.get('/:gameId', async (req: any, res: any) => {
   try {
-    const game = await db.game.findUnique({ where: { id: req.params.gameId } });
+    const game = await db.game.findUnique({ where: { id: (req.params as any).gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
     res.json(withJoinUrl(getBaseUrl(req), game));
   } catch (err) {
@@ -388,7 +388,7 @@ router.delete('/:gameId', async (req: any, res: any) => {
     return res.status(403).json({ error: 'Only admin can delete games' });
   }
   try {
-    const deleted = await deleteGame(req.params.gameId, req.app.get('io'));
+    const deleted = await deleteGame((req.params as any).gameId, req.app.get('io'));
     if (!deleted) return res.status(404).json({ error: 'Game not found' });
     res.status(204).end();
   } catch (err) {
@@ -399,7 +399,7 @@ router.delete('/:gameId', async (req: any, res: any) => {
 
 router.patch('/:gameId', async (req: any, res: any) => {
   try {
-    const { gameId } = req.params;
+    const { gameId } = req.params as any;
     const updates = buildGameData(req.body ?? {}, true);
 
     if (updates.status === 'LIVE') {
@@ -460,7 +460,7 @@ router.patch('/:gameId', async (req: any, res: any) => {
 });
 
 router.post('/:gameId/announce', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   const { message = '', teamIds = 'all', captainsOnly = false } = req.body ?? {};
 
   try {
@@ -503,7 +503,7 @@ router.post('/:gameId/announce', async (req: any, res: any) => {
 });
 
 router.get('/:gameId/chat/unread', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   try {
     const counts = await db.message.groupBy({
       by: ['teamId'],
@@ -520,7 +520,7 @@ router.get('/:gameId/chat/unread', async (req: any, res: any) => {
 });
 
 router.get('/:gameId/chat/:teamId', async (req: any, res: any) => {
-  const { gameId, teamId } = req.params;
+  const { gameId, teamId } = req.params as any;
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -538,7 +538,7 @@ router.get('/:gameId/chat/:teamId', async (req: any, res: any) => {
 });
 
 router.post('/:gameId/chat/:teamId', async (req: any, res: any) => {
-  const { gameId, teamId } = req.params;
+  const { gameId, teamId } = req.params as any;
   const { content } = req.body ?? {};
   if (!content?.trim()) return res.status(400).json({ error: 'Message is empty' });
   try {
@@ -564,7 +564,7 @@ router.post('/:gameId/chat/:teamId', async (req: any, res: any) => {
 });
 
 router.post('/:gameId/chat/:teamId/read', async (req: any, res: any) => {
-  const { gameId, teamId } = req.params;
+  const { gameId, teamId } = req.params as any;
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -584,3 +584,4 @@ router.post('/:gameId/chat/:teamId/read', async (req: any, res: any) => {
 });
 
 export default router;
+

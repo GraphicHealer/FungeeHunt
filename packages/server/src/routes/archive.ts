@@ -4,7 +4,7 @@ import { db } from '../db/client';
 const router = Router({ mergeParams: true });
 
 router.get('/', async (req: any, res: any) => {
-  const { code } = req.params;
+  const { code } = req.params as any;
   try {
     const game = await db.game.findUnique({
       where: { code: (code ?? '').toUpperCase() },
@@ -60,3 +60,4 @@ router.get('/', async (req: any, res: any) => {
 });
 
 export default router;
+

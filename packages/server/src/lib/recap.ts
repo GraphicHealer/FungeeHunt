@@ -2,6 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { spawn, execFileSync } from 'node:child_process';
+import type { RecapVideoStatus } from '@prisma/client';
 import { db } from '../db/client';
 import { config } from '../config';
 import { logger } from './logger';
@@ -194,7 +195,7 @@ export async function getRecapPlan(gameId: string): Promise<RecapPlan> {
   };
 }
 
-export async function updateRecapStatus(gameId: string, status: string, url?: string) {
+export async function updateRecapStatus(gameId: string, status: RecapVideoStatus, url?: string) {
   if (process.env.RECAP_DEV) {
     logger.info('Skipping DB recap status update in dev mode', { gameId, status, url });
     return;

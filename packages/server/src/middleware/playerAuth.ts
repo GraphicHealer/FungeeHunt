@@ -12,7 +12,7 @@ export async function playerAuth(req: Request, res: Response, next: NextFunction
 
   try {
     const payload = verifyPlayerToken(token);
-    const game = await db.game.findUnique({ where: { code: req.params.code.toUpperCase() } });
+    const game = await db.game.findUnique({ where: { code: (req.params as any).code.toUpperCase() } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
 
     const player = await db.player.findFirst({
@@ -33,3 +33,4 @@ export async function playerAuth(req: Request, res: Response, next: NextFunction
     res.status(401).json({ error: err?.message ?? 'Unauthorized' });
   }
 }
+

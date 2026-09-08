@@ -29,7 +29,7 @@ router.post('/', async (req: any, res: any) => {
 router.get('/:code', async (req: any, res: any) => {
   try {
     const session = await db.spectatorSession.findUnique({
-      where: { code: req.params.code },
+      where: { code: (req.params as any).code },
       include: { game: true },
     });
     if (!session) return res.status(404).json({ error: 'Not found' });
@@ -47,7 +47,7 @@ router.post('/:code/pair', gmAuth, async (req: any, res: any) => {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
     const session = await db.spectatorSession.update({
-      where: { code: req.params.code },
+      where: { code: (req.params as any).code },
       data: { gameId },
       include: { game: true },
     });
@@ -59,3 +59,4 @@ router.post('/:code/pair', gmAuth, async (req: any, res: any) => {
 });
 
 export default router;
+

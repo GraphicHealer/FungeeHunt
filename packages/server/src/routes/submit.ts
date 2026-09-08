@@ -22,7 +22,7 @@ function generateVideoThumb(input: string, output: string) {
 }
 
 router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: any) => {
-  const { taskId } = req.params;
+  const { taskId } = req.params as any;
   const player = (res.locals as any).player;
   const game = (res.locals as any).game;
   const files = (req.files ?? []) as any[];
@@ -129,3 +129,4 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
 });
 
 export default router;
+

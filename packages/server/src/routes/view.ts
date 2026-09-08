@@ -15,7 +15,7 @@ function formatDuration(ms: number): string {
 }
 
 router.get('/', async (req, res) => {
-  const { code } = req.params;
+  const { code } = req.params as any;
   try {
     const game = await db.game.findUnique({ where: { code: code.toUpperCase() } });
     if (!game) return res.status(404).json({ error: 'Game not found' });

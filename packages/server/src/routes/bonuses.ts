@@ -4,7 +4,7 @@ import { db } from '../db/client';
 const router = Router({ mergeParams: true });
 
 router.post('/return/:teamId', async (req, res) => {
-  const { gameId, teamId } = req.params;
+  const { gameId, teamId } = req.params as any;
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -47,7 +47,7 @@ router.post('/return/:teamId', async (req, res) => {
 });
 
 router.post('/food-drive/:teamId', async (req, res) => {
-  const { gameId, teamId } = req.params;
+  const { gameId, teamId } = req.params as any;
   const { items } = req.body ?? {};
 
   try {

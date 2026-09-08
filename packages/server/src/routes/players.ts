@@ -6,7 +6,7 @@ import { getBaseUrl } from '../lib/urls';
 const router = Router({ mergeParams: true });
 
 router.get('/', async (req, res) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   try {
     const players = await db.player.findMany({
       where: { gameId },
@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/offline', async (req, res) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   const { displayName, hasCar } = req.body ?? {};
   const trimmed = displayName ? displayName.trim() : '';
   if (!trimmed) return res.status(400).json({ error: 'Display name is required' });
@@ -51,7 +51,7 @@ router.post('/offline', async (req, res) => {
 });
 
 router.post('/:playerId/reissue', async (req, res) => {
-  const { gameId, playerId } = req.params;
+  const { gameId, playerId } = req.params as any;
   try {
     const player = await db.player.findFirst({
       where: { id: playerId, gameId, type: 'APP' },
@@ -77,7 +77,7 @@ router.post('/:playerId/reissue', async (req, res) => {
 });
 
 router.patch('/:playerId', async (req: any, res: any) => {
-  const { gameId, playerId } = req.params;
+  const { gameId, playerId } = req.params as any;
   const { displayName, hasCar } = req.body ?? {};
   const trimmed = displayName ? displayName.trim() : '';
 
@@ -112,7 +112,7 @@ router.patch('/:playerId', async (req: any, res: any) => {
 });
 
 router.delete('/:playerId', async (req, res) => {
-  const { gameId, playerId } = req.params;
+  const { gameId, playerId } = req.params as any;
   try {
     const player = await db.player.findFirst({
       where: { id: playerId, gameId },

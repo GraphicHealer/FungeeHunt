@@ -8,7 +8,7 @@ import { uploadPath } from '../lib/uploads';
 const router = Router({ mergeParams: true });
 
 router.get('/', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
@@ -37,7 +37,7 @@ router.get('/', async (req: any, res: any) => {
 });
 
 router.patch('/:submissionId', async (req: any, res: any) => {
-  const { gameId, submissionId } = req.params;
+  const { gameId, submissionId } = req.params as any;
   const { status, reason, isHighlight } = req.body ?? {};
 
   const hasStatus = status !== undefined;
@@ -131,3 +131,4 @@ router.patch('/:submissionId', async (req: any, res: any) => {
 });
 
 export default router;
+

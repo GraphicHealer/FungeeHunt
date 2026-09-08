@@ -5,7 +5,7 @@ import { parseCsv, parseTaskRows } from '../lib/taskCsv';
 const router = Router({ mergeParams: true });
 
 router.get('/', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   try {
     const tasks = await db.task.findMany({
       where: { gameId },
@@ -19,7 +19,7 @@ router.get('/', async (req: any, res: any) => {
 });
 
 router.post('/', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   const { title, description, points, proofType, photoCount, order, category, delayMinutes, isBonus } = req.body ?? {};
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
@@ -55,7 +55,7 @@ router.post('/', async (req: any, res: any) => {
 });
 
 router.post('/batch', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   const { tasks: items } = req.body ?? {};
   if (!Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'No tasks provided' });
@@ -104,7 +104,7 @@ router.post('/batch', async (req: any, res: any) => {
 });
 
 router.patch('/:taskId', async (req: any, res: any) => {
-  const { gameId, taskId } = req.params;
+  const { gameId, taskId } = req.params as any;
   const { title, description, points, proofType, photoCount, order, category, delayMinutes, isBonus } = req.body ?? {};
   try {
     const data: any = {};
@@ -140,7 +140,7 @@ router.patch('/:taskId', async (req: any, res: any) => {
 });
 
 router.delete('/:taskId', async (req: any, res: any) => {
-  const { taskId } = req.params;
+  const { taskId } = req.params as any;
   try {
     await db.task.delete({ where: { id: taskId } });
     res.status(204).end();
@@ -151,7 +151,7 @@ router.delete('/:taskId', async (req: any, res: any) => {
 });
 
 router.post('/bulk', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   const { action, ids, points } = req.body ?? {};
   if (!Array.isArray(ids) || ids.length === 0) {
     return res.status(400).json({ error: 'No tasks selected' });
@@ -179,7 +179,7 @@ router.post('/bulk', async (req: any, res: any) => {
 });
 
 router.post('/reorder', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   const { taskIds } = req.body ?? {};
   if (!Array.isArray(taskIds) || taskIds.length === 0) {
     return res.status(400).json({ error: 'No task order provided' });
@@ -202,7 +202,7 @@ router.post('/reorder', async (req: any, res: any) => {
 });
 
 router.post('/import', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   const { csv } = req.body ?? {};
   if (!csv || typeof csv !== 'string') {
     return res.status(400).json({ error: 'CSV content is required' });
@@ -257,3 +257,4 @@ router.post('/import', async (req: any, res: any) => {
 });
 
 export default router;
+

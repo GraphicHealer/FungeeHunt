@@ -4,7 +4,7 @@ import { db } from '../db/client';
 const router = Router({ mergeParams: true });
 
 router.get('/', async (req, res) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   try {
     const teams = await db.team.findMany({
       where: { gameId },
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   const { name, managerId, memberIds = [] } = req.body ?? {};
   try {
     const game = await db.game.findUnique({ where: { id: gameId } });
@@ -82,7 +82,7 @@ router.post('/', async (req, res) => {
 });
 
 router.patch('/:teamId', async (req, res) => {
-  const { gameId, teamId } = req.params;
+  const { gameId, teamId } = req.params as any;
   const { name, managerId, memberIds } = req.body ?? {};
 
   try {
@@ -158,7 +158,7 @@ router.patch('/:teamId', async (req, res) => {
 });
 
 router.post('/auto', async (req, res) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   const { teamCount } = req.body ?? {};
   const count = Number(teamCount);
   if (!count || count < 1 || !Number.isInteger(count)) {
@@ -239,7 +239,7 @@ router.post('/auto', async (req, res) => {
 });
 
 router.delete('/:teamId', async (req, res) => {
-  const { gameId, teamId } = req.params;
+  const { gameId, teamId } = req.params as any;
   try {
     const team = await db.team.findFirst({ where: { id: teamId, gameId } });
     if (!team) return res.status(404).json({ error: 'Team not found' });

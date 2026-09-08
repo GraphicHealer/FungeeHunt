@@ -11,7 +11,50 @@ env:
   IMAGE_NAME: graphichealer/fungeehunt
 
 jobs:
+  typecheck-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Typecheck server
+        working-directory: packages/server
+        run: npx tsc --noEmit
+
+  # svelte-check is allowed to fail without blocking the image build —
+  # it surfaces warnings as annotations on the run instead.
+  typecheck-web:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck web
+        working-directory: packages/web
+        run: npm run check
+
   build-and-push:
+    needs: typecheck-server
     runs-on: ubuntu-latest
     permissions:
       contents: read

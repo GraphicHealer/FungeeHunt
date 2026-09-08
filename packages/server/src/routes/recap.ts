@@ -5,7 +5,7 @@ import { getRecapPlan, getRecapProgress, startRecapRender, updateRecapStatus } f
 const router = Router({ mergeParams: true });
 
 router.get('/', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   try {
     const game = await db.game.findUnique({
       where: { id: gameId },
@@ -27,7 +27,7 @@ router.get('/', async (req: any, res: any) => {
 });
 
 router.post('/', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   try {
     const game = await db.game.findUnique({
       where: { id: gameId },
@@ -50,7 +50,7 @@ router.post('/', async (req: any, res: any) => {
 });
 
 router.delete('/', async (req: any, res: any) => {
-  const { gameId } = req.params;
+  const { gameId } = req.params as any;
   try {
     await updateRecapStatus(gameId, 'PENDING');
     res.json({ status: 'PENDING' });
@@ -61,3 +61,4 @@ router.delete('/', async (req: any, res: any) => {
 });
 
 export default router;
+
