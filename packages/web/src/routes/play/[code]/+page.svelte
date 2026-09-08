@@ -78,7 +78,9 @@
   $: completedCount = completedTaskIds.size;
   let allTasks: any[] = [];
   $: allTasks = archive?.tasks ?? [];
-  $: missedTasks = allTasks.filter((t: any) => !completedTaskIds.has(t.id));
+  $: missedTasks = allTasks.filter((t) => !completedTaskIds.has(t.id));
+  let missedTitles = '';
+  $: missedTitles = missedTasks.map((t: any) => ` #${t.order} ${t.title}`).join(',');
 
   async function loadAndGo() {
     const res = await fetch(`/api/play/${code}`, {
@@ -112,7 +114,7 @@
           <h2 class="fungee-section-title" style="margin: 0 0 0.25rem;">Your Team: {myTeam.name ?? 'Unnamed team'}</h2>
           <p class="completion">{completedCount} / {allTasks.length} challenges completed</p>
           {#if missedTasks.length}
-            <p class="missed"><strong>Missed:</strong> {missedTasks.map((t: any) => ` #${t.order} ${t.title}`).join(',')}</p>
+            <p class="missed"><strong>Missed:</strong> {missedTitles}</p>
           {:else}
             <p class="missed all-done">Completed every challenge!</p>
           {/if}
