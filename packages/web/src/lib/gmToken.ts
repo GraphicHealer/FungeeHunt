@@ -27,6 +27,23 @@ export function gmToken(gameId?: string): string {
   return '';
 }
 
+/** Game-scoped GM tokens saved in this browser, keyed by game id. */
+export function storedGameTokens(): { gameId: string; token: string }[] {
+  const out: { gameId: string; token: string }[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key?.startsWith('gmToken:')) continue;
+    const gameId = key.slice('gmToken:'.length);
+    const token = localStorage.getItem(key);
+    if (token && tokenGameId(token) === gameId) out.push({ gameId, token });
+  }
+  return out;
+}
+
+export function clearGmToken(gameId: string) {
+  localStorage.removeItem(`gmToken:${gameId}`);
+}
+
 export function setGmToken(gameId: string, token: string) {
   localStorage.setItem(`gmToken:${gameId}`, token);
 }

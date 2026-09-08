@@ -40,6 +40,7 @@ router.patch('/', async (req, res) => {
     returnBonusWindowMinutes,
     returnBonusPoints,
     randomizeReturnBonus,
+    autoDeleteDays,
     defaultRules,
     defaultTasks,
     taskCategories,
@@ -59,6 +60,7 @@ router.patch('/', async (req, res) => {
     if (returnBonusWindowMinutes !== undefined) data.returnBonusWindowMinutes = Number(returnBonusWindowMinutes) || 0;
     if (returnBonusPoints !== undefined) data.returnBonusPoints = Number(returnBonusPoints) || 0;
     if (randomizeReturnBonus !== undefined) data.randomizeReturnBonus = randomizeReturnBonus === true || randomizeReturnBonus === 'true' || randomizeReturnBonus === 'on' || randomizeReturnBonus === '1';
+    if (autoDeleteDays !== undefined) data.autoDeleteDays = Math.max(0, Math.floor(Number(autoDeleteDays) || 0));
     if (defaultRules !== undefined) data.defaultRules = typeof defaultRules === 'string' ? defaultRules : JSON.stringify(defaultRules);
     if (defaultTasks !== undefined) data.defaultTasks = typeof defaultTasks === 'string' ? defaultTasks : JSON.stringify(defaultTasks);
     if (taskCategories !== undefined) data.taskCategories = typeof taskCategories === 'string' ? taskCategories : JSON.stringify(taskCategories);
