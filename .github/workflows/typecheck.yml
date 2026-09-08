@@ -1,8 +1,12 @@
 name: Typecheck
 
-# PR-only: pushes to main are covered by the gating jobs in docker.yml.
+# Runs on PRs (result posted as a PR comment) and on pushes to dev as an
+# early signal. Pushes to main are covered by the gating jobs in docker.yml.
 on:
   pull_request:
+  push:
+    branches:
+      - dev
 
 permissions:
   contents: read
@@ -39,7 +43,7 @@ jobs:
         run: npm run check
 
       - name: Comment results on the PR
-        if: always()
+        if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
