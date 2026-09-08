@@ -17,7 +17,7 @@ function tokenGameId(token: string): string | null {
 export function gmToken(gameId?: string): string {
   if (gameId) {
     const perGame = localStorage.getItem(`gmToken:${gameId}`);
-    if (perGame && tokenGameId(perGame) === gameId) return perGame;
+    if (perGame) return perGame;
   }
   const fallback = localStorage.getItem('gmToken');
   if (fallback) {

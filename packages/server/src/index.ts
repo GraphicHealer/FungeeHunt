@@ -97,7 +97,7 @@ console.log(`Starting Fungee-Hunt with LOG_LEVEL=${config.LOG_LEVEL}`);
 seedSystemSettings()
   .then(() => seedStyleProfiles())
   .then(() => {
-    startPushSweep();
+    startPushSweep(io);
     server.listen(config.WEB_UI, () => {
       logger.info(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
     });

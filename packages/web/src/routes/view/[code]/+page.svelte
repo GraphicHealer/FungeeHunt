@@ -29,6 +29,21 @@
   let activePhoto: HTMLImageElement | null = null;
   let stage: HTMLDivElement | null = null;
 
+  const placementKey = `viewPlacement:${code.toUpperCase()}`;
+  let placementMap: Record<string, any> = {};
+
+  function loadPlacements() {
+    try {
+      placementMap = JSON.parse(localStorage.getItem(placementKey) || '{}');
+    } catch {
+      placementMap = {};
+    }
+  }
+
+  function savePlacements() {
+    localStorage.setItem(placementKey, JSON.stringify(placementMap));
+  }
+
   function formatDuration(ms: number): string {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
     const h = Math.floor(totalSeconds / 3600);
@@ -169,15 +184,48 @@
     const res = await fetch(`/api/view/${code}`);
     if (res.ok) {
       const next = await res.json();
-      const previous = data?.recent ?? [];
+      const isFirst = !data;
       data = next;
       setupTimers();
-      addToQueue(next.recent ?? []);
+      if (isFirst) {
+        initRecent(next.recent ?? []);
+      } else {
+        addToQueue(next.recent ?? []);
+      }
     } else if (res.status === 404) {
       goto('/?notfound=1');
     } else {
       error = 'Could not load viewer';
     }
+  }
+
+  function initRecent(recentData: any[]) {
+    loadPlacements();
+    const seed: any[] = [];
+    for (const sub of recentData) {
+      if (sub.task?.proofType === 'PHOTOS' && sub.proofUrls?.length) {
+        for (let i = 0; i < sub.proofUrls.length; i++) {
+          const url = sub.proofUrls[i];
+          if (!seen.has(url)) {
+            seen.add(url);
+            const id = `${sub.id}-${i}`;
+            const item = { ...sub, id, proofUrl: url, _isVideo: false, _isMulti: true };
+            const style = placementMap[id] ?? nextPosition(1280, 720, seed);
+            placementMap[id] = style;
+            seed.push({ ...item, thumbStyle: style, thumbnail: true });
+          }
+        }
+      } else if (!seen.has(sub.id)) {
+        seen.add(sub.id);
+        const id = sub.id;
+        const item = { ...sub, _isVideo: isVideo(sub), _isMulti: false };
+        const style = placementMap[id] ?? nextPosition(1280, 720, seed);
+        placementMap[id] = style;
+        seed.push({ ...item, thumbStyle: style, thumbnail: true });
+      }
+    }
+    displayed = seed;
+    savePlacements();
   }
 
   async function loadMyTeam() {
@@ -242,12 +290,14 @@
       intrinsicH = activePhoto.naturalHeight || 720;
     }
 
-    const style = nextPosition(intrinsicW, intrinsicH, displayed);
+    const style = placementMap[activeItem.id] ?? nextPosition(intrinsicW, intrinsicH, displayed);
+    placementMap[activeItem.id] = style;
     const thumb: any = { ...activeItem, thumbStyle: style, thumbnail: true };
     if (thumbData) {
       thumb.thumbUrl = thumbData.dataUrl;
     }
     displayed = [...displayed, thumb];
+    savePlacements();
 
     if (photoTimer) {
       clearTimeout(photoTimer);

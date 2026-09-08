@@ -44,6 +44,8 @@
   let bonusStartTime = '';
   let bonusEndTime = '';
   let bonusTaskIndex = 0;
+  let bonusStartDate: Date | null = null;
+  let bonusEndDate: Date | null = null;
 
   let error = '';
 
@@ -51,8 +53,8 @@
   $: endAt = `${date}T${endTime}`;
   $: returnStart = date && returnStartTime ? `${date}T${returnStartTime}` : '';
   $: returnEnd = date && returnEndTime ? `${date}T${returnEndTime}` : '';
-  $: bonusStart = date && bonusStartTime ? `${date}T${bonusStartTime}` : '';
-  $: bonusEnd = date && bonusEndTime ? `${date}T${bonusEndTime}` : '';
+  $: bonusStart = bonusStartDate ? toInputValue(bonusStartDate) : '';
+  $: bonusEnd = bonusEndDate ? toInputValue(bonusEndDate) : '';
 
   $: if (date && returnStartTime && returnBonusWindowMinutes) {
     const start = fromInputValue(returnStart);
@@ -130,24 +132,51 @@
     returnBonusWindowMinutes = fallbackWindow;
   }
 
+  function updateBonusTimes() {
+    bonusStartTime = bonusStartDate ? toInputValue(bonusStartDate).slice(11, 16) : '';
+    bonusEndTime = bonusEndDate ? toInputValue(bonusEndDate).slice(11, 16) : '';
+  }
+
+  function applyBonusStartTime() {
+    if (!bonusStartDate || !bonusStartTime) return;
+    const [h, m] = bonusStartTime.split(':').map(Number);
+    bonusStartDate = new Date(bonusStartDate.getTime());
+    bonusStartDate.setHours(h, m, 0, 0);
+    bonusStartTime = toInputValue(bonusStartDate).slice(11, 16);
+  }
+
+  function applyBonusEndTime() {
+    if (!bonusEndDate || !bonusEndTime) return;
+    const [h, m] = bonusEndTime.split(':').map(Number);
+    bonusEndDate = new Date(bonusEndDate.getTime());
+    bonusEndDate.setHours(h, m, 0, 0);
+    bonusEndTime = toInputValue(bonusEndDate).slice(11, 16);
+  }
+
   function regenerateBonus() {
     if (!date || !startTime || !endTime || !availableTasks.length) return;
     const start = fromInputValue(startAt);
     let end = fromInputValue(endAt);
     if (end <= start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
     const mid = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2 - 10 * 60 * 1000);
-    const bonusEnd = new Date(mid.getTime() + 20 * 60 * 1000);
-    bonusStartTime = toInputValue(mid).slice(11, 16);
-    bonusEndTime = toInputValue(bonusEnd).slice(11, 16);
+    bonusStartDate = mid;
+    bonusEndDate = new Date(mid.getTime() + 20 * 60 * 1000);
+    updateBonusTimes();
     bonusTaskIndex = Math.floor(Math.random() * availableTasks.length);
   }
 
-  $: if (step === 4 && bonusEnabled && !bonusStartTime) {
+  $: if (step === 4 && bonusEnabled && availableTasks.length && !bonusStartTime) {
     regenerateBonus();
   }
 
   async function createGame() {
     error = '';
+    if (bonusEnabled && availableTasks.length && (!bonusStartDate || !bonusEndDate)) {
+      regenerateBonus();
+    }
+    const bonusStartStr = bonusEnabled && bonusStartDate ? toInputValue(bonusStartDate) : null;
+    const bonusEndStr = bonusEnabled && bonusEndDate ? toInputValue(bonusEndDate) : null;
+    const bonusTaskObj = bonusEnabled && bonusStartStr && bonusEndStr && availableTasks[bonusTaskIndex] ? availableTasks[bonusTaskIndex] : null;
     const res = await fetch('/api/gm/games', {
       method: 'POST',
       headers: {
@@ -164,9 +193,9 @@
         returnEnd,
         returnPoints,
         taskCount,
-        bonusStart: bonusEnabled ? bonusStart : null,
-        bonusEnd: bonusEnabled ? bonusEnd : null,
-        bonusTask: bonusEnabled ? availableTasks[bonusTaskIndex] : null,
+        bonusStart: bonusStartStr,
+        bonusEnd: bonusEndStr,
+        bonusTask: bonusTaskObj,
         foodDriveEnabled,
         foodDrivePointsPerItem,
         foodDrivePermissible,
@@ -287,10 +316,10 @@
             </p>
 
             <label class="fungee-label" for="bs">Window Start Time</label>
-            <input class="fungee-input" id="bs" type="time" bind:value={bonusStartTime} />
+            <input class="fungee-input" id="bs" type="time" bind:value={bonusStartTime} on:change={applyBonusStartTime} />
 
             <label class="fungee-label" for="be">Window End Time</label>
-            <input class="fungee-input" id="be" type="time" bind:value={bonusEndTime} />
+            <input class="fungee-input" id="be" type="time" bind:value={bonusEndTime} on:change={applyBonusEndTime} />
 
             <label class="fungee-label" for="bt">Bonus Task</label>
             <select class="fungee-select" id="bt" bind:value={bonusTaskIndex}>

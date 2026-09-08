@@ -1,16 +1,13 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount, onDestroy } from 'svelte';
-  import { goto } from '$app/navigation';
   import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
   import ChatWidget from '$lib/ChatWidget.svelte';
   import { gmToken } from '$lib/gmToken';
 
-  let gameId = $page.params.gameId;
-  $: gameId = $page.params.gameId;
-
   let game: any = null;
+  let loadError = '';
   let socket: any;
   let remainingStr = '';
   let interval: ReturnType<typeof setInterval>;
@@ -31,7 +28,7 @@
   ];
 
   function token() {
-    return gmToken(gameId);
+    return gmToken($page.params.gameId);
   }
 
   async function pairSpectator() {
@@ -47,7 +44,7 @@
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token()}`,
       },
-      body: JSON.stringify({ gameId }),
+      body: JSON.stringify({ gameId: $page.params.gameId }),
     });
     if (res.ok) {
       spectatorCode = '';
@@ -60,13 +57,16 @@
   }
 
   async function load() {
-    const res = await fetch(`/api/gm/games/${gameId}`, {
+    const res = await fetch(`/api/gm/games/${$page.params.gameId}`, {
       headers: { Authorization: `Bearer ${token()}` },
     });
     if (res.ok) {
       game = await res.json();
-    } else if (res.status === 401 || res.status === 403) {
-      goto('/login');
+      loadError = '';
+    } else {
+      loadError = res.status === 401 || res.status === 403
+        ? 'You do not have access to this game.'
+        : 'Could not load game.';
     }
   }
 
@@ -114,7 +114,7 @@
         <a
           class="item"
           class:active={active === item.path}
-          href={`/gm/${gameId}/${item.path}`}
+          href={`/gm/${$page.params.gameId}/${item.path}`}
         >
           {item.label}
         </a>
@@ -159,12 +159,18 @@
             {/if}
           </div>
         </div>
+      {:else if loadError}
+        <h1>Access denied</h1>
+        <p>{loadError}</p>
+        <a href="/" style="color: var(--brand); font-weight: 600;">Back to home</a>
       {:else}
         <h1>Loading…</h1>
       {/if}
     </header>
     <div class="content">
-      <slot />
+      {#if !loadError}
+        <slot />
+      {/if}
     </div>
   </main>
 </div>

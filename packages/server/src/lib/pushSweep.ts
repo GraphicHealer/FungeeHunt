@@ -3,6 +3,7 @@ import { sendPushToCaptains } from './push';
 
 const SWEEP_INTERVAL_MS = 30 * 1000;
 const scheduled = new Map<string, ReturnType<typeof setTimeout>>();
+let ioInstance: any = null;
 
 async function sendBonusPush(gameId: string) {
   try {
@@ -10,6 +11,7 @@ async function sendBonusPush(gameId: string) {
     if (!game || game.status !== 'LIVE' || !game.bonusStart || !game.bonusEnd || game.bonusPushSent) return;
     const now = Date.now();
     if (now < new Date(game.bonusStart).getTime() || now > new Date(game.bonusEnd).getTime()) return;
+    ioInstance?.emit(`game:${game.code.toUpperCase()}`, { type: 'bonus' });
     await sendPushToCaptains(
       game.id,
       'Bonus task available!',
@@ -59,7 +61,8 @@ async function scheduleActiveGames() {
   }
 }
 
-export function startPushSweep() {
+export function startPushSweep(io: any) {
+  ioInstance = io;
   scheduleActiveGames();
   setInterval(scheduleActiveGames, SWEEP_INTERVAL_MS);
 }

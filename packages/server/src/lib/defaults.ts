@@ -213,7 +213,7 @@ const defaultTasks = [
 
   },
   {
-    title: `Gerbil? I Hardly Know Her!`,
+    title: `Gerbil Economics`,
     description: `At a pet store, ask "Do you have a bulk discount on gerbils, and how much meat is on a gerbil anyway?" You cannot explain until after they answer.`,
     points: 200,
     proofType: 'VIDEO',

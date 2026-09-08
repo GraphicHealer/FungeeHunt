@@ -15,7 +15,9 @@ import { uploadPath } from '../lib/uploads';
 const router = Router();
 
 function asDate(value: any): Date | null {
-  return value ? new Date(value) : null;
+  if (!value) return null;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 function asBool(value: any): boolean {
@@ -225,12 +227,15 @@ router.post('/', async (req: any, res: any) => {
     const body = { ...defaults, ...(req.body ?? {}) };
 
     const code = await generateGameCode();
+    const gameData = buildGameData(body);
+    console.warn('create game body bonus', { bonusStart: body.bonusStart, bonusEnd: body.bonusEnd, hasBonusTask: !!body.bonusTask });
     const game = await db.game.create({
       data: {
         code,
-        ...buildGameData(body),
+        ...gameData,
       },
     });
+    console.warn('created game bonus', { bonusStart: game.bonusStart, bonusEnd: game.bonusEnd });
 
     const defaultTasks = settings.defaultTasks ? JSON.parse(settings.defaultTasks) : [];
     const defaultRules = settings.defaultRules ? JSON.parse(settings.defaultRules) : [];
