@@ -47,29 +47,13 @@
     },
   ];
 
-  onMount(async () => {
-    try {
-      const res = await fetch('/api/config');
-      if (res.ok) {
-        const data = await res.json();
-        if (!data.gmTourShown) visible = true;
-      }
-    } catch {
+  onMount(() => {
+    // Set by the new-game wizard when this device opted in to the tutorial.
+    if (localStorage.getItem('gmTourNext') === '1') {
+      localStorage.removeItem('gmTourNext');
       visible = true;
     }
   });
-
-  async function markSeen() {
-    try {
-      await fetch('/api/config', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gmTourShown: true }),
-      });
-    } catch {
-      // ignore
-    }
-  }
 
   function next() {
     if (step < steps.length - 1) step++;
@@ -79,8 +63,12 @@
     if (step > 0) step--;
   }
 
-  async function close() {
-    await markSeen();
+  function close() {
+    // Once the tour is finished on the last step, don't offer it again on this device.
+    if (step >= steps.length - 1) {
+      localStorage.setItem('gmTourPref', 'no');
+    }
+    visible = false;
     dispatch('close');
   }
 </script>

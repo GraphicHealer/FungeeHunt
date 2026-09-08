@@ -39,15 +39,9 @@ export async function deleteGame(gameId: string, io?: Server): Promise<boolean> 
     // folder may not exist
   }
 
-  await db.$transaction(async (tx: any) => {
-    await tx.spectatorSession.updateMany({ where: { gameId }, data: { gameId: null } });
-    await tx.submission.deleteMany({ where: { task: { gameId } } });
-    await tx.task.deleteMany({ where: { gameId } });
-    await tx.ruleSection.deleteMany({ where: { gameId } });
-    await tx.team.deleteMany({ where: { gameId } });
-    await tx.player.deleteMany({ where: { gameId } });
-    await tx.game.delete({ where: { id: gameId } });
-  });
+  // FK cascades delete players, teams, tasks, submissions, rules, and chat;
+  // spectator sessions are detached via ON DELETE SET NULL.
+  await db.game.delete({ where: { id: gameId } });
 
   io?.emit(`game:${game.code.toUpperCase()}`, { type: 'deleted' });
   return true;

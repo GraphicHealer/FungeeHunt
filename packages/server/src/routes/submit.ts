@@ -1,8 +1,9 @@
 import { execFile } from 'node:child_process';
+import { rmSync } from 'node:fs';
 import { Router } from 'express';
 import { db } from '../db/client';
 import { playerAuth } from '../middleware/playerAuth';
-import { upload, uploadPath } from '../lib/uploads';
+import { sniffUploadKind, upload, uploadPath } from '../lib/uploads';
 
 const router = Router({ mergeParams: true });
 
@@ -28,6 +29,17 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
 
   if (files.length === 0) {
     return res.status(400).json({ error: 'Photo or video proof is required' });
+  }
+
+  // The MIME header is client-supplied; verify the actual bytes on disk.
+  for (const f of files) {
+    const claimed = f.mimetype.startsWith('image/') ? 'image' : 'video';
+    if (sniffUploadKind(f.path) !== claimed) {
+      for (const g of files) {
+        try { rmSync(g.path, { force: true }); } catch { /* best effort */ }
+      }
+      return res.status(400).json({ error: 'Uploaded file is not a valid image or video' });
+    }
   }
 
   if (!player.teamId || !player.team || player.team.managerId !== player.id) {

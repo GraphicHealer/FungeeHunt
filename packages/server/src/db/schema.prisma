@@ -50,8 +50,8 @@ model Player {
   hasCar           Boolean            @default(false)
   sessionToken     String?            @unique
   joinedAt         DateTime           @default(now())
-  game             Game               @relation(fields: [gameId], references: [id])
-  team             Team?              @relation(fields: [teamId], references: [id])
+  game             Game               @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  team             Team?              @relation(fields: [teamId], references: [id], onDelete: SetNull)
   teamId                String?
   lastAnnouncementReadAt DateTime?
   managerOf              Team?              @relation("TeamManager")
@@ -63,11 +63,11 @@ model Team {
   gameId                String
   name                  String?
   managerId             String?      @unique
-  manager               Player?      @relation("TeamManager", fields: [managerId], references: [id])
+  manager               Player?      @relation("TeamManager", fields: [managerId], references: [id], onDelete: SetNull)
   members               Player[]
   submissions           Submission[]
   messages              Message[]
-  game                  Game         @relation(fields: [gameId], references: [id])
+  game                  Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
   returnedAt            DateTime?
   returnBonusAwarded    Boolean      @default(false)
   foodDriveItems        Int          @default(0)
@@ -101,7 +101,7 @@ model Task {
   isBonus      Boolean      @default(false)
   category     String?
   order        Int
-  game        Game         @relation(fields: [gameId], references: [id])
+  game        Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
   submissions Submission[]
 }
 
@@ -116,8 +116,8 @@ model Submission {
   reason      String?
   submittedAt DateTime         @default(now())
   reviewedAt  DateTime?
-  task        Task             @relation(fields: [taskId], references: [id])
-  team        Team             @relation(fields: [teamId], references: [id])
+  task        Task             @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  team        Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, teamId])
 }
@@ -128,7 +128,7 @@ model SpectatorSession {
   gameId    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  game      Game?    @relation(fields: [gameId], references: [id])
+  game      Game?    @relation(fields: [gameId], references: [id], onDelete: SetNull)
 }
 
 model PushSubscription {
@@ -147,7 +147,7 @@ model RuleSection {
   gameId String
   title  String
   body   String
-  game   Game   @relation(fields: [gameId], references: [id])
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
 }
 
 model StyleProfile {
@@ -173,7 +173,7 @@ model SystemSettings {
   returnBonusWindowMinutes Int     @default(10)
   returnBonusPoints        Float   @default(100)
   randomizeReturnBonus     Boolean @default(false)
-  autoDeleteDays           Int     @default(0)
+  autoDeleteHours          Int     @default(24)
   welcomeShown             Boolean @default(false)
   tourStep                 Int     @default(0)
   tourDone                 Boolean @default(false)
@@ -183,6 +183,8 @@ model SystemSettings {
   vapidPublicKey           String?
   vapidPrivateKey          String?
   sessionSecret            String?
+  gmailRefreshToken        String?
+  gmailUser                String?
 }
 
 enum GameStatus {

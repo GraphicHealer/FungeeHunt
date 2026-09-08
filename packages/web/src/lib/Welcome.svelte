@@ -1,57 +1,53 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { fade, scale } from 'svelte/transition';
-  import { tourRefresh } from './tourStore';
 
   let visible = false;
+  let adminUrl = '/admin';
 
   onMount(async () => {
+    adminUrl = `${window.location.origin}/admin`;
     try {
       const res = await fetch('/api/config');
       if (res.ok) {
         const data = await res.json();
-        if (!data.welcomeShown && !data.tourDone) visible = true;
+        if (!data.welcomeShown) visible = true;
       }
     } catch {
       visible = false;
     }
   });
 
-  async function update(body: any) {
+  async function close() {
+    visible = false;
     try {
       await fetch('/api/config', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ welcomeShown: true }),
       });
     } catch {
       // ignore
     }
-    tourRefresh.set(Date.now());
-    visible = false;
-  }
-
-  function begin() {
-    update({ welcomeShown: true });
-  }
-
-  function cancel() {
-    update({ welcomeShown: true, tourDone: true });
   }
 </script>
 
 {#if visible}
-  <div class="modal-backdrop" on:click={cancel} transition:fade={{ duration: 180 }}>
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
     <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <h1>Welcome to Fungee-Hunt</h1>
       <p>
-        Fungee-Hunt is a self-hosted scavenger-hunt game for groups. Players join with a code, complete photo or video challenges, and earn points.
-        Game Masters create and run games from this device.
+        Thanks for installing Fungee-Hunt! It's a self-hosted scavenger-hunt game for groups — players join
+        with a code, complete photo or video challenges, and earn points.
       </p>
-      <p class="question">Would you like a quick walkthrough?</p>
+      <p>
+        The system admin dashboard is at:
+        <br />
+        <a class="admin-link" href="/admin">{adminUrl}</a>
+      </p>
+      <p class="hint">Bookmark it — that's where you'll manage games and system settings.</p>
       <div class="actions">
-        <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={cancel}>NO THANKS</button>
-        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={begin}>BEGIN TOUR</button>
+        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={close}>GET STARTED</button>
       </div>
     </div>
   </div>
@@ -90,9 +86,17 @@
     margin: 0 0 1rem;
   }
 
-  .question {
-    font-weight: 600;
-    margin-bottom: 1.5rem;
+  .admin-link {
+    font-family: monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--brand);
+    word-break: break-all;
+  }
+
+  .hint {
+    font-size: 0.85rem;
+    color: var(--muted) !important;
   }
 
   .actions {

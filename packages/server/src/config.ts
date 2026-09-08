@@ -21,6 +21,14 @@ const envSchema = z.object({
   WEB_UI: z.coerce.number().int().positive().default(3000),
   FRONTEND_BUILD_DIR: z.string().min(1).default('/app/packages/web/build'),
   UPLOAD_DIR: z.string().min(1),
+  GMAIL_CLIENT_ID: z.string().optional(),
+  GMAIL_CLIENT_SECRET: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
+  SMTP_SECURE: z.preprocess((v) => (v === 'false' ? false : v === 'true' || v === undefined || v === '' ? undefined : v), z.boolean().optional()),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 });
 

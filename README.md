@@ -251,6 +251,24 @@ npm run build --workspace=@fungeehunt/web
 | `PG_DATABASE` | PostgreSQL database name |
 | `UPLOAD_DIR` | Where player uploads are stored |
 | `WEB_UI` | Port the server listens on |
+| `GMAIL_CLIENT_ID` | Optional. Google OAuth client ID for Gmail sending; when set (with the secret below), the Admin → Settings "Connect with Gmail" flow works without entering credentials in the UI |
+| `GMAIL_CLIENT_SECRET` | Optional. Google OAuth client secret for Gmail sending |
+| `SMTP_HOST` | Optional. SMTP server host; when set with `SMTP_PORT` and `SMTP_FROM`, email is sent via SMTP instead of Gmail |
+| `SMTP_PORT` | Optional. SMTP server port (e.g. 465 or 587) |
+| `SMTP_USER` | Optional. SMTP username |
+| `SMTP_PASS` | Optional. SMTP password |
+| `SMTP_FROM` | Optional. From address, e.g. `Fungee-Hunt <fungeehunt@gmail.com>` |
+| `SMTP_SECURE` | Optional. `true` for implicit TLS (port 465), `false` for STARTTLS (defaults to true) |
+
+### Email setup
+
+Email is configured entirely server-side via environment variables — there are no UI controls for it. If `SMTP_HOST`, `SMTP_PORT`, and `SMTP_FROM` are set, all mail is sent via SMTP. Otherwise, if `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET` are set, mail is sent through a connected Gmail account.
+
+To connect a Gmail account (one-time, per deployment):
+
+1. Create a Google Cloud OAuth "Web application" client with the Gmail API enabled and redirect URI `https://<your-host>/api/gm/settings/email/callback`.
+2. Visit `https://<your-host>/api/gm/settings/email/connect?key=<admin GM token>` while logged in as admin (the admin token is the `gmToken` value in your browser's localStorage). This redirects to Google's consent screen — sign in as the sending account (e.g. fungeehunt@gmail.com).
+3. The resulting refresh token and account address are stored in the database; no further action is needed, and they survive restarts.
 
 ## Music attribution
 

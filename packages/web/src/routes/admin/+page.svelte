@@ -5,6 +5,7 @@
 
   let games: any[] = [];
   let loading = true;
+  let showGmailPrompt = false;
 
   function token() {
     return localStorage.getItem('gmToken') ?? '';
@@ -23,12 +24,37 @@
     });
     if (res.ok) {
       games = await res.json();
+      checkGmailSetup();
     } else if (res.status === 401 || res.status === 403) {
       goto('/login');
     } else {
       toast.add('Could not load games', 'error');
     }
     loading = false;
+  }
+
+  async function checkGmailSetup() {
+    if (localStorage.getItem('gmailSetupDismissed') === '1') return;
+    try {
+      const res = await fetch('/api/gm/settings');
+      if (!res.ok) return;
+      const s = await res.json();
+      const es = s.emailStatus;
+      if (es?.gmailConfigured && !es.gmailConnected && !es.smtpConfigured) {
+        showGmailPrompt = true;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  function dismissGmailPrompt() {
+    showGmailPrompt = false;
+    localStorage.setItem('gmailSetupDismissed', '1');
+  }
+
+  function connectGmail() {
+    window.location.href = `/api/gm/settings/email/connect?key=${encodeURIComponent(token())}`;
   }
 
   async function remove(game: any) {
@@ -121,6 +147,19 @@
     </div>
   {/if}
 </main>
+
+{#if showGmailPrompt}
+  <div class="modal-backdrop">
+    <div class="modal">
+      <h2>Gmail OAuth detected</h2>
+      <p>Gmail credentials are configured on the server. Would you like to finish setup and connect the sending account?</p>
+      <div class="modal-actions">
+        <button type="button" on:click={dismissGmailPrompt}>NO THANKS</button>
+        <button class="primary" type="button" on:click={connectGmail}>YES, CONNECT</button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   .board {
@@ -257,5 +296,58 @@
   .empty-card p {
     color: var(--muted);
     margin: 0;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1200;
+    padding: 1rem;
+  }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    max-width: 26rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  .modal h2 {
+    margin: 0 0 0.75rem;
+  }
+
+  .modal p {
+    color: var(--text);
+    line-height: 1.5;
+    margin: 0 0 1.5rem;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
+  .modal-actions button {
+    padding: 0.6rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modal-actions button.primary {
+    background: var(--brand);
+    color: #fff;
+    border-color: var(--brand);
   }
 </style>

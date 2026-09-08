@@ -8,6 +8,7 @@
   import { downloadTemplate } from '$lib/taskCsv';
   import { gmToken } from '$lib/gmToken';
   import SubmissionReview from '$lib/SubmissionReview.svelte';
+  import GmTour from '$lib/GmTour.svelte';
 
   const gameId = $page.params.gameId;
 
@@ -26,6 +27,7 @@
   let announcementTeamIds: string[] = [];
   let announcementAll = true;
   let announcementCaptainsOnly = false;
+  let autoDeleteHours = 0;
 
   function token() {
     return gmToken(gameId);
@@ -67,6 +69,18 @@
       error = 'Could not load game';
     }
   }
+
+  async function loadSettings() {
+    const res = await fetch('/api/gm/settings');
+    if (res.ok) {
+      const s = await res.json();
+      autoDeleteHours = Number(s.autoDeleteHours) || 0;
+    }
+  }
+
+  $: autoDeleteAt = game?.status === 'COMPLETED' && autoDeleteHours > 0 && game?.endAt
+    ? new Date(new Date(game.endAt).getTime() + autoDeleteHours * 60 * 60 * 1000)
+    : null;
 
   async function loadSubmissions() {
     const res = await fetch(`/api/gm/games/${gameId}/submissions`, {
@@ -259,6 +273,7 @@
     await loadSubmissions();
     await loadTeams();
     await loadRecap();
+    await loadSettings();
     if (game?.code) {
       socket = io({ transports: ['websocket', 'polling'] });
       socket.on(`game:${game.code.toUpperCase()}`, async () => {
@@ -283,6 +298,16 @@
 <main class="container">
   {#if game}
     <div class="main">
+      {#if autoDeleteAt}
+        <section class="feed auto-delete-warning" style="margin-bottom: 1rem;">
+          <h2 class="fungee-section-title" style="margin-bottom: 0.5rem; color: var(--danger);">Auto-Delete Scheduled</h2>
+          <p style="margin: 0;">
+            This game and all of its uploaded photos and videos will be permanently deleted on
+            <strong>{autoDeleteAt.toLocaleString()}</strong>.
+            Download the recap video and anything else you want to keep before then.
+          </p>
+        </section>
+      {/if}
       <section class="feed" style="margin-bottom: 1rem;">
         <h2 class="fungee-section-title" style="margin-bottom: 1rem;">Leaderboard</h2>
         {#if leaderboard.length === 0}
@@ -432,6 +457,8 @@
   {/if}
 </main>
 
+<GmTour />
+
 {#if reviewing}
   <SubmissionReview {gameId} sub={reviewing} on:close={() => (reviewing = null)} on:review={loadSubmissions} />
 {/if}
@@ -523,6 +550,11 @@
     border: 1px solid var(--border);
     border-radius: 0.5rem;
     padding: 1.25rem;
+  }
+
+  .auto-delete-warning {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 1px var(--danger);
   }
 
   .submissions {

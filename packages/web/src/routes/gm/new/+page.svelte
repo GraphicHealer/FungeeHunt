@@ -48,6 +48,12 @@
   let bonusEndDate: Date | null = null;
 
   let error = '';
+  let showTourAsk = false;
+
+  function answerTour(wants: boolean) {
+    localStorage.setItem('gmTourPref', wants ? 'yes' : 'no');
+    showTourAsk = false;
+  }
 
   let existingGames: { id: string; name: string; code: string; status: string; startAt: string | null }[] = [];
   let checkingExisting = true;
@@ -97,6 +103,7 @@
   }
 
   onMount(async () => {
+    if (!localStorage.getItem('gmTourPref')) showTourAsk = true;
     findExistingGames().finally(() => (checkingExisting = false));
 
     const now = new Date();
@@ -235,15 +242,7 @@
     const data = await res.json();
     if (res.ok) {
       if (data.gmToken) setGmToken(data.id, data.gmToken);
-      try {
-        await fetch('/api/config', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tourStep: 7 }),
-        });
-      } catch {
-        // ignore
-      }
+      if (localStorage.getItem('gmTourPref') === 'yes') localStorage.setItem('gmTourNext', '1');
       goto(`/gm/${data.id}/dashboard`);
     } else {
       error = data.error ?? 'Could not create game';
@@ -411,7 +410,58 @@
   </div>
 </main>
 
+{#if showTourAsk}
+  <div class="tour-backdrop">
+    <div class="tour-modal">
+      <h2>Quick tutorial?</h2>
+      <p>Would you like a short guided tour of the Game Master dashboard after your game is created?</p>
+      <div class="tour-actions">
+        <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={() => answerTour(false)}>NO THANKS</button>
+        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={() => answerTour(true)}>YES, SHOW ME</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
 <style>
+  .tour-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1200;
+    padding: 1rem;
+  }
+
+  .tour-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    max-width: 26rem;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .tour-modal h2 {
+    margin: 0 0 0.75rem;
+  }
+
+  .tour-modal p {
+    color: var(--text);
+    line-height: 1.5;
+    margin: 0 0 1.5rem;
+  }
+
+  .tour-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
   .existing-games {
     list-style: none;
     padding: 0;

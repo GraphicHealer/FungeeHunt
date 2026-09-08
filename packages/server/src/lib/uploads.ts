@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readSync } from 'node:fs';
 import path from 'node:path';
 import multer from 'multer';
 import { config } from '../config';
@@ -53,7 +53,40 @@ function fileFilter(_req: any, file: Express.Multer.File, cb: multer.FileFilterC
   cb(null, extensionForMime(file.mimetype) !== null);
 }
 
-export const upload = multer({ storage, fileFilter });
+export const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 512 * 1024 * 1024, files: 10 },
+});
+
+// HEIF-family brands that share the ISO-BMFF 'ftyp' container with MP4/MOV video.
+const HEIF_BRANDS = new Set([
+  'heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'hevm', 'hevs',
+  'mif1', 'msf1', 'avif', 'avis',
+]);
+
+/** Sniffs the first bytes of a written upload; returns 'image', 'video', or null if unrecognized. */
+export function sniffUploadKind(filePath: string): 'image' | 'video' | null {
+  try {
+    const fd = openSync(filePath, 'r');
+    const buf = Buffer.alloc(16);
+    const n = readSync(fd, buf, 0, 16, 0);
+    closeSync(fd);
+    if (n < 12) return null;
+    if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'image'; // JPEG
+    if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return 'image'; // PNG
+    if (buf.toString('latin1', 0, 4) === 'GIF8') return 'image'; // GIF
+    if (buf.toString('latin1', 0, 4) === 'RIFF' && buf.toString('latin1', 8, 12) === 'WEBP') return 'image'; // WebP
+    if (buf.toString('latin1', 4, 8) === 'ftyp') {
+      const brand = buf.toString('latin1', 8, 12);
+      return HEIF_BRANDS.has(brand) ? 'image' : 'video'; // ISO-BMFF: HEIF/AVIF vs MP4/MOV/3GP
+    }
+    if (buf[0] === 0x1a && buf[1] === 0x45 && buf[2] === 0xdf && buf[3] === 0xa3) return 'video'; // WebM/MKV
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 export function uploadPath(proofUrl: string) {
   if (!proofUrl) return '';

@@ -25,7 +25,7 @@ import { logger } from './lib/logger';
 import { startPushSweep } from './lib/pushSweep';
 import { startAutoDeleteSweep } from './lib/autoDelete';
 import { gmAuth } from './middleware/gmAuth';
-import { gmLoginLimiter, createGameLimiter, codeLookupLimiter } from './middleware/rateLimit';
+import { gmLoginLimiter, createGameLimiter, codeLookupLimiter, submitLimiter } from './middleware/rateLimit';
 import { loadSessionSecret } from './lib/auth';
 
 const app = express();
@@ -37,7 +37,7 @@ const io = new Server(server, {
 app.set('io', io);
 app.set('trust proxy', config.TRUST_PROXY);
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use('/uploads', express.static(config.UPLOAD_DIR, {
   setHeaders: (res, filePath) => {
     res.set('X-Content-Type-Options', 'nosniff');
@@ -53,7 +53,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/join', codeLookupLimiter, joinRoute);
 app.use('/api/archive/:code', codeLookupLimiter, archiveRoute);
 app.use('/api/play/:code', playRoute);
-app.use('/api/play/:code/tasks/:taskId/submit', submitRoute);
+app.use('/api/play/:code/tasks/:taskId/submit', submitLimiter, submitRoute);
 app.use('/api/view/:code', codeLookupLimiter, viewRoute);
 app.use('/api/spectator', codeLookupLimiter, spectatorRoute);
 // POST /api/gm/games is intentionally public: the Create Game wizard runs without a login.

@@ -4,7 +4,8 @@
   import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
   import ChatWidget from '$lib/ChatWidget.svelte';
-  import { gmToken } from '$lib/gmToken';
+  import { gmToken, setGmToken } from '$lib/gmToken';
+  import { toast } from '$lib/toast';
 
   let game: any = null;
   let loadError = '';
@@ -80,7 +81,20 @@
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   }
 
+  function copyGmLink() {
+    const url = `${location.origin}/gm/${$page.params.gameId}/dashboard?key=${token()}`;
+    navigator.clipboard.writeText(url);
+    toast.add('GM link copied — keep it private, it grants full access to this game', 'success');
+  }
+
   onMount(async () => {
+    const key = $page.url.searchParams.get('key');
+    if (key) {
+      setGmToken($page.params.gameId, key);
+      const u = new URL($page.url);
+      u.searchParams.delete('key');
+      history.replaceState(null, '', u.pathname + u.search + u.hash);
+    }
     await load();
     remainingStr = remaining();
     if (game?.code) {
@@ -132,6 +146,14 @@
         </div>
         <div class="countdown">{remainingStr}</div>
         <div class="topbar-actions">
+          <button
+            class="spectator"
+            on:click={copyGmLink}
+            title="Copy a link that opens this game's GM dashboard on any device"
+          >
+            <span class="mdi mdi-link-variant"></span>
+            <span class="label">GM LINK</span>
+          </button>
           <div class="timer">
             {#if game.startAt && game.endAt}
               <span>{fmtTime(game.startAt)} – {fmtTime(game.endAt)}</span>
