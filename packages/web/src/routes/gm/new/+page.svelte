@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
-  import { setGmToken } from '$lib/gmToken';
+  import { setGmToken, storedGameTokens, clearGmToken, isAdminToken } from '$lib/gmToken';
 
   function toInputValue(d: Date) {
     const pad = (n: number) => n.toString().padStart(2, '0');
@@ -49,6 +49,34 @@
 
   let error = '';
 
+  let existingGames: { id: string; name: string; code: string; status: string; startAt: string | null }[] = [];
+  let checkingExisting = true;
+
+  async function findExistingGames() {
+    const admin = localStorage.getItem('gmToken');
+    if (admin && isAdminToken(admin)) return;
+    const found = await Promise.all(
+      storedGameTokens().map(async ({ gameId, token }) => {
+        try {
+          const res = await fetch(`/api/gm/games/${gameId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const g = await res.json();
+            return { id: g.id, name: g.name, code: g.code, status: g.status, startAt: g.startAt ?? null };
+          }
+          if (res.status === 401 || res.status === 403 || res.status === 404) clearGmToken(gameId);
+        } catch {
+          // offline; leave token alone
+        }
+        return null;
+      }),
+    );
+    existingGames = found
+      .filter((g): g is NonNullable<typeof g> => g !== null)
+      .sort((a, b) => (b.startAt ?? '').localeCompare(a.startAt ?? ''));
+  }
+
   $: startAt = `${date}T${startTime}`;
   $: endAt = `${date}T${endTime}`;
   $: returnStart = date && returnStartTime ? `${date}T${returnStartTime}` : '';
@@ -69,6 +97,8 @@
   }
 
   onMount(async () => {
+    findExistingGames().finally(() => (checkingExisting = false));
+
     const now = new Date();
     now.setMinutes(0, 0, 0);
     now.setHours(now.getHours() + 1);
@@ -226,7 +256,24 @@
     <h1 class="fungee-title">NEW GAME</h1>
 
     <div class="wizard">
-      {#if step === 1}
+      {#if checkingExisting}
+        <p class="fungee-subtitle">Checking for your existing games…</p>
+      {:else if existingGames.length}
+        <h2 class="fungee-section-title">You already have a game on this device</h2>
+        <p class="fungee-subtitle">Open an existing game, or start a new one.</p>
+        <ul class="existing-games">
+          {#each existingGames as g (g.id)}
+            <li>
+              <div class="existing-info">
+                <strong>{g.name}</strong>
+                <span class="existing-meta">Code {g.code} · {g.status.replace('_', ' ')}</span>
+              </div>
+              <button class="fungee-btn" type="button" style="width: auto; margin: 0;" on:click={() => goto(`/gm/${g.id}/dashboard`)}>OPEN</button>
+            </li>
+          {/each}
+        </ul>
+        <button class="fungee-btn secondary" type="button" on:click={() => (existingGames = [])}>START A NEW GAME</button>
+      {:else if step === 1}
         <form on:submit|preventDefault={() => step = 2}>
           <h2 class="fungee-section-title">1. Basics</h2>
           <label class="fungee-label" for="name">Game Name</label>
@@ -363,3 +410,36 @@
     </div>
   </div>
 </main>
+
+<style>
+  .existing-games {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .existing-games li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg);
+  }
+
+  .existing-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .existing-meta {
+    font-size: 0.85rem;
+    opacity: 0.75;
+  }
+</style>

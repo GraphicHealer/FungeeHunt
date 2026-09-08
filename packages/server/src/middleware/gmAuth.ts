@@ -1,10 +1,10 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyGmToken } from '../lib/auth';
 
-function gameIdFromPath(path: string): string | undefined {
-  const segments = path.replace(/^\/|\/$/g, '').split('/');
-  // API paths are /api/gm/games/{gameId}/...
-  return segments[3];
+// req.params is not populated for params in an app.use()/router.use() mount path, so fall back to the URL.
+function gameIdFromUrl(url: string): string | undefined {
+  const m = /^\/api\/gm\/games\/([^/?#]+)/.exec(url);
+  return m ? decodeURIComponent(m[1]) : undefined;
 }
 
 export function gmAuth(req: Request, res: Response, next: NextFunction) {
@@ -16,7 +16,8 @@ export function gmAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const payload = verifyGmToken(token);
     (res.locals as any).gm = payload;
-    const gameId = (req.params as any).gameId || req.body?.gameId || gameIdFromPath(req.originalUrl.split('?')[0]);
+    const gameId: string | undefined =
+      (req.params as any).gameId ?? gameIdFromUrl(req.originalUrl) ?? (req.body as any)?.gameId;
     if (payload.gameId) {
       if (!gameId) {
         console.warn('gmAuth 403: game token on admin path', req.path, 'tokenGameId', payload.gameId);

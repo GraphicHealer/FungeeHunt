@@ -64,6 +64,7 @@
         returnBonusWindowMinutes: Number(settings.returnBonusWindowMinutes),
         returnBonusPoints: Number(settings.returnBonusPoints),
         randomizeReturnBonus: settings.randomizeReturnBonus,
+        autoDeleteDays: Number(settings.autoDeleteDays),
         defaultRules: defaultRulesStr,
         taskCategories: taskCategoriesStr,
       }),
@@ -128,6 +129,13 @@
         <input id="rbw" type="number" bind:value={settings.returnBonusWindowMinutes} min="1" />
         <label for="rbp">Default points</label>
         <input id="rbp" type="number" step="0.1" bind:value={settings.returnBonusPoints} min="0" />
+      </section>
+
+      <section class="card">
+        <h2>Game Cleanup</h2>
+        <label for="adf">Auto-delete games this many days after they end (0 = never)</label>
+        <input id="adf" type="number" bind:value={settings.autoDeleteDays} min="0" step="1" />
+        <p class="hint">Deletes the game along with its teams, players, submissions, and uploaded files. Games that were never given an end time are counted from when they were created.</p>
       </section>
 
       <section class="card">
@@ -202,6 +210,12 @@
 
   .topbar h1 {
     margin: 0;
+  }
+
+  .hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: var(--muted, #888);
   }
 
   .card {

@@ -1,12 +1,11 @@
 import { Router } from 'express';
-import { config } from '../config';
-import { createGmToken } from '../lib/auth';
+import { checkGmPassphrase, createGmToken } from '../lib/auth';
 
 const router = Router();
 
 router.post('/gm', (req, res) => {
   const { passphrase } = req.body ?? {};
-  if (passphrase !== config.GM_PASSPHRASE) {
+  if (!checkGmPassphrase(passphrase)) {
     return res.status(401).json({ error: 'Invalid passphrase' });
   }
   res.json({ token: createGmToken() });

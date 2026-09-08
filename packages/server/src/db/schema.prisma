@@ -12,6 +12,7 @@ model Game {
   code                   String         @unique
   name                   String
   status                 GameStatus     @default(NOT_STARTED)
+  createdAt              DateTime       @default(now())
   startAt                DateTime?
   endAt                  DateTime?
   liveAt                 DateTime?
@@ -172,6 +173,7 @@ model SystemSettings {
   returnBonusWindowMinutes Int     @default(10)
   returnBonusPoints        Float   @default(100)
   randomizeReturnBonus     Boolean @default(false)
+  autoDeleteDays           Int     @default(0)
   welcomeShown             Boolean @default(false)
   tourStep                 Int     @default(0)
   tourDone                 Boolean @default(false)
@@ -180,6 +182,7 @@ model SystemSettings {
   taskCategories           String?
   vapidPublicKey           String?
   vapidPrivateKey          String?
+  sessionSecret            String?
 }
 
 enum GameStatus {

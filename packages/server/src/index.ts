@@ -23,7 +23,10 @@ import recapRoute from './routes/recap';
 import { seedSystemSettings, seedStyleProfiles } from './lib/defaults';
 import { logger } from './lib/logger';
 import { startPushSweep } from './lib/pushSweep';
+import { startAutoDeleteSweep } from './lib/autoDelete';
 import { gmAuth } from './middleware/gmAuth';
+import { gmLoginLimiter, createGameLimiter, codeLookupLimiter } from './middleware/rateLimit';
+import { loadSessionSecret } from './lib/auth';
 
 const app = express();
 const server = createServer(app);
@@ -32,23 +35,30 @@ const io = new Server(server, {
 });
 
 app.set('io', io);
+app.set('trust proxy', config.TRUST_PROXY);
 
 app.use(express.json());
 app.use('/uploads', express.static(config.UPLOAD_DIR, {
   setHeaders: (res, filePath) => {
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.set('Content-Security-Policy', 'sandbox');
     if (filePath.toLowerCase().endsWith('.mov')) {
       res.set('Content-Type', 'video/mp4');
     }
   },
 }));
 app.use('/api/config', configRoute);
+app.post('/api/auth/gm', gmLoginLimiter);
 app.use('/api/auth', authRoute);
-app.use('/api/join', joinRoute);
-app.use('/api/archive/:code', archiveRoute);
+app.use('/api/join', codeLookupLimiter, joinRoute);
+app.use('/api/archive/:code', codeLookupLimiter, archiveRoute);
 app.use('/api/play/:code', playRoute);
 app.use('/api/play/:code/tasks/:taskId/submit', submitRoute);
-app.use('/api/view/:code', viewRoute);
-app.use('/api/spectator', spectatorRoute);
+app.use('/api/view/:code', codeLookupLimiter, viewRoute);
+app.use('/api/spectator', codeLookupLimiter, spectatorRoute);
+// POST /api/gm/games is intentionally public: the Create Game wizard runs without a login.
+// It is rate limited here; gmAuth is applied to every other games route inside the router.
+app.post('/api/gm/games', createGameLimiter);
 app.use('/api/gm/games', gamesRoute);
 app.use('/api/gm/games/:gameId/submissions', gmAuth, submissionsRoute);
 app.use('/api/gm/games/:gameId/tasks', gmAuth, tasksRoute);
@@ -95,9 +105,11 @@ io.on('connection', (socket) => {
 console.log(`Starting Fungee-Hunt with LOG_LEVEL=${config.LOG_LEVEL}`);
 
 seedSystemSettings()
+  .then(() => loadSessionSecret())
   .then(() => seedStyleProfiles())
   .then(() => {
     startPushSweep(io);
+    startAutoDeleteSweep(io);
     server.listen(config.WEB_UI, () => {
       logger.info(`Fungee-Hunt server listening on port ${config.WEB_UI}`);
     });

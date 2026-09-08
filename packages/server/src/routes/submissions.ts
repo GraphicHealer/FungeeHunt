@@ -57,7 +57,7 @@ router.patch('/:submissionId', async (req: any, res: any) => {
     const game = await db.game.findUnique({ where: { id: gameId } });
     if (!game) return res.status(404).json({ error: 'Game not found' });
 
-    const current = await db.submission.findUnique({ where: { id: submissionId } });
+    const current = await db.submission.findFirst({ where: { id: submissionId, team: { gameId } } });
     if (!current) return res.status(404).json({ error: 'Submission not found' });
 
     const updateData: any = {};

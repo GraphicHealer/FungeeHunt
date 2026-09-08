@@ -20,7 +20,8 @@ services:
       - "3000:3000"
     environment:
       GM_PASSPHRASE: changeme
-      SESSION_SECRET: changeme
+      # SESSION_SECRET: optional; a random secret is generated and stored in the database on first boot.
+      # TRUST_PROXY: 1   # set to the number of reverse proxies in front of the app so rate limits see real client IPs
       PG_USER: fungeehunt
       PG_PASS: changeme
       PG_HOST: postgres
