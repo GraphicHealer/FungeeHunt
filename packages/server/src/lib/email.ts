@@ -82,6 +82,57 @@ export function renderEmail(title: string, bodyHtml: string, cta?: { text: strin
 </html>`;
 }
 
+function escapeHtml(s: string) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/** Base URL for links inside emails: PUBLIC_URL env wins, then the URL captured at game creation. */
+export function gameBaseUrl(game: { baseUrl?: string | null }) {
+  return (config.PUBLIC_URL ?? game.baseUrl ?? '').replace(/\/$/, '');
+}
+
+export async function sendGameCreatedEmail(game: { name: string; code: string; gmEmail: string; baseUrl?: string | null }, gmLink?: string) {
+  const base = gameBaseUrl(game);
+  const joinUrl = `${base}/play/${game.code}`;
+  const body =
+    `<p>Your game <strong>${escapeHtml(game.name)}</strong> is set up and ready.</p>` +
+    `<p>Players join with code <strong style="font-family:monospace;font-size:1.2rem;letter-spacing:0.2em;">${escapeHtml(game.code)}</strong> or this link:<br><a href="${joinUrl}">${joinUrl}</a></p>` +
+    (gmLink ? `<p>Your Game Master link (keep it private — anyone with it has full control):<br><a href="${gmLink}">${gmLink}</a></p>` : '');
+  await sendEmail(
+    game.gmEmail,
+    `Fungee-Hunt: "${game.name}" created`,
+    `Game "${game.name}" created. Join: ${joinUrl}${gmLink ? `\nGM link: ${gmLink}` : ''}`,
+    renderEmail('Game created', body, gmLink ? { text: 'OPEN GM DASHBOARD', url: gmLink } : undefined),
+  );
+}
+
+export async function sendGameReminderEmail(game: { name: string; code: string; gmEmail: string; startAt?: Date | null; baseUrl?: string | null }, gmLink?: string) {
+  const base = gameBaseUrl(game);
+  const joinUrl = `${base}/play/${game.code}`;
+  const when = game.startAt ? game.startAt.toLocaleString() : 'soon';
+  const body =
+    `<p>Reminder: <strong>${escapeHtml(game.name)}</strong> starts at <strong>${when}</strong>.</p>` +
+    `<p>Players join with code <strong style="font-family:monospace;font-size:1.2rem;letter-spacing:0.2em;">${escapeHtml(game.code)}</strong> or this link:<br><a href="${joinUrl}">${joinUrl}</a></p>`;
+  await sendEmail(
+    game.gmEmail,
+    `Fungee-Hunt: "${game.name}" starts soon`,
+    `Reminder: "${game.name}" starts at ${when}. Join: ${joinUrl}`,
+    renderEmail('Game starts soon', body, gmLink ? { text: 'OPEN GM DASHBOARD', url: gmLink } : undefined),
+  );
+}
+
+export async function sendGameDeleteWarningEmail(game: { name: string; code: string; gmEmail: string; baseUrl?: string | null }, deleteAt: Date, archiveLink?: string) {
+  const body =
+    `<p><strong>${escapeHtml(game.name)}</strong> will be automatically deleted at <strong>${deleteAt.toLocaleString()}</strong>.</p>` +
+    `<p>If you want to keep the submissions, open the game dashboard or spectator archive and download them before then.</p>`;
+  await sendEmail(
+    game.gmEmail,
+    `Fungee-Hunt: "${game.name}" will be deleted soon`,
+    `"${game.name}" will be deleted at ${deleteAt.toLocaleString()}.${archiveLink ? ` Archive: ${archiveLink}` : ''}`,
+    renderEmail('Deletion warning', body, archiveLink ? { text: 'OPEN ARCHIVE', url: archiveLink } : undefined),
+  );
+}
+
 export async function sendEmail(to: string, subject: string, text: string, html?: string) {
   const backend = await emailBackend();
   if (!backend) throw new Error('Email is not configured');

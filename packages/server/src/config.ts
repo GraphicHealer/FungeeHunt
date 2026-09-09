@@ -29,6 +29,7 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
   SMTP_SECURE: z.preprocess((v) => (v === 'false' ? false : v === 'true' || v === undefined || v === '' ? undefined : v), z.boolean().optional()),
+  PUBLIC_URL: z.string().url().optional(),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 });
 

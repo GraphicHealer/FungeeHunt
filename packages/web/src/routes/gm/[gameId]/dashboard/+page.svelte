@@ -8,7 +8,6 @@
   import { downloadTemplate } from '$lib/taskCsv';
   import { gmToken } from '$lib/gmToken';
   import SubmissionReview from '$lib/SubmissionReview.svelte';
-  import GmTour from '$lib/GmTour.svelte';
 
   const gameId = $page.params.gameId ?? '';
 
@@ -456,8 +455,6 @@
     <p>Loading...</p>
   {/if}
 </main>
-
-<GmTour />
 
 {#if reviewing}
   <SubmissionReview {gameId} sub={reviewing} on:close={() => (reviewing = null)} on:review={loadSubmissions} />

@@ -34,6 +34,10 @@ model Game {
   captainCanUpdateFoodDrive   Boolean        @default(true)
   recapVideoStatus       RecapVideoStatus @default(PENDING)
   recapVideoUrl          String?
+  gmEmail                String?
+  gmReminderSent         Boolean        @default(false)
+  gmDeleteWarned         Boolean        @default(false)
+  baseUrl                String?
   players                Player[]
   teams                  Team[]
   tasks                  Task[]
