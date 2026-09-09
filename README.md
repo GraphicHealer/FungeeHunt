@@ -257,7 +257,7 @@ npm run build --workspace=@fungeehunt/web
 | `SMTP_PORT` | Optional. SMTP server port (e.g. 465 or 587) |
 | `SMTP_USER` | Optional. SMTP username |
 | `SMTP_PASS` | Optional. SMTP password |
-| `SMTP_FROM` | Optional. From address, e.g. `Fungee-Hunt <fungeehunt@gmail.com>` |
+| `SMTP_FROM` | Optional. From address |
 | `SMTP_SECURE` | Optional. `true` for implicit TLS (port 465), `false` for STARTTLS (defaults to true) |
 
 ### Email setup
