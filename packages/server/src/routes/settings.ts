@@ -105,11 +105,28 @@ router.get('/email/callback', async (req, res) => {
       return res.redirect('/admin/settings?email=error');
     }
 
+    // Resolve the connected account's address. The mail scope alone doesn't
+    // return an id_token, so ask the Gmail profile endpoint with the access token.
     let email = '';
     try {
-      const payload = JSON.parse(Buffer.from(tokens.id_token.split('.')[1], 'base64').toString());
-      email = payload.email ?? '';
-    } catch { /* email stays empty */ }
+      const profileRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/profile', {
+        headers: { Authorization: `Bearer ${tokens.access_token}` },
+      });
+      if (profileRes.ok) {
+        const profile: any = await profileRes.json();
+        email = profile.emailAddress ?? '';
+      }
+    } catch { /* fall through to id_token decode */ }
+    if (!email && tokens.id_token) {
+      try {
+        const payload = JSON.parse(Buffer.from(tokens.id_token.split('.')[1], 'base64').toString());
+        email = payload.email ?? '';
+      } catch { /* email stays empty */ }
+    }
+    if (!email) {
+      console.error('gmail oauth succeeded but account email could not be resolved');
+      return res.redirect('/admin/settings?email=error');
+    }
 
     await db.systemSettings.update({
       where: { id: settings.id },
