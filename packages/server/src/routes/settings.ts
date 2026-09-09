@@ -3,7 +3,7 @@ import { Router } from 'express';
 import type { SystemSettings } from '@prisma/client';
 import { db } from '../db/client';
 import { parseCsv, parseTaskRows } from '../lib/taskCsv';
-import { gmailCredentials, sendEmail, smtpConfig } from '../lib/email';
+import { gmailCredentials, renderEmail, sendEmail, smtpConfig } from '../lib/email';
 import { getBaseUrl } from '../lib/urls';
 import { verifyGmToken } from '../lib/auth';
 import { gmAuth } from '../middleware/gmAuth';
@@ -178,7 +178,12 @@ router.post('/email/test', async (req, res) => {
     return res.status(400).json({ error: 'Recipient email is required' });
   }
   try {
-    await sendEmail(to, 'Fungee-Hunt email test', 'Email is configured and working. You can now send game links and notifications from Fungee-Hunt.');
+    await sendEmail(
+      to,
+      'Fungee-Hunt email test',
+      'Email is configured and working. You can now send game links and notifications from Fungee-Hunt.',
+      renderEmail('Email is working', '<p>Email is configured and working. You can now send game links and notifications from Fungee-Hunt.</p>'),
+    );
     res.json({ sent: true });
   } catch (err) {
     console.error('test email failed', err);

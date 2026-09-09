@@ -39,6 +39,49 @@ export async function emailReady() {
   return (await emailBackend()) !== null;
 }
 
+/**
+ * Wraps content in the Fungee-Hunt branded email shell — mirrors the web UI
+ * (light background, white card, brand blue, same system font stack).
+ * All styles are inline since email clients strip <style> blocks.
+ */
+export function renderEmail(title: string, bodyHtml: string, cta?: { text: string; url: string }) {
+  const button = cta
+    ? `<a href="${cta.url}" class="fh-btn" style="display:inline-block;background:#0366d6;color:#ffffff;font-weight:600;font-size:1rem;text-decoration:none;padding:0.75rem 1.5rem;border-radius:0.5rem;margin-top:1.25rem;">${cta.text}</a>`
+    : '';
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<style>
+  /* Dark-mode overrides for clients that support prefers-color-scheme
+     (Apple Mail, iOS Mail, some others). Mirrors [data-theme="dark"]. */
+  @media (prefers-color-scheme: dark) {
+    .fh-body { background: #0d1117 !important; }
+    .fh-brand { color: #58a6ff !important; }
+    .fh-card { background: #161b22 !important; border-color: #30363d !important; }
+    .fh-text { color: #f0f6fc !important; }
+    .fh-muted { color: #8b949e !important; }
+    .fh-btn { background: #1f6feb !important; }
+  }
+</style>
+</head>
+<body class="fh-body" style="margin:0;padding:0;background:#f5f7fa;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#1f2328;line-height:1.5;">
+  <div style="padding:2rem 1rem;">
+    <div style="max-width:28rem;margin:0 auto;">
+      <h1 class="fh-brand" style="color:#0366d6;font-size:1.5rem;margin:0 0 1rem;text-align:center;">FUNGEE-HUNT</h1>
+      <div class="fh-card" style="background:#ffffff;border:1px solid #d0d7de;border-radius:0.75rem;box-shadow:0 4px 16px rgba(31,35,40,0.08);padding:2rem;">
+        <h2 class="fh-brand" style="color:#0366d6;font-size:1.25rem;margin:0 0 1rem;">${title}</h2>
+        <div class="fh-text" style="color:#1f2328;">${bodyHtml}</div>
+        <div style="text-align:center;">${button}</div>
+      </div>
+      <p class="fh-muted" style="color:#656d76;font-size:0.8rem;text-align:center;margin:1.5rem 0 0;">Sent by Fungee-Hunt — self-hosted scavenger hunts.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 export async function sendEmail(to: string, subject: string, text: string, html?: string) {
   const backend = await emailBackend();
   if (!backend) throw new Error('Email is not configured');
