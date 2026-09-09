@@ -40,6 +40,8 @@
   let foodDrivePermissible = '';
   let foodDriveSuggested = '';
 
+  let gmEmail = '';
+
   let bonusEnabled = true;
   let bonusStartTime = '';
   let bonusEndTime = '';
@@ -51,7 +53,14 @@
   let showTourAsk = false;
 
   function answerTour(wants: boolean) {
-    localStorage.setItem('gmTourPref', wants ? 'yes' : 'no');
+    if (wants) {
+      localStorage.setItem('gmTourPref', 'yes');
+      localStorage.setItem('gmTourRun', '1');
+      localStorage.setItem('gmTourStep', '0');
+      window.dispatchEvent(new Event('gm-tour-start'));
+    } else {
+      localStorage.setItem('gmTourPref', 'no');
+    }
     showTourAsk = false;
   }
 
@@ -104,6 +113,7 @@
 
   onMount(async () => {
     if (!localStorage.getItem('gmTourPref')) showTourAsk = true;
+    gmEmail = localStorage.getItem('gmEmail') ?? '';
     findExistingGames().finally(() => (checkingExisting = false));
 
     const now = new Date();
@@ -237,12 +247,13 @@
         foodDrivePointsPerItem,
         foodDrivePermissible,
         foodDriveSuggested,
+        gmEmail: gmEmail.trim(),
       }),
     });
     const data = await res.json();
     if (res.ok) {
       if (data.gmToken) setGmToken(data.id, data.gmToken);
-      if (localStorage.getItem('gmTourPref') === 'yes') localStorage.setItem('gmTourNext', '1');
+      if (gmEmail.trim()) localStorage.setItem('gmEmail', gmEmail.trim());
       goto(`/gm/${data.id}/dashboard`);
     } else {
       error = data.error ?? 'Could not create game';
@@ -383,7 +394,7 @@
           </div>
         </form>
       {:else if step === 5}
-        <form on:submit|preventDefault={createGame}>
+        <form on:submit|preventDefault={() => step = 6}>
           <h2 class="fungee-section-title">5. Food Drive</h2>
           <label class="fungee-check">
             <input type="checkbox" bind:checked={foodDriveEnabled} />
@@ -398,10 +409,33 @@
             <textarea class="fungee-textarea" id="fdsug" bind:value={foodDriveSuggested} placeholder="Peanut butter, soup, etc."></textarea>
           {/if}
 
+          <div class="fungee-btn-row">
+            <button class="fungee-btn secondary" type="button" on:click={() => step = 4}>BACK</button>
+            <button class="fungee-btn" type="submit" data-tour="step5-next">NEXT</button>
+          </div>
+        </form>
+      {:else if step === 6}
+        <form on:submit|preventDefault={createGame}>
+          <h2 class="fungee-section-title">6. Email Notifications</h2>
+          <p style="margin: 0 0 0.5rem; color: var(--muted); font-size: 0.95rem;">
+            Optionally get emails about this game:
+          </p>
+          <ul style="margin: 0 0 0.75rem; padding-left: 1.25rem; color: var(--muted); font-size: 0.9rem;">
+            <li>A copy of the game link when the game is created</li>
+            <li>A reminder with the link about 2 hours before the game starts</li>
+            <li>A warning shortly before the game is auto-deleted</li>
+          </ul>
+          <p style="margin: 0 0 0.75rem; color: var(--muted); font-size: 0.85rem;">
+            Requires email to be configured on the server (see Admin settings).
+          </p>
+
+          <label class="fungee-label" for="gm-email">Your Email (optional)</label>
+          <input class="fungee-input" id="gm-email" type="email" bind:value={gmEmail} placeholder="you@example.com" use:focus />
+
           {#if error}<p class="fungee-error">{error}</p>{/if}
 
           <div class="fungee-btn-row">
-            <button class="fungee-btn secondary" type="button" on:click={() => step = 4}>BACK</button>
+            <button class="fungee-btn secondary" type="button" on:click={() => step = 5}>BACK</button>
             <button class="fungee-btn" type="submit" data-tour="create-game">CREATE GAME</button>
           </div>
         </form>

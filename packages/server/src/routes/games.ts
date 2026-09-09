@@ -8,6 +8,7 @@ import { sendPushToCaptains, sendPushToTeams, sendPushToPlayer } from '../lib/pu
 import { scheduleBonusPushForGame } from '../lib/pushSweep';
 import { gmAuth } from '../middleware/gmAuth';
 import { createGmToken } from '../lib/auth';
+import { sendGameCreatedEmail } from '../lib/email';
 import { uploadPath } from '../lib/uploads';
 import { deleteGame } from '../lib/deleteGame';
 
@@ -33,6 +34,10 @@ function validStatus(value: any): string | undefined {
 
 function buildGameData(body: any, partial = false) {
   const data: any = {};
+  if (body.gmEmail !== undefined || !partial) {
+    const e = typeof body.gmEmail === 'string' ? body.gmEmail.trim().toLowerCase() : '';
+    data.gmEmail = e || null;
+  }
 
   if (body.name !== undefined || !partial) {
     data.name = body.name ?? 'Untitled Game';
@@ -231,6 +236,7 @@ router.post('/', async (req: any, res: any) => {
     const game = await db.game.create({
       data: {
         code,
+        baseUrl: getBaseUrl(req),
         ...gameData,
       },
     });
@@ -293,6 +299,16 @@ router.post('/', async (req: any, res: any) => {
 
     const gmToken = createGmToken(game.id);
     res.json({ ...withJoinUrl(getBaseUrl(req), game), gmToken });
+
+    // Send the GM a copy of the game links — fire and forget so a mail
+    // problem never blocks game creation.
+    if (game.gmEmail) {
+      const base = getBaseUrl(req);
+      const gmLink = `${base}/gm/${game.id}/dashboard?key=${gmToken}`;
+      sendGameCreatedEmail({ ...game, gmEmail: game.gmEmail }, gmLink).catch((err) =>
+        console.error('gm creation email failed', err),
+      );
+    }
   } catch (err) {
     console.error('create game failed', err);
     res.status(500).json({ error: 'Could not create game' });
