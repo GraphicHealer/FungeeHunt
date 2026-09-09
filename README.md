@@ -264,11 +264,31 @@ npm run build --workspace=@fungeehunt/web
 
 Email is configured entirely server-side via environment variables — there are no UI controls for it. If `SMTP_HOST`, `SMTP_PORT`, and `SMTP_FROM` are set, all mail is sent via SMTP. Otherwise, if `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET` are set, mail is sent through a connected Gmail account.
 
-To connect a Gmail account (one-time, per deployment):
+#### Gmail OAuth (recommended)
 
-1. Create a Google Cloud OAuth "Web application" client with the Gmail API enabled and redirect URI `https://<your-host>/api/gm/settings/email/callback`.
-2. Visit `https://<your-host>/api/gm/settings/email/connect?key=<admin GM token>` while logged in as admin (the admin token is the `gmToken` value in your browser's localStorage). This redirects to Google's consent screen — sign in as the sending account.
-3. The resulting refresh token and account address are stored in the database; no further action is needed, and they survive restarts.
+Create the Google OAuth credentials once, then connect the sending account:
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) and create a project (or pick an existing one).
+2. **APIs & Services → Library** → search for "Gmail API" → **Enable**.
+3. **APIs & Services → OAuth consent screen** → choose **External**, fill in the app name and your email. On the **Scopes** step, add the scope `https://mail.google.com/` (full Gmail access — needed to send mail). On **Test users**, add the Gmail address you'll send from (e.g. `fungeehunt@gmail.com`) — while the app is in "Testing" mode only listed test users can complete the flow.
+4. **APIs & Services → Credentials** → **Create Credentials → OAuth client ID** → Application type: **Web application** → under **Authorized redirect URIs** add:
+   `https://<your-host>/api/gm/settings/email/callback`
+   (use the exact public URL of your deployment, including the port if non-standard).
+5. Copy the **Client ID** and **Client Secret** into your environment as `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET`, then restart the container.
+6. Open `https://<your-host>/admin` and log in — a **"Gmail OAuth detected"** prompt appears automatically. Click **YES, CONNECT** and sign in as the sending account.
+7. The resulting refresh token and account address are stored in the database — no further action needed, and they survive restarts.
+
+If you ever need to trigger the connect flow manually (e.g. you dismissed the prompt), visit:
+
+```
+https://<your-host>/api/gm/settings/email/connect?key=<admin GM token>
+```
+
+(the admin token is the `gmToken` value in your browser's localStorage while logged in to `/admin`).
+
+#### SMTP (alternative)
+
+Set `SMTP_HOST`, `SMTP_PORT`, and `SMTP_FROM` (plus `SMTP_USER`/`SMTP_PASS`/`SMTP_SECURE` as needed). When a complete SMTP config exists it is always used in preference to Gmail.
 
 ## Music attribution
 

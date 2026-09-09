@@ -42,10 +42,19 @@
       body: 'SETTINGS in the left sidebar lets you change start/end times and submission review mode after the game is created.',
     },
     {
+      title: 'Email (optional)',
+      body: 'To send emails (game links, alerts), set <code>GMAIL_CLIENT_ID</code> and <code>GMAIL_CLIENT_SECRET</code> in your container environment, or use SMTP_* variables. Create the OAuth client at <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer">console.cloud.google.com → APIs &amp; Services → Credentials</a>: enable the Gmail API, create an OAuth client ID of type "Web application", and add redirect URI <code>{{origin}}/api/gm/settings/email/callback</code>. Then open the Admin page and accept the "Gmail OAuth detected" prompt.',
+    },
+    {
       title: 'You are ready',
       body: 'Create a game, add some tasks and rules, invite players, and press START. Good luck!',
     },
   ];
+
+  let origin = '';
+  onMount(() => {
+    origin = window.location.origin;
+  });
 
   onMount(() => {
     // Set by the new-game wizard when this device opted in to the tutorial.
@@ -77,7 +86,7 @@
   <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
     <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
       <h2>{steps[step].title}</h2>
-      <p>{steps[step].body}</p>
+      <p>{@html steps[step].body.replaceAll('{{origin}}', origin)}</p>
 
       <div class="dots">
         {#each steps as _, i (i)}
@@ -130,6 +139,19 @@
     color: var(--text);
     margin: 0 0 1.5rem;
     line-height: 1.5;
+  }
+
+  .modal p :global(code) {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    padding: 0.05rem 0.3rem;
+    font-size: 0.85em;
+    word-break: break-all;
+  }
+
+  .modal p :global(a) {
+    color: var(--brand);
   }
 
   .dots {
