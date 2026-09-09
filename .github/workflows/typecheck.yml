@@ -7,6 +7,13 @@ on:
   push:
     branches:
       - dev
+    paths-ignore:
+      - '**.md'
+      - 'docker-compose.yml'
+      - '*.xml'
+      - 'nginx/**'
+      - 'type-logs.txt'
+      - 'LICENSE*'
 
 permissions:
   contents: read

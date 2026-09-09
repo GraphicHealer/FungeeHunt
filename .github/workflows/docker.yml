@@ -7,6 +7,14 @@ on:
       - dev
     tags:
       - 'v*'
+    paths-ignore:
+      # Docs, samples, and repo meta that never reach the image
+      - '**.md'
+      - 'docker-compose.yml'
+      - '*.xml'
+      - 'nginx/**'
+      - 'type-logs.txt'
+      - 'LICENSE*'
   workflow_dispatch:
 
 env:
