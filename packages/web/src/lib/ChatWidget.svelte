@@ -5,8 +5,8 @@
   import { fade, scale } from 'svelte/transition';
   import { gmToken } from './gmToken';
 
-  $: code = $page.params.code;
-  $: gameId = $page.params.gameId;
+  $: code = $page.params.code ?? '';
+  $: gameId = $page.params.gameId ?? '';
   $: isPlayer = !!code;
   $: isGm = !!gameId && !code;
 

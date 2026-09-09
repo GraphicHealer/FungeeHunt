@@ -6,7 +6,7 @@
   import { formatPoints } from '$lib/format';
   import { io } from 'socket.io-client';
 
-  const code = $page.params.code;
+  const code = $page.params.code ?? '';
   const token = $page.url.searchParams.get('token');
 
   let archive: any = null;
@@ -73,11 +73,14 @@
     }
   }
 
-  $: myTeam = myTeamId ? archive?.teams?.find((t) => t.id === myTeamId) : null;
-  $: completedTaskIds = myTeam ? new Set(myTeam.submissions.filter((s) => s.status === 'COMPLETED').map((s) => s.taskId)) : new Set();
+  $: myTeam = myTeamId ? archive?.teams?.find((t: any) => t.id === myTeamId) : null;
+  $: completedTaskIds = myTeam ? new Set(myTeam.submissions.filter((s: any) => s.status === 'COMPLETED').map((s: any) => s.taskId)) : new Set<string>();
   $: completedCount = completedTaskIds.size;
+  let allTasks: any[] = [];
   $: allTasks = archive?.tasks ?? [];
   $: missedTasks = allTasks.filter((t) => !completedTaskIds.has(t.id));
+  let missedTitles = '';
+  $: missedTitles = missedTasks.map((t: any) => ` #${t.order} ${t.title}`).join(',');
 
   async function loadAndGo() {
     const res = await fetch(`/api/play/${code}`, {
@@ -111,7 +114,7 @@
           <h2 class="fungee-section-title" style="margin: 0 0 0.25rem;">Your Team: {myTeam.name ?? 'Unnamed team'}</h2>
           <p class="completion">{completedCount} / {allTasks.length} challenges completed</p>
           {#if missedTasks.length}
-            <p class="missed"><strong>Missed:</strong> {missedTasks.map((t) => ` #${t.order} ${t.title}`).join(',')}</p>
+            <p class="missed"><strong>Missed:</strong> {missedTitles}</p>
           {:else}
             <p class="missed all-done">Completed every challenge!</p>
           {/if}

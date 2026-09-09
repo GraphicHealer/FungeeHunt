@@ -90,7 +90,7 @@
   onMount(async () => {
     const key = $page.url.searchParams.get('key');
     if (key) {
-      setGmToken($page.params.gameId, key);
+      setGmToken($page.params.gameId ?? '', key);
       const u = new URL($page.url);
       u.searchParams.delete('key');
       history.replaceState(null, '', u.pathname + u.search + u.hash);

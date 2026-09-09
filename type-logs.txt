@@ -1,0 +1,3499 @@
+====================================
+Loading svelte-check in workspace: /home/runner/work/FungeeHunt/FungeeHunt/packages/web
+Getting Svelte diagnostics...
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/ChatWidget.svelte:251:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if visible}
+  <div class="chat-bubble" on:click={openPanel} class:dot={unread > 0} transition:fade={{ duration: 180 }} style={style}>
+    <span class="mdi mdi-message-text"></span>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/ChatWidget.svelte:251:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if visible}
+  <div class="chat-bubble" on:click={openPanel} class:dot={unread > 0} transition:fade={{ duration: 180 }} style={style}>
+    <span class="mdi mdi-message-text"></span>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/ChatWidget.svelte:258:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="chat-backdrop" on:click={closePanel} transition:fade={{ duration: 180 }}>
+    <div class="chat-panel" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <div class="chat-header">
+        {#if isGm && selectedTeamId}
+          <button class="chat-back" on:click={backToTeams}><span class="mdi mdi-arrow-left"></span></button>
+        {/if}
+        <span class="chat-title">{isGm ? (selectedTeamName || 'Select a team') : selectedTeamName}</span>
+        <button class="chat-close" on:click={closePanel}><span class="mdi mdi-close"></span></button>
+      </div>
+
+      <div class="chat-body" bind:this={scrollEl}>
+        {#if isGm && !selectedTeamId}
+          {#if loading}<p class="chat-loading">Loading…</p>{/if}
+          {#each teams as team (team.id)}
+            <button class="chat-team" on:click={() => selectTeam(team)}>
+              <span>{team.name ?? 'Unnamed team'}</span>
+              {#if teamUnread[team.id]}
+                <span class="chat-dot">{teamUnread[team.id]}</span>
+              {:else}
+                <span class="mdi mdi-chevron-right"></span>
+              {/if}
+            </button>
+          {/each}
+        {:else}
+          {#if loading}<p class="chat-loading">Loading…</p>{/if}
+          {#each messages as msg (msg.id)}
+            <div class="chat-msg" class:self={msg.sender === (isGm ? 'GM' : 'CAPTAIN')}>
+              <div class="chat-bubble-msg">{msg.content}</div>
+              <div class="chat-meta">
+                {new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                {#if msg.sender === (isGm ? 'GM' : 'CAPTAIN')}
+                  <span class="mdi {msg.readAt ? 'mdi-check-all' : 'mdi-check'}" style="margin-left: 0.25rem;"></span>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        {/if}
+      </div>
+
+      {#if !isGm || selectedTeamId}
+        <form class="chat-footer" on:submit|preventDefault={send}>
+          {#if pickerOpen}
+            <div class="emoji-picker">
+              {#each commonEmojis as e}<button type="button" on:click={() => appendEmoji(e)}>{e}</button>{/each}
+            </div>
+          {/if}
+          <button type="button" class="emoji-toggle" on:click={() => (pickerOpen = !pickerOpen)}><span class="mdi mdi-emoticon-happy-outline"></span></button>
+          <input class="chat-input" type="text" bind:value={input} bind:this={chatInput} placeholder="Type a message…" />
+          <button class="chat-send" type="submit"><span class="mdi mdi-send"></span></button>
+        </form>
+      {/if}
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/ChatWidget.svelte:258:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="chat-backdrop" on:click={closePanel} transition:fade={{ duration: 180 }}>
+    <div class="chat-panel" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <div class="chat-header">
+        {#if isGm && selectedTeamId}
+          <button class="chat-back" on:click={backToTeams}><span class="mdi mdi-arrow-left"></span></button>
+        {/if}
+        <span class="chat-title">{isGm ? (selectedTeamName || 'Select a team') : selectedTeamName}</span>
+        <button class="chat-close" on:click={closePanel}><span class="mdi mdi-close"></span></button>
+      </div>
+
+      <div class="chat-body" bind:this={scrollEl}>
+        {#if isGm && !selectedTeamId}
+          {#if loading}<p class="chat-loading">Loading…</p>{/if}
+          {#each teams as team (team.id)}
+            <button class="chat-team" on:click={() => selectTeam(team)}>
+              <span>{team.name ?? 'Unnamed team'}</span>
+              {#if teamUnread[team.id]}
+                <span class="chat-dot">{teamUnread[team.id]}</span>
+              {:else}
+                <span class="mdi mdi-chevron-right"></span>
+              {/if}
+            </button>
+          {/each}
+        {:else}
+          {#if loading}<p class="chat-loading">Loading…</p>{/if}
+          {#each messages as msg (msg.id)}
+            <div class="chat-msg" class:self={msg.sender === (isGm ? 'GM' : 'CAPTAIN')}>
+              <div class="chat-bubble-msg">{msg.content}</div>
+              <div class="chat-meta">
+                {new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                {#if msg.sender === (isGm ? 'GM' : 'CAPTAIN')}
+                  <span class="mdi {msg.readAt ? 'mdi-check-all' : 'mdi-check'}" style="margin-left: 0.25rem;"></span>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        {/if}
+      </div>
+
+      {#if !isGm || selectedTeamId}
+        <form class="chat-footer" on:submit|preventDefault={send}>
+          {#if pickerOpen}
+            <div class="emoji-picker">
+              {#each commonEmojis as e}<button type="button" on:click={() => appendEmoji(e)}>{e}</button>{/each}
+            </div>
+          {/if}
+          <button type="button" class="emoji-toggle" on:click={() => (pickerOpen = !pickerOpen)}><span class="mdi mdi-emoticon-happy-outline"></span></button>
+          <input class="chat-input" type="text" bind:value={input} bind:this={chatInput} placeholder="Type a message…" />
+          <button class="chat-send" type="submit"><span class="mdi mdi-send"></span></button>
+        </form>
+      {/if}
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/ChatWidget.svelte:257:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if panelOpen}
+  <div class="chat-backdrop" on:click={closePanel} transition:fade={{ duration: 180 }}>
+    <div class="chat-panel" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <div class="chat-header">
+        {#if isGm && selectedTeamId}
+          <button class="chat-back" on:click={backToTeams}><span class="mdi mdi-arrow-left"></span></button>
+        {/if}
+        <span class="chat-title">{isGm ? (selectedTeamName || 'Select a team') : selectedTeamName}</span>
+        <button class="chat-close" on:click={closePanel}><span class="mdi mdi-close"></span></button>
+      </div>
+
+      <div class="chat-body" bind:this={scrollEl}>
+        {#if isGm && !selectedTeamId}
+          {#if loading}<p class="chat-loading">Loading…</p>{/if}
+          {#each teams as team (team.id)}
+            <button class="chat-team" on:click={() => selectTeam(team)}>
+              <span>{team.name ?? 'Unnamed team'}</span>
+              {#if teamUnread[team.id]}
+                <span class="chat-dot">{teamUnread[team.id]}</span>
+              {:else}
+                <span class="mdi mdi-chevron-right"></span>
+              {/if}
+            </button>
+          {/each}
+        {:else}
+          {#if loading}<p class="chat-loading">Loading…</p>{/if}
+          {#each messages as msg (msg.id)}
+            <div class="chat-msg" class:self={msg.sender === (isGm ? 'GM' : 'CAPTAIN')}>
+              <div class="chat-bubble-msg">{msg.content}</div>
+              <div class="chat-meta">
+                {new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                {#if msg.sender === (isGm ? 'GM' : 'CAPTAIN')}
+                  <span class="mdi {msg.readAt ? 'mdi-check-all' : 'mdi-check'}" style="margin-left: 0.25rem;"></span>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        {/if}
+      </div>
+
+      {#if !isGm || selectedTeamId}
+        <form class="chat-footer" on:submit|preventDefault={send}>
+          {#if pickerOpen}
+            <div class="emoji-picker">
+              {#each commonEmojis as e}<button type="button" on:click={() => appendEmoji(e)}>{e}</button>{/each}
+            </div>
+          {/if}
+          <button type="button" class="emoji-toggle" on:click={() => (pickerOpen = !pickerOpen)}><span class="mdi mdi-emoticon-happy-outline"></span></button>
+          <input class="chat-input" type="text" bind:value={input} bind:this={chatInput} placeholder="Type a message…" />
+          <button class="chat-send" type="submit"><span class="mdi mdi-send"></span></button>
+        </form>
+      {/if}
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/ChatWidget.svelte:257:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if panelOpen}
+  <div class="chat-backdrop" on:click={closePanel} transition:fade={{ duration: 180 }}>
+    <div class="chat-panel" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <div class="chat-header">
+        {#if isGm && selectedTeamId}
+          <button class="chat-back" on:click={backToTeams}><span class="mdi mdi-arrow-left"></span></button>
+        {/if}
+        <span class="chat-title">{isGm ? (selectedTeamName || 'Select a team') : selectedTeamName}</span>
+        <button class="chat-close" on:click={closePanel}><span class="mdi mdi-close"></span></button>
+      </div>
+
+      <div class="chat-body" bind:this={scrollEl}>
+        {#if isGm && !selectedTeamId}
+          {#if loading}<p class="chat-loading">Loading…</p>{/if}
+          {#each teams as team (team.id)}
+            <button class="chat-team" on:click={() => selectTeam(team)}>
+              <span>{team.name ?? 'Unnamed team'}</span>
+              {#if teamUnread[team.id]}
+                <span class="chat-dot">{teamUnread[team.id]}</span>
+              {:else}
+                <span class="mdi mdi-chevron-right"></span>
+              {/if}
+            </button>
+          {/each}
+        {:else}
+          {#if loading}<p class="chat-loading">Loading…</p>{/if}
+          {#each messages as msg (msg.id)}
+            <div class="chat-msg" class:self={msg.sender === (isGm ? 'GM' : 'CAPTAIN')}>
+              <div class="chat-bubble-msg">{msg.content}</div>
+              <div class="chat-meta">
+                {new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                {#if msg.sender === (isGm ? 'GM' : 'CAPTAIN')}
+                  <span class="mdi {msg.readAt ? 'mdi-check-all' : 'mdi-check'}" style="margin-left: 0.25rem;"></span>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        {/if}
+      </div>
+
+      {#if !isGm || selectedTeamId}
+        <form class="chat-footer" on:submit|preventDefault={send}>
+          {#if pickerOpen}
+            <div class="emoji-picker">
+              {#each commonEmojis as e}<button type="button" on:click={() => appendEmoji(e)}>{e}</button>{/each}
+            </div>
+          {/if}
+          <button type="button" class="emoji-toggle" on:click={() => (pickerOpen = !pickerOpen)}><span class="mdi mdi-emoticon-happy-outline"></span></button>
+          <input class="chat-input" type="text" bind:value={input} bind:this={chatInput} placeholder="Type a message…" />
+          <button class="chat-send" type="submit"><span class="mdi mdi-send"></span></button>
+        </form>
+      {/if}
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/GmTour.svelte:78:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h2>{steps[step].title}</h2>
+      <p>{steps[step].body}</p>
+
+      <div class="dots">
+        {#each steps as _, i (i)}
+          <span class="dot" class:active={i === step}></span>
+        {/each}
+      </div>
+
+      <div class="actions">
+        <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={close}>CLOSE</button>
+        {#if step > 0}
+          <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={back}>BACK</button>
+        {/if}
+        {#if step < steps.length - 1}
+          <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={next}>NEXT</button>
+        {:else}
+          <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={close}>DONE</button>
+        {/if}
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/GmTour.svelte:78:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h2>{steps[step].title}</h2>
+      <p>{steps[step].body}</p>
+
+      <div class="dots">
+        {#each steps as _, i (i)}
+          <span class="dot" class:active={i === step}></span>
+        {/each}
+      </div>
+
+      <div class="actions">
+        <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={close}>CLOSE</button>
+        {#if step > 0}
+          <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={back}>BACK</button>
+        {/if}
+        {#if step < steps.length - 1}
+          <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={next}>NEXT</button>
+        {:else}
+          <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={close}>DONE</button>
+        {/if}
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/GmTour.svelte:77:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if visible}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h2>{steps[step].title}</h2>
+      <p>{steps[step].body}</p>
+
+      <div class="dots">
+        {#each steps as _, i (i)}
+          <span class="dot" class:active={i === step}></span>
+        {/each}
+      </div>
+
+      <div class="actions">
+        <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={close}>CLOSE</button>
+        {#if step > 0}
+          <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={back}>BACK</button>
+        {/if}
+        {#if step < steps.length - 1}
+          <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={next}>NEXT</button>
+        {:else}
+          <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={close}>DONE</button>
+        {/if}
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/GmTour.svelte:77:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if visible}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h2>{steps[step].title}</h2>
+      <p>{steps[step].body}</p>
+
+      <div class="dots">
+        {#each steps as _, i (i)}
+          <span class="dot" class:active={i === step}></span>
+        {/each}
+      </div>
+
+      <div class="actions">
+        <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={close}>CLOSE</button>
+        {#if step > 0}
+          <button class="fungee-btn secondary" style="width: auto; margin: 0;" type="button" on:click={back}>BACK</button>
+        {/if}
+        {#if step < steps.length - 1}
+          <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={next}>NEXT</button>
+        {:else}
+          <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={close}>DONE</button>
+        {/if}
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/PlayerTopbar.svelte:108:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="announcement-backdrop" on:click={markAnnouncementRead}>
+    <div class="announcement-modal" on:click|stopPropagation>
+      <h3>Announcement</h3>
+      <p>{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/PlayerTopbar.svelte:108:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="announcement-backdrop" on:click={markAnnouncementRead}>
+    <div class="announcement-modal" on:click|stopPropagation>
+      <h3>Announcement</h3>
+      <p>{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/PlayerTopbar.svelte:107:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showAnnouncement}
+  <div class="announcement-backdrop" on:click={markAnnouncementRead}>
+    <div class="announcement-modal" on:click|stopPropagation>
+      <h3>Announcement</h3>
+      <p>{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/PlayerTopbar.svelte:107:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showAnnouncement}
+  <div class="announcement-backdrop" on:click={markAnnouncementRead}>
+    <div class="announcement-modal" on:click|stopPropagation>
+      <h3>Announcement</h3>
+      <p>{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/SubmissionReview.svelte:81:13
+Warn: A11y: <video> elements must have a <track kind="captions"> (svelte)
+          {#if sub.task?.proofType === 'VIDEO'}
+            <video src={url} controls></video>
+          {:else}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/SubmissionReview.svelte:68:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+<div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+  <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+    <h2>Review Submission</h2>
+    <div class="details">
+      <p><strong>Team:</strong> {sub.team?.name ?? 'Unknown'}</p>
+      <p><strong>Task:</strong> {sub.task?.title ?? ''}</p>
+      <p><strong>Status:</strong> {sub.status}</p>
+      {#if sub.reason}<p class="reason"><strong>Reason:</strong> {sub.reason}</p>{/if}
+    </div>
+
+    {#if sub.proofUrls?.length || sub.proofUrl}
+      <div class="proof" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        {#each [...new Set([sub.proofUrl, ...(sub.proofUrls ?? [])])].filter(Boolean) as url (url)}
+          {#if sub.task?.proofType === 'VIDEO'}
+            <video src={url} controls></video>
+          {:else}
+            <img src={url} alt="Proof" />
+          {/if}
+        {/each}
+      </div>
+    {/if}
+
+    {#if rejecting}
+      <form on:submit|preventDefault={() => review('INCOMPLETE')}>
+        <label class="fungee-label" for="reason">Reason for rejecting (required)</label>
+        <textarea class="fungee-textarea" id="reason" bind:value={reason} placeholder="Explain why this submission is rejected…"></textarea>
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn danger" type="submit">REJECT</button>
+          <button class="fungee-btn" type="button" on:click={() => { rejecting = false; reason = ''; }}>CANCEL</button>
+        </div>
+      </form>
+    {/if}
+
+    <div class="fungee-btn-row" style="margin-top: 1rem;">
+      <button class="fungee-btn secondary" on:click={close}>CLOSE</button>
+      {#if sub.status === 'COMPLETED'}
+        <button
+          class="fungee-btn"
+          class:active={sub.isHighlight}
+          on:click={toggleHighlight}
+          title={sub.isHighlight ? 'Remove from Best of' : 'Mark as Best of'}
+        >
+          <span class="mdi {sub.isHighlight ? 'mdi-star' : 'mdi-star-outline'}"></span>
+          {sub.isHighlight ? 'Best of' : 'Mark Best of'}
+        </button>
+      {/if}
+      {#if !rejecting}
+        <button class="fungee-btn danger" on:click={() => (rejecting = true)}>REJECT</button>
+      {/if}
+      {#if sub.status !== 'COMPLETED'}
+        <button class="fungee-btn" on:click={() => review('COMPLETED')}>APPROVE</button>
+      {/if}
+    </div>
+  </div>
+</div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/SubmissionReview.svelte:68:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+<div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+  <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+    <h2>Review Submission</h2>
+    <div class="details">
+      <p><strong>Team:</strong> {sub.team?.name ?? 'Unknown'}</p>
+      <p><strong>Task:</strong> {sub.task?.title ?? ''}</p>
+      <p><strong>Status:</strong> {sub.status}</p>
+      {#if sub.reason}<p class="reason"><strong>Reason:</strong> {sub.reason}</p>{/if}
+    </div>
+
+    {#if sub.proofUrls?.length || sub.proofUrl}
+      <div class="proof" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        {#each [...new Set([sub.proofUrl, ...(sub.proofUrls ?? [])])].filter(Boolean) as url (url)}
+          {#if sub.task?.proofType === 'VIDEO'}
+            <video src={url} controls></video>
+          {:else}
+            <img src={url} alt="Proof" />
+          {/if}
+        {/each}
+      </div>
+    {/if}
+
+    {#if rejecting}
+      <form on:submit|preventDefault={() => review('INCOMPLETE')}>
+        <label class="fungee-label" for="reason">Reason for rejecting (required)</label>
+        <textarea class="fungee-textarea" id="reason" bind:value={reason} placeholder="Explain why this submission is rejected…"></textarea>
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn danger" type="submit">REJECT</button>
+          <button class="fungee-btn" type="button" on:click={() => { rejecting = false; reason = ''; }}>CANCEL</button>
+        </div>
+      </form>
+    {/if}
+
+    <div class="fungee-btn-row" style="margin-top: 1rem;">
+      <button class="fungee-btn secondary" on:click={close}>CLOSE</button>
+      {#if sub.status === 'COMPLETED'}
+        <button
+          class="fungee-btn"
+          class:active={sub.isHighlight}
+          on:click={toggleHighlight}
+          title={sub.isHighlight ? 'Remove from Best of' : 'Mark as Best of'}
+        >
+          <span class="mdi {sub.isHighlight ? 'mdi-star' : 'mdi-star-outline'}"></span>
+          {sub.isHighlight ? 'Best of' : 'Mark Best of'}
+        </button>
+      {/if}
+      {#if !rejecting}
+        <button class="fungee-btn danger" on:click={() => (rejecting = true)}>REJECT</button>
+      {/if}
+      {#if sub.status !== 'COMPLETED'}
+        <button class="fungee-btn" on:click={() => review('COMPLETED')}>APPROVE</button>
+      {/if}
+    </div>
+  </div>
+</div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/SubmissionReview.svelte:67:1
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+
+<div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+  <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+    <h2>Review Submission</h2>
+    <div class="details">
+      <p><strong>Team:</strong> {sub.team?.name ?? 'Unknown'}</p>
+      <p><strong>Task:</strong> {sub.task?.title ?? ''}</p>
+      <p><strong>Status:</strong> {sub.status}</p>
+      {#if sub.reason}<p class="reason"><strong>Reason:</strong> {sub.reason}</p>{/if}
+    </div>
+
+    {#if sub.proofUrls?.length || sub.proofUrl}
+      <div class="proof" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        {#each [...new Set([sub.proofUrl, ...(sub.proofUrls ?? [])])].filter(Boolean) as url (url)}
+          {#if sub.task?.proofType === 'VIDEO'}
+            <video src={url} controls></video>
+          {:else}
+            <img src={url} alt="Proof" />
+          {/if}
+        {/each}
+      </div>
+    {/if}
+
+    {#if rejecting}
+      <form on:submit|preventDefault={() => review('INCOMPLETE')}>
+        <label class="fungee-label" for="reason">Reason for rejecting (required)</label>
+        <textarea class="fungee-textarea" id="reason" bind:value={reason} placeholder="Explain why this submission is rejected…"></textarea>
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn danger" type="submit">REJECT</button>
+          <button class="fungee-btn" type="button" on:click={() => { rejecting = false; reason = ''; }}>CANCEL</button>
+        </div>
+      </form>
+    {/if}
+
+    <div class="fungee-btn-row" style="margin-top: 1rem;">
+      <button class="fungee-btn secondary" on:click={close}>CLOSE</button>
+      {#if sub.status === 'COMPLETED'}
+        <button
+          class="fungee-btn"
+          class:active={sub.isHighlight}
+          on:click={toggleHighlight}
+          title={sub.isHighlight ? 'Remove from Best of' : 'Mark as Best of'}
+        >
+          <span class="mdi {sub.isHighlight ? 'mdi-star' : 'mdi-star-outline'}"></span>
+          {sub.isHighlight ? 'Best of' : 'Mark Best of'}
+        </button>
+      {/if}
+      {#if !rejecting}
+        <button class="fungee-btn danger" on:click={() => (rejecting = true)}>REJECT</button>
+      {/if}
+      {#if sub.status !== 'COMPLETED'}
+        <button class="fungee-btn" on:click={() => review('COMPLETED')}>APPROVE</button>
+      {/if}
+    </div>
+  </div>
+</div>
+
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/SubmissionReview.svelte:67:1
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+
+<div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+  <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+    <h2>Review Submission</h2>
+    <div class="details">
+      <p><strong>Team:</strong> {sub.team?.name ?? 'Unknown'}</p>
+      <p><strong>Task:</strong> {sub.task?.title ?? ''}</p>
+      <p><strong>Status:</strong> {sub.status}</p>
+      {#if sub.reason}<p class="reason"><strong>Reason:</strong> {sub.reason}</p>{/if}
+    </div>
+
+    {#if sub.proofUrls?.length || sub.proofUrl}
+      <div class="proof" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        {#each [...new Set([sub.proofUrl, ...(sub.proofUrls ?? [])])].filter(Boolean) as url (url)}
+          {#if sub.task?.proofType === 'VIDEO'}
+            <video src={url} controls></video>
+          {:else}
+            <img src={url} alt="Proof" />
+          {/if}
+        {/each}
+      </div>
+    {/if}
+
+    {#if rejecting}
+      <form on:submit|preventDefault={() => review('INCOMPLETE')}>
+        <label class="fungee-label" for="reason">Reason for rejecting (required)</label>
+        <textarea class="fungee-textarea" id="reason" bind:value={reason} placeholder="Explain why this submission is rejected…"></textarea>
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn danger" type="submit">REJECT</button>
+          <button class="fungee-btn" type="button" on:click={() => { rejecting = false; reason = ''; }}>CANCEL</button>
+        </div>
+      </form>
+    {/if}
+
+    <div class="fungee-btn-row" style="margin-top: 1rem;">
+      <button class="fungee-btn secondary" on:click={close}>CLOSE</button>
+      {#if sub.status === 'COMPLETED'}
+        <button
+          class="fungee-btn"
+          class:active={sub.isHighlight}
+          on:click={toggleHighlight}
+          title={sub.isHighlight ? 'Remove from Best of' : 'Mark as Best of'}
+        >
+          <span class="mdi {sub.isHighlight ? 'mdi-star' : 'mdi-star-outline'}"></span>
+          {sub.isHighlight ? 'Best of' : 'Mark Best of'}
+        </button>
+      {/if}
+      {#if !rejecting}
+        <button class="fungee-btn danger" on:click={() => (rejecting = true)}>REJECT</button>
+      {/if}
+      {#if sub.status !== 'COMPLETED'}
+        <button class="fungee-btn" on:click={() => review('COMPLETED')}>APPROVE</button>
+      {/if}
+    </div>
+  </div>
+</div>
+
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/Toast.svelte:12:7
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+    {#each messages as m (m.id)}
+      <div class="toast {m.type}" role="alert" in:fly={{ x: 50, duration: 250 }} out:scale={{ duration: 200 }} on:click={() => toast.remove(m.id)}>
+        {m.message}
+      </div>
+    {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/Toast.svelte:12:7
+Warn: A11y: Non-interactive element <div> should not be assigned mouse or keyboard event listeners. (svelte)
+    {#each messages as m (m.id)}
+      <div class="toast {m.type}" role="alert" in:fly={{ x: 50, duration: 250 }} out:scale={{ duration: 200 }} on:click={() => toast.remove(m.id)}>
+        {m.message}
+      </div>
+    {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/Welcome.svelte:37:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h1>Welcome to Fungee-Hunt</h1>
+      <p>
+        Thanks for installing Fungee-Hunt! It's a self-hosted scavenger-hunt game for groups — players join
+        with a code, complete photo or video challenges, and earn points.
+      </p>
+      <p>
+        The system admin dashboard is at:
+        <br />
+        <a class="admin-link" href="/admin">{adminUrl}</a>
+      </p>
+      <p class="hint">Bookmark it — that's where you'll manage games and system settings.</p>
+      <div class="actions">
+        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={close}>GET STARTED</button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/Welcome.svelte:37:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h1>Welcome to Fungee-Hunt</h1>
+      <p>
+        Thanks for installing Fungee-Hunt! It's a self-hosted scavenger-hunt game for groups — players join
+        with a code, complete photo or video challenges, and earn points.
+      </p>
+      <p>
+        The system admin dashboard is at:
+        <br />
+        <a class="admin-link" href="/admin">{adminUrl}</a>
+      </p>
+      <p class="hint">Bookmark it — that's where you'll manage games and system settings.</p>
+      <div class="actions">
+        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={close}>GET STARTED</button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/Welcome.svelte:36:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if visible}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h1>Welcome to Fungee-Hunt</h1>
+      <p>
+        Thanks for installing Fungee-Hunt! It's a self-hosted scavenger-hunt game for groups — players join
+        with a code, complete photo or video challenges, and earn points.
+      </p>
+      <p>
+        The system admin dashboard is at:
+        <br />
+        <a class="admin-link" href="/admin">{adminUrl}</a>
+      </p>
+      <p class="hint">Bookmark it — that's where you'll manage games and system settings.</p>
+      <div class="actions">
+        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={close}>GET STARTED</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/lib/Welcome.svelte:36:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if visible}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h1>Welcome to Fungee-Hunt</h1>
+      <p>
+        Thanks for installing Fungee-Hunt! It's a self-hosted scavenger-hunt game for groups — players join
+        with a code, complete photo or video challenges, and earn points.
+      </p>
+      <p>
+        The system admin dashboard is at:
+        <br />
+        <a class="admin-link" href="/admin">{adminUrl}</a>
+      </p>
+      <p class="hint">Bookmark it — that's where you'll manage games and system settings.</p>
+      <div class="actions">
+        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={close}>GET STARTED</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/+layout.svelte:173:15
+Warn: A11y: <div> with mouseleave handler must have an ARIA role (svelte)
+            {#if showSpectatorDropdown}
+              <div class="dropdown" on:mouseleave={() => (showSpectatorDropdown = false)}>
+                <a href={game.viewUrl} target="_blank" rel="noreferrer" on:click={() => (showSpectatorDropdown = false)}>
+                  <span class="mdi mdi-open-in-new"></span> Open
+                </a>
+                <button type="button" on:click={() => { showSpectatorDropdown = false; showSpectatorModal = true; }}>
+                  <span class="mdi mdi-television"></span> Pair
+                </button>
+              </div>
+            {/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/+layout.svelte:204:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={() => (showSpectatorModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={pairSpectator}>
+        <h3>Pair Spectator</h3>
+        <p style="margin: 0 0 1rem; color: var(--muted);">Enter the 6-digit code shown on the spectator screen.</p>
+        <input
+          class="fungee-input"
+          type="text"
+          bind:value={spectatorCode}
+          placeholder="123456"
+          maxlength="6"
+          inputmode="numeric"
+          style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: 700;"
+        />
+        {#if spectatorError}
+          <p class="error" style="color: var(--danger); margin-top: 0.5rem;">{spectatorError}</p>
+        {/if}
+        <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+          <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showSpectatorModal = false)}>Cancel</button>
+          <button class="fungee-btn" style="flex: 1; margin: 0;" type="submit">Connect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/+layout.svelte:204:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={() => (showSpectatorModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={pairSpectator}>
+        <h3>Pair Spectator</h3>
+        <p style="margin: 0 0 1rem; color: var(--muted);">Enter the 6-digit code shown on the spectator screen.</p>
+        <input
+          class="fungee-input"
+          type="text"
+          bind:value={spectatorCode}
+          placeholder="123456"
+          maxlength="6"
+          inputmode="numeric"
+          style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: 700;"
+        />
+        {#if spectatorError}
+          <p class="error" style="color: var(--danger); margin-top: 0.5rem;">{spectatorError}</p>
+        {/if}
+        <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+          <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showSpectatorModal = false)}>Cancel</button>
+          <button class="fungee-btn" style="flex: 1; margin: 0;" type="submit">Connect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/+layout.svelte:203:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showSpectatorModal}
+  <div class="modal-backdrop" on:click={() => (showSpectatorModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={pairSpectator}>
+        <h3>Pair Spectator</h3>
+        <p style="margin: 0 0 1rem; color: var(--muted);">Enter the 6-digit code shown on the spectator screen.</p>
+        <input
+          class="fungee-input"
+          type="text"
+          bind:value={spectatorCode}
+          placeholder="123456"
+          maxlength="6"
+          inputmode="numeric"
+          style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: 700;"
+        />
+        {#if spectatorError}
+          <p class="error" style="color: var(--danger); margin-top: 0.5rem;">{spectatorError}</p>
+        {/if}
+        <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+          <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showSpectatorModal = false)}>Cancel</button>
+          <button class="fungee-btn" style="flex: 1; margin: 0;" type="submit">Connect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/+layout.svelte:203:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showSpectatorModal}
+  <div class="modal-backdrop" on:click={() => (showSpectatorModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={pairSpectator}>
+        <h3>Pair Spectator</h3>
+        <p style="margin: 0 0 1rem; color: var(--muted);">Enter the 6-digit code shown on the spectator screen.</p>
+        <input
+          class="fungee-input"
+          type="text"
+          bind:value={spectatorCode}
+          placeholder="123456"
+          maxlength="6"
+          inputmode="numeric"
+          style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: 700;"
+        />
+        {#if spectatorError}
+          <p class="error" style="color: var(--danger); margin-top: 0.5rem;">{spectatorError}</p>
+        {/if}
+        <div class="actions" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+          <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showSpectatorModal = false)}>Cancel</button>
+          <button class="fungee-btn" style="flex: 1; margin: 0;" type="submit">Connect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:343:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveReturn}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Return Time Bonus</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={retEnabled} />
+          Enable return bonus
+        </label>
+
+        {#if retEnabled}
+          <label class="fungee-label" for="rs">Window Start Time</label>
+          <input class="fungee-input" id="rs" type="time" bind:value={retStartTime} />
+
+          <label class="fungee-label" for="rw">Window Length (minutes)</label>
+          <input class="fungee-input" id="rw" type="number" style="margin-bottom: 0.75rem;" bind:value={retWindow} min="1" />
+
+          <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
+
+          <label class="fungee-label" for="rp">Points</label>
+          <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={retPoints} min="0" />
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:343:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveReturn}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Return Time Bonus</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={retEnabled} />
+          Enable return bonus
+        </label>
+
+        {#if retEnabled}
+          <label class="fungee-label" for="rs">Window Start Time</label>
+          <input class="fungee-input" id="rs" type="time" bind:value={retStartTime} />
+
+          <label class="fungee-label" for="rw">Window Length (minutes)</label>
+          <input class="fungee-input" id="rw" type="number" style="margin-bottom: 0.75rem;" bind:value={retWindow} min="1" />
+
+          <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
+
+          <label class="fungee-label" for="rp">Points</label>
+          <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={retPoints} min="0" />
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:342:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if modal === 'return'}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveReturn}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Return Time Bonus</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={retEnabled} />
+          Enable return bonus
+        </label>
+
+        {#if retEnabled}
+          <label class="fungee-label" for="rs">Window Start Time</label>
+          <input class="fungee-input" id="rs" type="time" bind:value={retStartTime} />
+
+          <label class="fungee-label" for="rw">Window Length (minutes)</label>
+          <input class="fungee-input" id="rw" type="number" style="margin-bottom: 0.75rem;" bind:value={retWindow} min="1" />
+
+          <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
+
+          <label class="fungee-label" for="rp">Points</label>
+          <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={retPoints} min="0" />
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:342:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if modal === 'return'}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveReturn}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Return Time Bonus</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={retEnabled} />
+          Enable return bonus
+        </label>
+
+        {#if retEnabled}
+          <label class="fungee-label" for="rs">Window Start Time</label>
+          <input class="fungee-input" id="rs" type="time" bind:value={retStartTime} />
+
+          <label class="fungee-label" for="rw">Window Length (minutes)</label>
+          <input class="fungee-input" id="rw" type="number" style="margin-bottom: 0.75rem;" bind:value={retWindow} min="1" />
+
+          <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
+
+          <label class="fungee-label" for="rp">Points</label>
+          <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={retPoints} min="0" />
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:392:11
+Warn: A11y: A form label must be associated with a control. (svelte)
+
+          <label class="fungee-label">Task Source</label>
+          <div style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:377:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveBonus}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;"><span class="mdi mdi-star"></span> Bonus Task</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={bonusEnabled} />
+          Enable limited-time bonus task
+        </label>
+
+        {#if bonusEnabled}
+          <label class="fungee-label" for="bts">Window Start</label>
+          <input class="fungee-input" id="bts" type="time" bind:value={bonusStart} />
+
+          <label class="fungee-label" for="bte">Window End</label>
+          <input class="fungee-input" id="bte" type="time" bind:value={bonusEnd} />
+
+          <label class="fungee-label">Task Source</label>
+          <div style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="built-in" bind:group={bonusMode} /> Built-in
+            </label>
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="custom" bind:group={bonusMode} /> Custom
+            </label>
+          </div>
+
+          {#if bonusMode === 'built-in'}
+            <label class="fungee-label" for="bt">Choose a default task</label>
+            <select class="fungee-input" id="bt" bind:value={bonusBuiltInIndex}>
+              {#each defaultTasks as t, i}
+                <option value={i}>{t.title} (+{t.points} pts)</option>
+              {/each}
+            </select>
+          {:else}
+            <label class="fungee-label" for="ct">Title</label>
+            <input class="fungee-input" id="ct" type="text" bind:value={customTitle} placeholder="Title" />
+
+            <label class="fungee-label" for="cd">Description</label>
+            <textarea class="fungee-textarea" id="cd" bind:value={customDescription} placeholder="Description"></textarea>
+
+            <label class="fungee-label" for="cp">Points</label>
+            <input class="fungee-input" id="cp" type="number" step="0.1" bind:value={customPoints} />
+
+            <label class="fungee-label" for="cpt">Proof Type</label>
+            <select class="fungee-input" id="cpt" bind:value={customProofType}>
+              <option value="PHOTO">Photo</option>
+              <option value="VIDEO">Video</option>
+              <option value="PHOTOS">Photos</option>
+            </select>
+
+            {#if customProofType === 'PHOTOS'}
+              <label class="fungee-label" for="cpc">Number of Photos (optional)</label>
+              <input class="fungee-input" id="cpc" type="number" min="1" bind:value={customPhotoCount} placeholder="e.g., number of other teams" />
+            {/if}
+          {/if}
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:377:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveBonus}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;"><span class="mdi mdi-star"></span> Bonus Task</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={bonusEnabled} />
+          Enable limited-time bonus task
+        </label>
+
+        {#if bonusEnabled}
+          <label class="fungee-label" for="bts">Window Start</label>
+          <input class="fungee-input" id="bts" type="time" bind:value={bonusStart} />
+
+          <label class="fungee-label" for="bte">Window End</label>
+          <input class="fungee-input" id="bte" type="time" bind:value={bonusEnd} />
+
+          <label class="fungee-label">Task Source</label>
+          <div style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="built-in" bind:group={bonusMode} /> Built-in
+            </label>
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="custom" bind:group={bonusMode} /> Custom
+            </label>
+          </div>
+
+          {#if bonusMode === 'built-in'}
+            <label class="fungee-label" for="bt">Choose a default task</label>
+            <select class="fungee-input" id="bt" bind:value={bonusBuiltInIndex}>
+              {#each defaultTasks as t, i}
+                <option value={i}>{t.title} (+{t.points} pts)</option>
+              {/each}
+            </select>
+          {:else}
+            <label class="fungee-label" for="ct">Title</label>
+            <input class="fungee-input" id="ct" type="text" bind:value={customTitle} placeholder="Title" />
+
+            <label class="fungee-label" for="cd">Description</label>
+            <textarea class="fungee-textarea" id="cd" bind:value={customDescription} placeholder="Description"></textarea>
+
+            <label class="fungee-label" for="cp">Points</label>
+            <input class="fungee-input" id="cp" type="number" step="0.1" bind:value={customPoints} />
+
+            <label class="fungee-label" for="cpt">Proof Type</label>
+            <select class="fungee-input" id="cpt" bind:value={customProofType}>
+              <option value="PHOTO">Photo</option>
+              <option value="VIDEO">Video</option>
+              <option value="PHOTOS">Photos</option>
+            </select>
+
+            {#if customProofType === 'PHOTOS'}
+              <label class="fungee-label" for="cpc">Number of Photos (optional)</label>
+              <input class="fungee-input" id="cpc" type="number" min="1" bind:value={customPhotoCount} placeholder="e.g., number of other teams" />
+            {/if}
+          {/if}
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:376:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if modal === 'bonus'}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveBonus}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;"><span class="mdi mdi-star"></span> Bonus Task</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={bonusEnabled} />
+          Enable limited-time bonus task
+        </label>
+
+        {#if bonusEnabled}
+          <label class="fungee-label" for="bts">Window Start</label>
+          <input class="fungee-input" id="bts" type="time" bind:value={bonusStart} />
+
+          <label class="fungee-label" for="bte">Window End</label>
+          <input class="fungee-input" id="bte" type="time" bind:value={bonusEnd} />
+
+          <label class="fungee-label">Task Source</label>
+          <div style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="built-in" bind:group={bonusMode} /> Built-in
+            </label>
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="custom" bind:group={bonusMode} /> Custom
+            </label>
+          </div>
+
+          {#if bonusMode === 'built-in'}
+            <label class="fungee-label" for="bt">Choose a default task</label>
+            <select class="fungee-input" id="bt" bind:value={bonusBuiltInIndex}>
+              {#each defaultTasks as t, i}
+                <option value={i}>{t.title} (+{t.points} pts)</option>
+              {/each}
+            </select>
+          {:else}
+            <label class="fungee-label" for="ct">Title</label>
+            <input class="fungee-input" id="ct" type="text" bind:value={customTitle} placeholder="Title" />
+
+            <label class="fungee-label" for="cd">Description</label>
+            <textarea class="fungee-textarea" id="cd" bind:value={customDescription} placeholder="Description"></textarea>
+
+            <label class="fungee-label" for="cp">Points</label>
+            <input class="fungee-input" id="cp" type="number" step="0.1" bind:value={customPoints} />
+
+            <label class="fungee-label" for="cpt">Proof Type</label>
+            <select class="fungee-input" id="cpt" bind:value={customProofType}>
+              <option value="PHOTO">Photo</option>
+              <option value="VIDEO">Video</option>
+              <option value="PHOTOS">Photos</option>
+            </select>
+
+            {#if customProofType === 'PHOTOS'}
+              <label class="fungee-label" for="cpc">Number of Photos (optional)</label>
+              <input class="fungee-input" id="cpc" type="number" min="1" bind:value={customPhotoCount} placeholder="e.g., number of other teams" />
+            {/if}
+          {/if}
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:376:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if modal === 'bonus'}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveBonus}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;"><span class="mdi mdi-star"></span> Bonus Task</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={bonusEnabled} />
+          Enable limited-time bonus task
+        </label>
+
+        {#if bonusEnabled}
+          <label class="fungee-label" for="bts">Window Start</label>
+          <input class="fungee-input" id="bts" type="time" bind:value={bonusStart} />
+
+          <label class="fungee-label" for="bte">Window End</label>
+          <input class="fungee-input" id="bte" type="time" bind:value={bonusEnd} />
+
+          <label class="fungee-label">Task Source</label>
+          <div style="display: flex; gap: 1rem; margin-bottom: 0.75rem;">
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="built-in" bind:group={bonusMode} /> Built-in
+            </label>
+            <label class="fungee-check" style="margin: 0;">
+              <input type="radio" value="custom" bind:group={bonusMode} /> Custom
+            </label>
+          </div>
+
+          {#if bonusMode === 'built-in'}
+            <label class="fungee-label" for="bt">Choose a default task</label>
+            <select class="fungee-input" id="bt" bind:value={bonusBuiltInIndex}>
+              {#each defaultTasks as t, i}
+                <option value={i}>{t.title} (+{t.points} pts)</option>
+              {/each}
+            </select>
+          {:else}
+            <label class="fungee-label" for="ct">Title</label>
+            <input class="fungee-input" id="ct" type="text" bind:value={customTitle} placeholder="Title" />
+
+            <label class="fungee-label" for="cd">Description</label>
+            <textarea class="fungee-textarea" id="cd" bind:value={customDescription} placeholder="Description"></textarea>
+
+            <label class="fungee-label" for="cp">Points</label>
+            <input class="fungee-input" id="cp" type="number" step="0.1" bind:value={customPoints} />
+
+            <label class="fungee-label" for="cpt">Proof Type</label>
+            <select class="fungee-input" id="cpt" bind:value={customProofType}>
+              <option value="PHOTO">Photo</option>
+              <option value="VIDEO">Video</option>
+              <option value="PHOTOS">Photos</option>
+            </select>
+
+            {#if customProofType === 'PHOTOS'}
+              <label class="fungee-label" for="cpc">Number of Photos (optional)</label>
+              <input class="fungee-input" id="cpc" type="number" min="1" bind:value={customPhotoCount} placeholder="e.g., number of other teams" />
+            {/if}
+          {/if}
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:446:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveFood}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Food Drive</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={fdEnabled} />
+          Enable food drive
+        </label>
+
+        {#if fdEnabled}
+          <label class="fungee-label" for="fdpp">Points Per Item</label>
+          <input class="fungee-input" id="fdpp" type="number" step="0.1" bind:value={fdPoints} min="0" />
+          <label class="fungee-label" for="fdperm">Permissible Items</label>
+          <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc."></textarea>
+          <label class="fungee-label" for="fdsug">Suggested Items</label>
+          <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc."></textarea>
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:446:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveFood}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Food Drive</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={fdEnabled} />
+          Enable food drive
+        </label>
+
+        {#if fdEnabled}
+          <label class="fungee-label" for="fdpp">Points Per Item</label>
+          <input class="fungee-input" id="fdpp" type="number" step="0.1" bind:value={fdPoints} min="0" />
+          <label class="fungee-label" for="fdperm">Permissible Items</label>
+          <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc."></textarea>
+          <label class="fungee-label" for="fdsug">Suggested Items</label>
+          <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc."></textarea>
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:445:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if modal === 'food'}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveFood}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Food Drive</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={fdEnabled} />
+          Enable food drive
+        </label>
+
+        {#if fdEnabled}
+          <label class="fungee-label" for="fdpp">Points Per Item</label>
+          <input class="fungee-input" id="fdpp" type="number" step="0.1" bind:value={fdPoints} min="0" />
+          <label class="fungee-label" for="fdperm">Permissible Items</label>
+          <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc."></textarea>
+          <label class="fungee-label" for="fdsug">Suggested Items</label>
+          <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc."></textarea>
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/bonuses/+page.svelte:445:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if modal === 'food'}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveFood}>
+        <h3 class="fungee-section-title" style="margin: 0 0 1rem;">Food Drive</h3>
+        <label class="fungee-check">
+          <input type="checkbox" bind:checked={fdEnabled} />
+          Enable food drive
+        </label>
+
+        {#if fdEnabled}
+          <label class="fungee-label" for="fdpp">Points Per Item</label>
+          <input class="fungee-input" id="fdpp" type="number" step="0.1" bind:value={fdPoints} min="0" />
+          <label class="fungee-label" for="fdperm">Permissible Items</label>
+          <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc."></textarea>
+          <label class="fungee-label" for="fdsug">Suggested Items</label>
+          <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc."></textarea>
+        {/if}
+
+        {#if error}<p class="fungee-error">{error}</p>{/if}
+
+        <div class="fungee-btn-row" style="margin-top: 1rem;">
+          <button class="fungee-btn secondary" type="button" on:click={close} disabled={saving}>CANCEL</button>
+          <button class="fungee-btn" type="submit" disabled={saving}>SAVE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:468:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={() => (showImportModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={() => (showImportModal = false)}>Close</button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:468:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={() => (showImportModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={() => (showImportModal = false)}>Close</button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:467:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showImportModal}
+  <div class="modal-backdrop" on:click={() => (showImportModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={() => (showImportModal = false)}>Close</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:467:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showImportModal}
+  <div class="modal-backdrop" on:click={() => (showImportModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={() => (showImportModal = false)}>Close</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:493:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={() => (showAnnouncementModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }} style="max-width: 28rem; width: 100%;">
+      <h3>Send Announcement</h3>
+      <textarea
+        class="fungee-textarea"
+        bind:value={announcementMessage}
+        placeholder="Type your message..."
+        rows="4"
+        style="width: 100%; margin-bottom: 0.75rem;"
+      ></textarea>
+      <label class="fungee-check" style="margin-bottom: 0.5rem;">
+        <input type="checkbox" bind:checked={announcementCaptainsOnly} />
+        Captains only
+      </label>
+      <label class="fungee-check" style="margin-bottom: 0.75rem;">
+        <input type="checkbox" bind:checked={announcementAll} />
+        All teams
+      </label>
+      {#if !announcementAll && teams.length}
+        <p style="margin: 0 0 0.5rem; font-weight: 600;">Select teams</p>
+        <div style="max-height: 12rem; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem; margin-bottom: 1rem;">
+          {#each teams as team (team.id)}
+            <label class="fungee-check" style="margin: 0.25rem 0;">
+              <input type="checkbox" value={team.id} bind:group={announcementTeamIds} />
+              {team.name ?? 'Unnamed team'}
+            </label>
+          {/each}
+        </div>
+      {/if}
+      <div class="actions" style="display: flex; gap: 0.5rem;">
+        <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showAnnouncementModal = false)}>Cancel</button>
+        <button class="fungee-btn" style="flex: 1; margin: 0; background: var(--brand); color: #fff;" type="button" on:click={sendAnnouncement} disabled={!announcementMessage.trim()}>Send</button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:493:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={() => (showAnnouncementModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }} style="max-width: 28rem; width: 100%;">
+      <h3>Send Announcement</h3>
+      <textarea
+        class="fungee-textarea"
+        bind:value={announcementMessage}
+        placeholder="Type your message..."
+        rows="4"
+        style="width: 100%; margin-bottom: 0.75rem;"
+      ></textarea>
+      <label class="fungee-check" style="margin-bottom: 0.5rem;">
+        <input type="checkbox" bind:checked={announcementCaptainsOnly} />
+        Captains only
+      </label>
+      <label class="fungee-check" style="margin-bottom: 0.75rem;">
+        <input type="checkbox" bind:checked={announcementAll} />
+        All teams
+      </label>
+      {#if !announcementAll && teams.length}
+        <p style="margin: 0 0 0.5rem; font-weight: 600;">Select teams</p>
+        <div style="max-height: 12rem; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem; margin-bottom: 1rem;">
+          {#each teams as team (team.id)}
+            <label class="fungee-check" style="margin: 0.25rem 0;">
+              <input type="checkbox" value={team.id} bind:group={announcementTeamIds} />
+              {team.name ?? 'Unnamed team'}
+            </label>
+          {/each}
+        </div>
+      {/if}
+      <div class="actions" style="display: flex; gap: 0.5rem;">
+        <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showAnnouncementModal = false)}>Cancel</button>
+        <button class="fungee-btn" style="flex: 1; margin: 0; background: var(--brand); color: #fff;" type="button" on:click={sendAnnouncement} disabled={!announcementMessage.trim()}>Send</button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:492:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showAnnouncementModal}
+  <div class="modal-backdrop" on:click={() => (showAnnouncementModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }} style="max-width: 28rem; width: 100%;">
+      <h3>Send Announcement</h3>
+      <textarea
+        class="fungee-textarea"
+        bind:value={announcementMessage}
+        placeholder="Type your message..."
+        rows="4"
+        style="width: 100%; margin-bottom: 0.75rem;"
+      ></textarea>
+      <label class="fungee-check" style="margin-bottom: 0.5rem;">
+        <input type="checkbox" bind:checked={announcementCaptainsOnly} />
+        Captains only
+      </label>
+      <label class="fungee-check" style="margin-bottom: 0.75rem;">
+        <input type="checkbox" bind:checked={announcementAll} />
+        All teams
+      </label>
+      {#if !announcementAll && teams.length}
+        <p style="margin: 0 0 0.5rem; font-weight: 600;">Select teams</p>
+        <div style="max-height: 12rem; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem; margin-bottom: 1rem;">
+          {#each teams as team (team.id)}
+            <label class="fungee-check" style="margin: 0.25rem 0;">
+              <input type="checkbox" value={team.id} bind:group={announcementTeamIds} />
+              {team.name ?? 'Unnamed team'}
+            </label>
+          {/each}
+        </div>
+      {/if}
+      <div class="actions" style="display: flex; gap: 0.5rem;">
+        <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showAnnouncementModal = false)}>Cancel</button>
+        <button class="fungee-btn" style="flex: 1; margin: 0; background: var(--brand); color: #fff;" type="button" on:click={sendAnnouncement} disabled={!announcementMessage.trim()}>Send</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:492:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showAnnouncementModal}
+  <div class="modal-backdrop" on:click={() => (showAnnouncementModal = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }} style="max-width: 28rem; width: 100%;">
+      <h3>Send Announcement</h3>
+      <textarea
+        class="fungee-textarea"
+        bind:value={announcementMessage}
+        placeholder="Type your message..."
+        rows="4"
+        style="width: 100%; margin-bottom: 0.75rem;"
+      ></textarea>
+      <label class="fungee-check" style="margin-bottom: 0.5rem;">
+        <input type="checkbox" bind:checked={announcementCaptainsOnly} />
+        Captains only
+      </label>
+      <label class="fungee-check" style="margin-bottom: 0.75rem;">
+        <input type="checkbox" bind:checked={announcementAll} />
+        All teams
+      </label>
+      {#if !announcementAll && teams.length}
+        <p style="margin: 0 0 0.5rem; font-weight: 600;">Select teams</p>
+        <div style="max-height: 12rem; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.5rem; padding: 0.5rem; margin-bottom: 1rem;">
+          {#each teams as team (team.id)}
+            <label class="fungee-check" style="margin: 0.25rem 0;">
+              <input type="checkbox" value={team.id} bind:group={announcementTeamIds} />
+              {team.name ?? 'Unnamed team'}
+            </label>
+          {/each}
+        </div>
+      {/if}
+      <div class="actions" style="display: flex; gap: 0.5rem;">
+        <button type="button" style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--bg); color: var(--text); font-weight: 600;" on:click={() => (showAnnouncementModal = false)}>Cancel</button>
+        <button class="fungee-btn" style="flex: 1; margin: 0; background: var(--brand); color: #fff;" type="button" on:click={sendAnnouncement} disabled={!announcementMessage.trim()}>Send</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:638:3
+Warn: Unused CSS selector ".meta" (svelte)
+
+  .meta {
+    display: flex;
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:657:3
+Warn: Unused CSS selector ".hint" (svelte)
+
+  .hint {
+    color: var(--brand);
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/dashboard/+page.svelte:691:3
+Warn: Unused CSS selector ".controls-card .join" (svelte)
+
+  .controls-card .join {
+    word-break: break-all;
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/players/+page.svelte:150:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={addOffline}>
+        <h3>Add Offline Player</h3>
+
+        <label for="displayName">Display Name</label>
+        <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" />
+
+        <label for="carValue">Has a car available to drive</label>
+        <select id="carValue" bind:value={carValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="submit" disabled={!displayName}>Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/players/+page.svelte:150:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={addOffline}>
+        <h3>Add Offline Player</h3>
+
+        <label for="displayName">Display Name</label>
+        <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" />
+
+        <label for="carValue">Has a car available to drive</label>
+        <select id="carValue" bind:value={carValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="submit" disabled={!displayName}>Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/players/+page.svelte:149:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showModal}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={addOffline}>
+        <h3>Add Offline Player</h3>
+
+        <label for="displayName">Display Name</label>
+        <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" />
+
+        <label for="carValue">Has a car available to drive</label>
+        <select id="carValue" bind:value={carValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="submit" disabled={!displayName}>Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/players/+page.svelte:149:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showModal}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={addOffline}>
+        <h3>Add Offline Player</h3>
+
+        <label for="displayName">Display Name</label>
+        <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" />
+
+        <label for="carValue">Has a car available to drive</label>
+        <select id="carValue" bind:value={carValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="submit" disabled={!displayName}>Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/players/+page.svelte:177:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={closeEdit} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveEdit}>
+        <h3>Edit Player</h3>
+
+        <label for="editName">Display Name</label>
+        <input id="editName" type="text" bind:value={editName} placeholder="Player name" />
+
+        <label for="editCarValue">Has a car available to drive</label>
+        <select id="editCarValue" bind:value={editCarValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeEdit}>Cancel</button>
+          <button type="submit" disabled={!editName}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/players/+page.svelte:177:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={closeEdit} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveEdit}>
+        <h3>Edit Player</h3>
+
+        <label for="editName">Display Name</label>
+        <input id="editName" type="text" bind:value={editName} placeholder="Player name" />
+
+        <label for="editCarValue">Has a car available to drive</label>
+        <select id="editCarValue" bind:value={editCarValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeEdit}>Cancel</button>
+          <button type="submit" disabled={!editName}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/players/+page.svelte:176:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showEditModal}
+  <div class="modal-backdrop" on:click={closeEdit} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveEdit}>
+        <h3>Edit Player</h3>
+
+        <label for="editName">Display Name</label>
+        <input id="editName" type="text" bind:value={editName} placeholder="Player name" />
+
+        <label for="editCarValue">Has a car available to drive</label>
+        <select id="editCarValue" bind:value={editCarValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeEdit}>Cancel</button>
+          <button type="submit" disabled={!editName}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/players/+page.svelte:176:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showEditModal}
+  <div class="modal-backdrop" on:click={closeEdit} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={saveEdit}>
+        <h3>Edit Player</h3>
+
+        <label for="editName">Display Name</label>
+        <input id="editName" type="text" bind:value={editName} placeholder="Player name" />
+
+        <label for="editCarValue">Has a car available to drive</label>
+        <select id="editCarValue" bind:value={editCarValue} required>
+          <option value="">Select one…</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeEdit}>Cancel</button>
+          <button type="submit" disabled={!editName}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/players/+page.svelte:320:3
+Warn: Unused CSS selector ".modal input[type="checkbox"]" (svelte)
+
+  .modal input[type="checkbox"] {
+    width: auto;
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/print/+page.svelte:195:5
+Warn: Unused CSS selector "body" (svelte)
+
+    body {
+      background: #fff;
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/rules/+page.svelte:132:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={closeModal} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={applyEdit}>
+        <h3>Edit Section</h3>
+        <label class="fungee-label" for="title">Title</label>
+        <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" />
+        <label class="fungee-label" for="body">Body</label>
+        <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" />
+        <div class="fungee-btn-row">
+          <button class="fungee-btn secondary" type="button" on:click={closeModal}>CANCEL</button>
+          <button class="fungee-btn danger" type="button" on:click={remove}>REMOVE</button>
+          <button class="fungee-btn" type="submit">SAVE SECTION</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/rules/+page.svelte:132:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={closeModal} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={applyEdit}>
+        <h3>Edit Section</h3>
+        <label class="fungee-label" for="title">Title</label>
+        <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" />
+        <label class="fungee-label" for="body">Body</label>
+        <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" />
+        <div class="fungee-btn-row">
+          <button class="fungee-btn secondary" type="button" on:click={closeModal}>CANCEL</button>
+          <button class="fungee-btn danger" type="button" on:click={remove}>REMOVE</button>
+          <button class="fungee-btn" type="submit">SAVE SECTION</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/rules/+page.svelte:131:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if editIndex >= 0}
+  <div class="modal-backdrop" on:click={closeModal} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={applyEdit}>
+        <h3>Edit Section</h3>
+        <label class="fungee-label" for="title">Title</label>
+        <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" />
+        <label class="fungee-label" for="body">Body</label>
+        <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" />
+        <div class="fungee-btn-row">
+          <button class="fungee-btn secondary" type="button" on:click={closeModal}>CANCEL</button>
+          <button class="fungee-btn danger" type="button" on:click={remove}>REMOVE</button>
+          <button class="fungee-btn" type="submit">SAVE SECTION</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/rules/+page.svelte:131:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if editIndex >= 0}
+  <div class="modal-backdrop" on:click={closeModal} transition:fade={{ duration: 180 }}>
+    <div class="modal fungee-card" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={applyEdit}>
+        <h3>Edit Section</h3>
+        <label class="fungee-label" for="title">Title</label>
+        <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" />
+        <label class="fungee-label" for="body">Body</label>
+        <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" />
+        <div class="fungee-btn-row">
+          <button class="fungee-btn secondary" type="button" on:click={closeModal}>CANCEL</button>
+          <button class="fungee-btn danger" type="button" on:click={remove}>REMOVE</button>
+          <button class="fungee-btn" type="submit">SAVE SECTION</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/submissions/+page.svelte:72:7
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+    {#each submissions as sub (sub.id)}
+      <li class:incomplete={sub.status === 'INCOMPLETE'} on:click={() => openModal(sub)}>
+        <div class="meta">
+          <span class="team">{sub.team?.name ?? 'Unknown team'}</span>
+          <span class="task">{sub.task?.title ?? ''}</span>
+          <span class="status">{sub.status === 'INCOMPLETE' ? 'REJECTED' : sub.status}</span>
+        </div>
+        <div class="thumb">
+          {#if sub.proofUrl}
+            {#if sub.task?.proofType === 'VIDEO' || sub.proofUrl?.endsWith('.mp4') || sub.proofUrl?.endsWith('.mov')}
+              <img src={`${sub.proofUrl}.thumb.jpg`} alt="Video thumbnail" />
+            {:else}
+              <img src={sub.proofUrl} alt="Submission" />
+            {/if}
+          {/if}
+        </div>
+      </li>
+    {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/submissions/+page.svelte:72:7
+Warn: A11y: Non-interactive element <li> should not be assigned mouse or keyboard event listeners. (svelte)
+    {#each submissions as sub (sub.id)}
+      <li class:incomplete={sub.status === 'INCOMPLETE'} on:click={() => openModal(sub)}>
+        <div class="meta">
+          <span class="team">{sub.team?.name ?? 'Unknown team'}</span>
+          <span class="task">{sub.task?.title ?? ''}</span>
+          <span class="status">{sub.status === 'INCOMPLETE' ? 'REJECTED' : sub.status}</span>
+        </div>
+        <div class="thumb">
+          {#if sub.proofUrl}
+            {#if sub.task?.proofType === 'VIDEO' || sub.proofUrl?.endsWith('.mp4') || sub.proofUrl?.endsWith('.mov')}
+              <img src={`${sub.proofUrl}.thumb.jpg`} alt="Video thumbnail" />
+            {:else}
+              <img src={sub.proofUrl} alt="Submission" />
+            {/if}
+          {/if}
+        </div>
+      </li>
+    {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:511:13
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+          {#if task.order !== 1}
+            <span
+              class="drag-handle"
+              draggable={true}
+              on:dragstart={(e) => handleDragStart(task, e)}
+              on:click|stopPropagation
+              title="Drag to reorder"
+            >
+              <span class="mdi mdi-drag-horizontal"></span>
+            </span>
+          {/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:511:13
+Warn: A11y: <span> with dragstart, click handlers must have an ARIA role (svelte)
+          {#if task.order !== 1}
+            <span
+              class="drag-handle"
+              draggable={true}
+              on:dragstart={(e) => handleDragStart(task, e)}
+              on:click|stopPropagation
+              title="Drag to reorder"
+            >
+              <span class="mdi mdi-drag-horizontal"></span>
+            </span>
+          {/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:490:7
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+    {#each tasks as task (task.id)}
+      <li
+        class:selected={selectedIds.includes(task.id)}
+        class:drag-over={dragOverId === task.id}
+        on:click={(e) => handleTaskClick(task, e)}
+        on:dragover={(e) => handleDragOver(task, e)}
+        on:dragleave={handleDragLeave}
+        on:drop={(e) => handleDrop(task, e)}
+      >
+        <div class="task-main">
+          {#if bulkMode}
+            <input
+              class="task-check"
+              type="checkbox"
+              checked={selectedIds.includes(task.id)}
+              on:click|stopPropagation={() => toggleTask(task.id)}
+            />
+          {/if}
+          <span class="order">{task.order}</span>
+          <span class="title">{task.title}</span>
+          <span class="meta">+{formatPoints(task.points)} · {task.proofType}</span>
+          {#if task.order !== 1}
+            <span
+              class="drag-handle"
+              draggable={true}
+              on:dragstart={(e) => handleDragStart(task, e)}
+              on:click|stopPropagation
+              title="Drag to reorder"
+            >
+              <span class="mdi mdi-drag-horizontal"></span>
+            </span>
+          {/if}
+        </div>
+        <p class="description">{task.description}</p>
+      </li>
+    {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:490:7
+Warn: A11y: Non-interactive element <li> should not be assigned mouse or keyboard event listeners. (svelte)
+    {#each tasks as task (task.id)}
+      <li
+        class:selected={selectedIds.includes(task.id)}
+        class:drag-over={dragOverId === task.id}
+        on:click={(e) => handleTaskClick(task, e)}
+        on:dragover={(e) => handleDragOver(task, e)}
+        on:dragleave={handleDragLeave}
+        on:drop={(e) => handleDrop(task, e)}
+      >
+        <div class="task-main">
+          {#if bulkMode}
+            <input
+              class="task-check"
+              type="checkbox"
+              checked={selectedIds.includes(task.id)}
+              on:click|stopPropagation={() => toggleTask(task.id)}
+            />
+          {/if}
+          <span class="order">{task.order}</span>
+          <span class="title">{task.title}</span>
+          <span class="meta">+{formatPoints(task.points)} · {task.proofType}</span>
+          {#if task.order !== 1}
+            <span
+              class="drag-handle"
+              draggable={true}
+              on:dragstart={(e) => handleDragStart(task, e)}
+              on:click|stopPropagation
+              title="Drag to reorder"
+            >
+              <span class="mdi mdi-drag-horizontal"></span>
+            </span>
+          {/if}
+        </div>
+        <p class="description">{task.description}</p>
+      </li>
+    {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:530:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Task' : 'Add Task'}</h3>
+
+        <label for="title">Title</label>
+        <input id="title" type="text" bind:value={title} placeholder="Title" />
+
+        <label for="description">Description</label>
+        <textarea id="description" bind:value={description} placeholder="Description" />
+
+        <label for="points">Points</label>
+        <input id="points" type="number" step="0.1" bind:value={points} />
+
+        <label for="proofType">Proof Type</label>
+        <select id="proofType" bind:value={proofType}>
+          <option value="PHOTO">Photo</option>
+          <option value="VIDEO">Video</option>
+          <option value="PHOTOS">Photos</option>
+        </select>
+
+        {#if proofType === 'PHOTOS'}
+          <label for="photoCount">Number of Photos (optional)</label>
+          <input id="photoCount" type="number" min="1" bind:value={photoCount} placeholder="e.g., number of other teams" />
+        {/if}
+
+        <label class="fungee-check" style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" bind:checked={delayEnabled} />
+          Delay this task after game start
+        </label>
+
+        {#if delayEnabled}
+          <label for="delayMinutes">Delay (minutes)</label>
+          <input id="delayMinutes" type="number" min="1" bind:value={delayMinutes} />
+        {/if}
+
+        <label for="order">Order</label>
+        <input id="order" type="number" bind:value={order} />
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="button" on:click={saveToDefault} disabled={!title}>Save to Database</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={() => remove(editId)}>Delete</button>
+          {/if}
+          <button type="submit" disabled={!title}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:530:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Task' : 'Add Task'}</h3>
+
+        <label for="title">Title</label>
+        <input id="title" type="text" bind:value={title} placeholder="Title" />
+
+        <label for="description">Description</label>
+        <textarea id="description" bind:value={description} placeholder="Description" />
+
+        <label for="points">Points</label>
+        <input id="points" type="number" step="0.1" bind:value={points} />
+
+        <label for="proofType">Proof Type</label>
+        <select id="proofType" bind:value={proofType}>
+          <option value="PHOTO">Photo</option>
+          <option value="VIDEO">Video</option>
+          <option value="PHOTOS">Photos</option>
+        </select>
+
+        {#if proofType === 'PHOTOS'}
+          <label for="photoCount">Number of Photos (optional)</label>
+          <input id="photoCount" type="number" min="1" bind:value={photoCount} placeholder="e.g., number of other teams" />
+        {/if}
+
+        <label class="fungee-check" style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" bind:checked={delayEnabled} />
+          Delay this task after game start
+        </label>
+
+        {#if delayEnabled}
+          <label for="delayMinutes">Delay (minutes)</label>
+          <input id="delayMinutes" type="number" min="1" bind:value={delayMinutes} />
+        {/if}
+
+        <label for="order">Order</label>
+        <input id="order" type="number" bind:value={order} />
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="button" on:click={saveToDefault} disabled={!title}>Save to Database</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={() => remove(editId)}>Delete</button>
+          {/if}
+          <button type="submit" disabled={!title}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:529:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showModal}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Task' : 'Add Task'}</h3>
+
+        <label for="title">Title</label>
+        <input id="title" type="text" bind:value={title} placeholder="Title" />
+
+        <label for="description">Description</label>
+        <textarea id="description" bind:value={description} placeholder="Description" />
+
+        <label for="points">Points</label>
+        <input id="points" type="number" step="0.1" bind:value={points} />
+
+        <label for="proofType">Proof Type</label>
+        <select id="proofType" bind:value={proofType}>
+          <option value="PHOTO">Photo</option>
+          <option value="VIDEO">Video</option>
+          <option value="PHOTOS">Photos</option>
+        </select>
+
+        {#if proofType === 'PHOTOS'}
+          <label for="photoCount">Number of Photos (optional)</label>
+          <input id="photoCount" type="number" min="1" bind:value={photoCount} placeholder="e.g., number of other teams" />
+        {/if}
+
+        <label class="fungee-check" style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" bind:checked={delayEnabled} />
+          Delay this task after game start
+        </label>
+
+        {#if delayEnabled}
+          <label for="delayMinutes">Delay (minutes)</label>
+          <input id="delayMinutes" type="number" min="1" bind:value={delayMinutes} />
+        {/if}
+
+        <label for="order">Order</label>
+        <input id="order" type="number" bind:value={order} />
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="button" on:click={saveToDefault} disabled={!title}>Save to Database</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={() => remove(editId)}>Delete</button>
+          {/if}
+          <button type="submit" disabled={!title}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:529:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showModal}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Task' : 'Add Task'}</h3>
+
+        <label for="title">Title</label>
+        <input id="title" type="text" bind:value={title} placeholder="Title" />
+
+        <label for="description">Description</label>
+        <textarea id="description" bind:value={description} placeholder="Description" />
+
+        <label for="points">Points</label>
+        <input id="points" type="number" step="0.1" bind:value={points} />
+
+        <label for="proofType">Proof Type</label>
+        <select id="proofType" bind:value={proofType}>
+          <option value="PHOTO">Photo</option>
+          <option value="VIDEO">Video</option>
+          <option value="PHOTOS">Photos</option>
+        </select>
+
+        {#if proofType === 'PHOTOS'}
+          <label for="photoCount">Number of Photos (optional)</label>
+          <input id="photoCount" type="number" min="1" bind:value={photoCount} placeholder="e.g., number of other teams" />
+        {/if}
+
+        <label class="fungee-check" style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" bind:checked={delayEnabled} />
+          Delay this task after game start
+        </label>
+
+        {#if delayEnabled}
+          <label for="delayMinutes">Delay (minutes)</label>
+          <input id="delayMinutes" type="number" min="1" bind:value={delayMinutes} />
+        {/if}
+
+        <label for="order">Order</label>
+        <input id="order" type="number" bind:value={order} />
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          <button type="button" on:click={saveToDefault} disabled={!title}>Save to Database</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={() => remove(editId)}>Delete</button>
+          {/if}
+          <button type="submit" disabled={!title}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:597:15
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+            {#each available as task (task.title)}
+              <li class="select-item" class:expanded={expandedDefault === task.title} on:click={() => toggleDefaultExpand(task)}>
+                <div class="select-row">
+                  <input
+                    type="checkbox"
+                    checked={isSelected(task)}
+                    on:click|stopPropagation={() => toggleDefault(task)}
+                  />
+                  <span class="select-title">{task.title}</span>
+                  <span class="select-meta">+{formatPoints(task.points)} · {task.proofType}</span>
+                </div>
+                {#if expandedDefault === task.title}
+                  <p class="select-description">{task.description}</p>
+                {/if}
+              </li>
+            {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:597:15
+Warn: A11y: Non-interactive element <li> should not be assigned mouse or keyboard event listeners. (svelte)
+            {#each available as task (task.title)}
+              <li class="select-item" class:expanded={expandedDefault === task.title} on:click={() => toggleDefaultExpand(task)}>
+                <div class="select-row">
+                  <input
+                    type="checkbox"
+                    checked={isSelected(task)}
+                    on:click|stopPropagation={() => toggleDefault(task)}
+                  />
+                  <span class="select-title">{task.title}</span>
+                  <span class="select-meta">+{formatPoints(task.points)} · {task.proofType}</span>
+                </div>
+                {#if expandedDefault === task.title}
+                  <p class="select-description">{task.description}</p>
+                {/if}
+              </li>
+            {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:585:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={closeSelect} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Select Tasks</h3>
+
+      {#if defaultTasks.length === 0}
+        <p>Loading default tasks…</p>
+      {:else}
+        {@const available = defaultTasks.filter((d) => !tasks.some((t) => t.title.toLowerCase() === d.title.toLowerCase()))}
+        {#if available.length === 0}
+          <p>All available default tasks are already in this game.</p>
+        {:else}
+          <ul class="select-list">
+            {#each available as task (task.title)}
+              <li class="select-item" class:expanded={expandedDefault === task.title} on:click={() => toggleDefaultExpand(task)}>
+                <div class="select-row">
+                  <input
+                    type="checkbox"
+                    checked={isSelected(task)}
+                    on:click|stopPropagation={() => toggleDefault(task)}
+                  />
+                  <span class="select-title">{task.title}</span>
+                  <span class="select-meta">+{formatPoints(task.points)} · {task.proofType}</span>
+                </div>
+                {#if expandedDefault === task.title}
+                  <p class="select-description">{task.description}</p>
+                {/if}
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      {/if}
+
+      {#if error}<p class="error">{error}</p>{/if}
+
+      <div class="actions">
+        <button type="button" on:click={closeSelect}>Cancel</button>
+        <button type="button" on:click={addSelected} disabled={selectedDefaults.length === 0}>
+          Add {selectedDefaults.length ? `(${selectedDefaults.length})` : ''}
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:585:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={closeSelect} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Select Tasks</h3>
+
+      {#if defaultTasks.length === 0}
+        <p>Loading default tasks…</p>
+      {:else}
+        {@const available = defaultTasks.filter((d) => !tasks.some((t) => t.title.toLowerCase() === d.title.toLowerCase()))}
+        {#if available.length === 0}
+          <p>All available default tasks are already in this game.</p>
+        {:else}
+          <ul class="select-list">
+            {#each available as task (task.title)}
+              <li class="select-item" class:expanded={expandedDefault === task.title} on:click={() => toggleDefaultExpand(task)}>
+                <div class="select-row">
+                  <input
+                    type="checkbox"
+                    checked={isSelected(task)}
+                    on:click|stopPropagation={() => toggleDefault(task)}
+                  />
+                  <span class="select-title">{task.title}</span>
+                  <span class="select-meta">+{formatPoints(task.points)} · {task.proofType}</span>
+                </div>
+                {#if expandedDefault === task.title}
+                  <p class="select-description">{task.description}</p>
+                {/if}
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      {/if}
+
+      {#if error}<p class="error">{error}</p>{/if}
+
+      <div class="actions">
+        <button type="button" on:click={closeSelect}>Cancel</button>
+        <button type="button" on:click={addSelected} disabled={selectedDefaults.length === 0}>
+          Add {selectedDefaults.length ? `(${selectedDefaults.length})` : ''}
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:584:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showSelectModal}
+  <div class="modal-backdrop" on:click={closeSelect} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Select Tasks</h3>
+
+      {#if defaultTasks.length === 0}
+        <p>Loading default tasks…</p>
+      {:else}
+        {@const available = defaultTasks.filter((d) => !tasks.some((t) => t.title.toLowerCase() === d.title.toLowerCase()))}
+        {#if available.length === 0}
+          <p>All available default tasks are already in this game.</p>
+        {:else}
+          <ul class="select-list">
+            {#each available as task (task.title)}
+              <li class="select-item" class:expanded={expandedDefault === task.title} on:click={() => toggleDefaultExpand(task)}>
+                <div class="select-row">
+                  <input
+                    type="checkbox"
+                    checked={isSelected(task)}
+                    on:click|stopPropagation={() => toggleDefault(task)}
+                  />
+                  <span class="select-title">{task.title}</span>
+                  <span class="select-meta">+{formatPoints(task.points)} · {task.proofType}</span>
+                </div>
+                {#if expandedDefault === task.title}
+                  <p class="select-description">{task.description}</p>
+                {/if}
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      {/if}
+
+      {#if error}<p class="error">{error}</p>{/if}
+
+      <div class="actions">
+        <button type="button" on:click={closeSelect}>Cancel</button>
+        <button type="button" on:click={addSelected} disabled={selectedDefaults.length === 0}>
+          Add {selectedDefaults.length ? `(${selectedDefaults.length})` : ''}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:584:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showSelectModal}
+  <div class="modal-backdrop" on:click={closeSelect} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Select Tasks</h3>
+
+      {#if defaultTasks.length === 0}
+        <p>Loading default tasks…</p>
+      {:else}
+        {@const available = defaultTasks.filter((d) => !tasks.some((t) => t.title.toLowerCase() === d.title.toLowerCase()))}
+        {#if available.length === 0}
+          <p>All available default tasks are already in this game.</p>
+        {:else}
+          <ul class="select-list">
+            {#each available as task (task.title)}
+              <li class="select-item" class:expanded={expandedDefault === task.title} on:click={() => toggleDefaultExpand(task)}>
+                <div class="select-row">
+                  <input
+                    type="checkbox"
+                    checked={isSelected(task)}
+                    on:click|stopPropagation={() => toggleDefault(task)}
+                  />
+                  <span class="select-title">{task.title}</span>
+                  <span class="select-meta">+{formatPoints(task.points)} · {task.proofType}</span>
+                </div>
+                {#if expandedDefault === task.title}
+                  <p class="select-description">{task.description}</p>
+                {/if}
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      {/if}
+
+      {#if error}<p class="error">{error}</p>{/if}
+
+      <div class="actions">
+        <button type="button" on:click={closeSelect}>Cancel</button>
+        <button type="button" on:click={addSelected} disabled={selectedDefaults.length === 0}>
+          Add {selectedDefaults.length ? `(${selectedDefaults.length})` : ''}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:630:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={closeImport} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={closeImport}>Close</button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:630:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={closeImport} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={closeImport}>Close</button>
+      </div>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:629:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showImportModal}
+  <div class="modal-backdrop" on:click={closeImport} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={closeImport}>Close</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:629:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showImportModal}
+  <div class="modal-backdrop" on:click={closeImport} transition:fade={{ duration: 180 }}>
+    <div class="modal select-modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Import Tasks from CSV</h3>
+      <p style="margin: 0 0 1rem; color: var(--muted);">
+        Download the template, add your tasks, then upload the CSV.
+      </p>
+      <div class="csv-actions">
+        <button class="fungee-btn" type="button" on:click={downloadGameTemplate} style="width: auto; margin: 0;">
+          Download Template
+        </button>
+        <label class="fungee-btn" for="game-tasks-csv" style="width: auto; margin: 0;">
+          Upload CSV
+        </label>
+        <input id="game-tasks-csv" type="file" accept=".csv,text/csv" on:change={importTasks} />
+      </div>
+      <div class="actions" style="margin-top: 1rem;">
+        <button type="button" on:click={closeImport}>Close</button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:768:3
+Warn: Unused CSS selector ".bulk-points" (svelte)
+
+  .bulk-points {
+    display: flex;
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/tasks/+page.svelte:775:3
+Warn: Unused CSS selector ".bulk-points input" (svelte)
+
+  .bulk-points input {
+    width: 5rem;
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:167:7
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+    {#each teams as team (team.id)}
+      <li on:click={() => openEdit(team)}>
+        <div class="team-name">{team.name ?? 'Unnamed team'}</div>
+        <div class="team-meta">
+          Team Captain: {team.manager?.displayName ?? '—'} · {team.members?.length ?? 0} members
+        </div>
+      </li>
+    {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:167:7
+Warn: A11y: Non-interactive element <li> should not be assigned mouse or keyboard event listeners. (svelte)
+    {#each teams as team (team.id)}
+      <li on:click={() => openEdit(team)}>
+        <div class="team-name">{team.name ?? 'Unnamed team'}</div>
+        <div class="team-meta">
+          Team Captain: {team.manager?.displayName ?? '—'} · {team.members?.length ?? 0} members
+        </div>
+      </li>
+    {/each}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:179:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Team' : 'Add Team'}</h3>
+
+        <label for="team-name">Team Name</label>
+        <input id="team-name" type="text" bind:value={name} placeholder="Optional" />
+
+        <label for="manager">Team Captain</label>
+        <select id="manager" bind:value={managerId}>
+          <option value="">Select Team Captain…</option>
+          {#each players.filter((p) => p.type === 'APP' && isAvailable(p)) as player (player.id)}
+            <option value={player.id}>{player.displayName}</option>
+          {/each}
+        </select>
+
+        <p class="label">Members</p>
+        <div class="members">
+          {#each players.filter(isAvailable) as player (player.id)}
+            <label>
+              <input type="checkbox" value={player.id} bind:group={selectedMembers} />
+              {player.displayName} ({player.type})
+            </label>
+          {/each}
+        </div>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={removeTeam}>Delete</button>
+          {/if}
+          <button type="submit" disabled={!managerId}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:179:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Team' : 'Add Team'}</h3>
+
+        <label for="team-name">Team Name</label>
+        <input id="team-name" type="text" bind:value={name} placeholder="Optional" />
+
+        <label for="manager">Team Captain</label>
+        <select id="manager" bind:value={managerId}>
+          <option value="">Select Team Captain…</option>
+          {#each players.filter((p) => p.type === 'APP' && isAvailable(p)) as player (player.id)}
+            <option value={player.id}>{player.displayName}</option>
+          {/each}
+        </select>
+
+        <p class="label">Members</p>
+        <div class="members">
+          {#each players.filter(isAvailable) as player (player.id)}
+            <label>
+              <input type="checkbox" value={player.id} bind:group={selectedMembers} />
+              {player.displayName} ({player.type})
+            </label>
+          {/each}
+        </div>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={removeTeam}>Delete</button>
+          {/if}
+          <button type="submit" disabled={!managerId}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:178:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showModal}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Team' : 'Add Team'}</h3>
+
+        <label for="team-name">Team Name</label>
+        <input id="team-name" type="text" bind:value={name} placeholder="Optional" />
+
+        <label for="manager">Team Captain</label>
+        <select id="manager" bind:value={managerId}>
+          <option value="">Select Team Captain…</option>
+          {#each players.filter((p) => p.type === 'APP' && isAvailable(p)) as player (player.id)}
+            <option value={player.id}>{player.displayName}</option>
+          {/each}
+        </select>
+
+        <p class="label">Members</p>
+        <div class="members">
+          {#each players.filter(isAvailable) as player (player.id)}
+            <label>
+              <input type="checkbox" value={player.id} bind:group={selectedMembers} />
+              {player.displayName} ({player.type})
+            </label>
+          {/each}
+        </div>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={removeTeam}>Delete</button>
+          {/if}
+          <button type="submit" disabled={!managerId}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:178:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showModal}
+  <div class="modal-backdrop" on:click={close} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={save}>
+        <h3>{editId ? 'Edit Team' : 'Add Team'}</h3>
+
+        <label for="team-name">Team Name</label>
+        <input id="team-name" type="text" bind:value={name} placeholder="Optional" />
+
+        <label for="manager">Team Captain</label>
+        <select id="manager" bind:value={managerId}>
+          <option value="">Select Team Captain…</option>
+          {#each players.filter((p) => p.type === 'APP' && isAvailable(p)) as player (player.id)}
+            <option value={player.id}>{player.displayName}</option>
+          {/each}
+        </select>
+
+        <p class="label">Members</p>
+        <div class="members">
+          {#each players.filter(isAvailable) as player (player.id)}
+            <label>
+              <input type="checkbox" value={player.id} bind:group={selectedMembers} />
+              {player.displayName} ({player.type})
+            </label>
+          {/each}
+        </div>
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={close}>Cancel</button>
+          {#if editId}
+            <button type="button" class="danger" on:click={removeTeam}>Delete</button>
+          {/if}
+          <button type="submit" disabled={!managerId}>Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:220:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={closeAuto} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={autoCreate}>
+        <h3>Auto-Create Teams</h3>
+
+        <p style="margin: 0 0 0.75rem; color: var(--muted);">
+          Each team will get one app player as Team Captain, at least one driver, and the rest will be distributed.
+        </p>
+
+        {#if players.length > 0}
+          <p style="margin: 0 0 0.75rem;">
+            <strong>{players.length} players</strong> — we recommend <strong>{suggestedTeamCount(players.length)} teams</strong>
+            ({players.length > 0 && suggestedTeamCount(players.length) > 0
+              ? `about ${Math.round(players.length / suggestedTeamCount(players.length))} per team`
+              : ''})
+          </p>
+        {/if}
+
+        <label for="auto-count">Number of teams</label>
+        <input id="auto-count" type="number" min="1" bind:value={autoCount} placeholder="How many teams?" />
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeAuto}>Cancel</button>
+          <button type="submit" disabled={!autoCount || Number(autoCount) < 1}>Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:220:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={closeAuto} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={autoCreate}>
+        <h3>Auto-Create Teams</h3>
+
+        <p style="margin: 0 0 0.75rem; color: var(--muted);">
+          Each team will get one app player as Team Captain, at least one driver, and the rest will be distributed.
+        </p>
+
+        {#if players.length > 0}
+          <p style="margin: 0 0 0.75rem;">
+            <strong>{players.length} players</strong> — we recommend <strong>{suggestedTeamCount(players.length)} teams</strong>
+            ({players.length > 0 && suggestedTeamCount(players.length) > 0
+              ? `about ${Math.round(players.length / suggestedTeamCount(players.length))} per team`
+              : ''})
+          </p>
+        {/if}
+
+        <label for="auto-count">Number of teams</label>
+        <input id="auto-count" type="number" min="1" bind:value={autoCount} placeholder="How many teams?" />
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeAuto}>Cancel</button>
+          <button type="submit" disabled={!autoCount || Number(autoCount) < 1}>Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:219:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showAutoModal}
+  <div class="modal-backdrop" on:click={closeAuto} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={autoCreate}>
+        <h3>Auto-Create Teams</h3>
+
+        <p style="margin: 0 0 0.75rem; color: var(--muted);">
+          Each team will get one app player as Team Captain, at least one driver, and the rest will be distributed.
+        </p>
+
+        {#if players.length > 0}
+          <p style="margin: 0 0 0.75rem;">
+            <strong>{players.length} players</strong> — we recommend <strong>{suggestedTeamCount(players.length)} teams</strong>
+            ({players.length > 0 && suggestedTeamCount(players.length) > 0
+              ? `about ${Math.round(players.length / suggestedTeamCount(players.length))} per team`
+              : ''})
+          </p>
+        {/if}
+
+        <label for="auto-count">Number of teams</label>
+        <input id="auto-count" type="number" min="1" bind:value={autoCount} placeholder="How many teams?" />
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeAuto}>Cancel</button>
+          <button type="submit" disabled={!autoCount || Number(autoCount) < 1}>Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/gm/[gameId]/teams/+page.svelte:219:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showAutoModal}
+  <div class="modal-backdrop" on:click={closeAuto} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <form on:submit|preventDefault={autoCreate}>
+        <h3>Auto-Create Teams</h3>
+
+        <p style="margin: 0 0 0.75rem; color: var(--muted);">
+          Each team will get one app player as Team Captain, at least one driver, and the rest will be distributed.
+        </p>
+
+        {#if players.length > 0}
+          <p style="margin: 0 0 0.75rem;">
+            <strong>{players.length} players</strong> — we recommend <strong>{suggestedTeamCount(players.length)} teams</strong>
+            ({players.length > 0 && suggestedTeamCount(players.length) > 0
+              ? `about ${Math.round(players.length / suggestedTeamCount(players.length))} per team`
+              : ''})
+          </p>
+        {/if}
+
+        <label for="auto-count">Number of teams</label>
+        <input id="auto-count" type="number" min="1" bind:value={autoCount} placeholder="How many teams?" />
+
+        {#if error}<p class="error">{error}</p>{/if}
+
+        <div class="actions">
+          <button type="button" on:click={closeAuto}>Cancel</button>
+          <button type="submit" disabled={!autoCount || Number(autoCount) < 1}>Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/+page.svelte:115:75
+Error: Unexpected token (svelte)
+          {#if missedTasks.length}
+            <p class="missed"><strong>Missed:</strong> {missedTasks.map((t: any) => ` #${t.order} ${t.title}`).join(',')}</p>
+          {:else}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/+page.svelte:115:75
+Error: Unexpected token (ts)
+          {#if missedTasks.length}
+            <p class="missed"><strong>Missed:</strong> {missedTasks.map((t: any) => ` #${t.order} ${t.title}`).join(',')}</p>
+          {:else}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/lobby/+page.svelte:156:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={markAnnouncementRead} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Announcement</h3>
+      <p style="white-space: pre-wrap;">{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/lobby/+page.svelte:156:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={markAnnouncementRead} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Announcement</h3>
+      <p style="white-space: pre-wrap;">{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/lobby/+page.svelte:155:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showAnnouncement}
+  <div class="modal-backdrop" on:click={markAnnouncementRead} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Announcement</h3>
+      <p style="white-space: pre-wrap;">{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/lobby/+page.svelte:155:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showAnnouncement}
+  <div class="modal-backdrop" on:click={markAnnouncementRead} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Announcement</h3>
+      <p style="white-space: pre-wrap;">{announcementMessage}</p>
+      <button class="fungee-btn" style="width: 100%;" on:click={markAnnouncementRead}>OK</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/tasks/+page.svelte:406:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>You are the Team Captain</h3>
+      <p>
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
+      </p>
+      <p>
+        Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 1.25rem; font-weight: 700; color: var(--brand); text-align: center; margin: 0 0 1rem;">
+        After taking a photo, tap <strong>Submit</strong>!
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showManagerInfo = false; askPushPermission(); }}>GOT IT</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/tasks/+page.svelte:406:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>You are the Team Captain</h3>
+      <p>
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
+      </p>
+      <p>
+        Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 1.25rem; font-weight: 700; color: var(--brand); text-align: center; margin: 0 0 1rem;">
+        After taking a photo, tap <strong>Submit</strong>!
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showManagerInfo = false; askPushPermission(); }}>GOT IT</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/tasks/+page.svelte:405:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showManagerInfo}
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>You are the Team Captain</h3>
+      <p>
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
+      </p>
+      <p>
+        Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 1.25rem; font-weight: 700; color: var(--brand); text-align: center; margin: 0 0 1rem;">
+        After taking a photo, tap <strong>Submit</strong>!
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showManagerInfo = false; askPushPermission(); }}>GOT IT</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/tasks/+page.svelte:405:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showManagerInfo}
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>You are the Team Captain</h3>
+      <p>
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
+      </p>
+      <p>
+        Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 1.25rem; font-weight: 700; color: var(--brand); text-align: center; margin: 0 0 1rem;">
+        After taking a photo, tap <strong>Submit</strong>!
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showManagerInfo = false; askPushPermission(); }}>GOT IT</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/tasks/+page.svelte:429:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" transition:fade={{ duration: 180 }} on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Enable Notifications?</h3>
+      <p>
+        Fungee-Hunt can send your phone a notification when a bonus task appears or if a submission is rejected, even when the game is in the background.
+      </p>
+      <p>
+        Tap <strong>OK</strong> below and then allow notifications when your browser asks.
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>OK</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/tasks/+page.svelte:429:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" transition:fade={{ duration: 180 }} on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Enable Notifications?</h3>
+      <p>
+        Fungee-Hunt can send your phone a notification when a bonus task appears or if a submission is rejected, even when the game is in the background.
+      </p>
+      <p>
+        Tap <strong>OK</strong> below and then allow notifications when your browser asks.
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>OK</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/tasks/+page.svelte:428:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showPushPrompt}
+  <div class="modal-backdrop" transition:fade={{ duration: 180 }} on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Enable Notifications?</h3>
+      <p>
+        Fungee-Hunt can send your phone a notification when a bonus task appears or if a submission is rejected, even when the game is in the background.
+      </p>
+      <p>
+        Tap <strong>OK</strong> below and then allow notifications when your browser asks.
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>OK</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/tasks/+page.svelte:428:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showPushPrompt}
+  <div class="modal-backdrop" transition:fade={{ duration: 180 }} on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>Enable Notifications?</h3>
+      <p>
+        Fungee-Hunt can send your phone a notification when a bonus task appears or if a submission is rejected, even when the game is in the background.
+      </p>
+      <p>
+        Tap <strong>OK</strong> below and then allow notifications when your browser asks.
+      </p>
+      <button class="fungee-btn" style="width: 100%;" on:click={() => { showPushPrompt = false; localStorage.setItem(`pushPrompt:${code}`, 'true'); subscribePush(); }}>OK</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/team/+page.svelte:139:5
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>You are the Team Captain</h3>
+      <p>
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
+      </p>
+      <p>
+        Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--muted); text-align: center;">
+        After taking a photo, tap <strong>Submit</strong>.
+      </p>
+      <button class="fungee-btn" style="width: 100%; margin-top: 1rem;" on:click={() => (showManagerInfo = false)}>GOT IT</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/team/+page.svelte:139:5
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>You are the Team Captain</h3>
+      <p>
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
+      </p>
+      <p>
+        Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--muted); text-align: center;">
+        After taking a photo, tap <strong>Submit</strong>.
+      </p>
+      <button class="fungee-btn" style="width: 100%; margin-top: 1rem;" on:click={() => (showManagerInfo = false)}>GOT IT</button>
+    </div>
+  </div>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/team/+page.svelte:138:3
+Warn: A11y: visible, non-interactive elements with an on:click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as <button type="button"> or <a> might be more appropriate. See https://svelte.dev/docs/accessibility-warnings#a11y-click-events-have-key-events for more details. (svelte)
+{#if showManagerInfo}
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>You are the Team Captain</h3>
+      <p>
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
+      </p>
+      <p>
+        Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--muted); text-align: center;">
+        After taking a photo, tap <strong>Submit</strong>.
+      </p>
+      <button class="fungee-btn" style="width: 100%; margin-top: 1rem;" on:click={() => (showManagerInfo = false)}>GOT IT</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/play/[code]/team/+page.svelte:138:3
+Warn: A11y: <div> with click handler must have an ARIA role (svelte)
+{#if showManagerInfo}
+  <div class="modal-backdrop" on:click={() => (showManagerInfo = false)} transition:fade={{ duration: 180 }}>
+    <div class="modal" on:click|stopPropagation in:scale={{ duration: 220, start: 0.95 }}>
+      <h3>You are the Team Captain</h3>
+      <p>
+        As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
+      </p>
+      <p>
+        Make sure your phone is charged and ready once the game starts. Good luck!
+      </p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
+        <span class="mdi mdi-camera"></span>
+        <span class="mdi mdi-arrow-right"></span>
+        <span class="mdi mdi-send"></span>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--muted); text-align: center;">
+        After taking a photo, tap <strong>Submit</strong>.
+      </p>
+      <button class="fungee-btn" style="width: 100%; margin-top: 1rem;" on:click={() => (showManagerInfo = false)}>GOT IT</button>
+    </div>
+  </div>
+{/if}
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/view/[code]/+page.svelte:421:50
+Error: Unexpected token
+
+If you expect this syntax to work, here are some suggestions: 
+If you use typescript with `svelte-preprocess`, did you add `lang="ts"` to your `script` tag? 
+Did you setup a `svelte.config.js`? 
+See https://github.com/sveltejs/language-tools/tree/master/docs#using-with-preprocessors for more info. (svelte)
+                  <span class="missed">
+                    Missed: {data.tasks.filter((t: any) => !(myTeam.completedTaskIds ?? []).includes(t.id)).map((t: any) => t.title).join(', ')}
+                  </span>
+
+
+/home/runner/work/FungeeHunt/FungeeHunt/packages/web/src/routes/view/[code]/+page.svelte:421:50
+Error: Unexpected token (ts)
+                  <span class="missed">
+                    Missed: {data.tasks.filter((t: any) => !(myTeam.completedTaskIds ?? []).includes(t.id)).map((t: any) => t.title).join(', ')}
+                  </span>
+
+
+====================================
+svelte-check found 4 errors and 116 warnings in 20 files
+npm error Lifecycle script `check` failed with error:
+npm error code 1
+npm error path /home/runner/work/FungeeHunt/FungeeHunt/packages/web
+npm error workspace @fungeehunt/web@0.1.0
+npm error location /home/runner/work/FungeeHunt/FungeeHunt/packages/web
+npm error command failed
+npm error command sh -c svelte-kit sync && svelte-check
+
+Error: Process completed with exit code 1.

@@ -6,7 +6,7 @@
   import { io } from 'socket.io-client';
   import { formatPoints } from '$lib/format';
 
-  const code = $page.params.code;
+  const code = $page.params.code ?? '';
 
   let state: any = null;
   let newName = '';
