@@ -250,6 +250,7 @@ npm run build --workspace=@fungeehunt/web
 | `PG_PORT` | PostgreSQL port (defaults to 5432) |
 | `PG_DATABASE` | PostgreSQL database name |
 | `UPLOAD_DIR` | Where player uploads are stored |
+| `PUBLIC_URL` | Optional. Public URL of this deployment, e.g. `https://fungee.rdagitz.net`. Used by emails for links. If omitted, the URL from the create-game request is stored per-game |
 | `WEB_UI` | Port the server listens on |
 | `GMAIL_CLIENT_ID` | Optional. Google OAuth client ID for Gmail sending; when set (with the secret below), the Admin → Settings "Connect with Gmail" flow works without entering credentials in the UI |
 | `GMAIL_CLIENT_SECRET` | Optional. Google OAuth client secret for Gmail sending |
