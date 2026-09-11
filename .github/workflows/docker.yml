@@ -10,6 +10,7 @@ on:
     paths-ignore:
       # Docs, samples, and repo meta that never reach the image
       - '**.md'
+      - 'docs/**'
       - 'docker-compose.yml'
       - '*.xml'
       - 'nginx/**'

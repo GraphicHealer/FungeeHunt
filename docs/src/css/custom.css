@@ -1,0 +1,27 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima documentation: https://infima.dev/
+ */
+
+:root {
+  --ifm-color-primary: #0366d6;
+  --ifm-color-primary-dark: #024ea4;
+  --ifm-color-primary-darker: #003b7d;
+  --ifm-color-primary-darkest: #002855;
+  --ifm-color-primary-light: #4a9eff;
+  --ifm-color-primary-lighter: #80baff;
+  --ifm-color-primary-lightest: #b7d7ff;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(3, 102, 214, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #58a6ff;
+  --ifm-color-primary-dark: #1f6feb;
+  --ifm-color-primary-darker: #1158c7;
+  --ifm-color-primary-darkest: #0d419c;
+  --ifm-color-primary-light: #79c0ff;
+  --ifm-color-primary-lighter: #a5d6ff;
+  --ifm-color-primary-lightest: #cae8ff;
+  --docusaurus-highlighted-code-line-bg: rgba(88, 166, 255, 0.15);
+}

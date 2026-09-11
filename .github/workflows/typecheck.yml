@@ -9,6 +9,7 @@ on:
       - dev
     paths-ignore:
       - '**.md'
+      - 'docs/**'
       - 'docker-compose.yml'
       - '*.xml'
       - 'nginx/**'
