@@ -79,6 +79,9 @@ router.get('/email/callback', async (req, res) => {
   if (!code || !state || !pendingOauthState || pendingOauthState.state !== state) {
     return res.redirect('/admin/settings?email=error');
   }
+  if (Date.now() - pendingOauthState.createdAt > 5 * 60 * 1000) {
+    return res.redirect('/admin/settings?email=expired');
+  }
   pendingOauthState = null;
 
   try {

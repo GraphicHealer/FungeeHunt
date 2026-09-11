@@ -171,11 +171,16 @@
     input.value = '';
   }
 
+  function reconnectGmail() {
+    window.location.href = `/api/gm/settings/email/connect?key=${encodeURIComponent(token())}`;
+  }
+
   onMount(async () => {
     const emailResult = $page.url.searchParams.get('email');
     if (emailResult) {
       if (emailResult === 'connected') toast.add('Gmail connected', 'success');
       else if (emailResult === 'denied') toast.add('Gmail access was denied', 'error');
+      else if (emailResult === 'expired') toast.add('Gmail connect link expired; try again', 'error');
       else toast.add('Gmail connect failed', 'error');
       const u = new URL($page.url);
       u.searchParams.delete('email');
@@ -278,8 +283,15 @@
             Email is not configured.
           {/if}
         </p>
+        {#if settings.emailStatus?.gmailConfigured}
+          <div class="csv-actions" style="gap: 0.75rem;">
+            <button class="fungee-btn" type="button" on:click={reconnectGmail} style="width: auto; margin: 0;">
+              {settings.emailStatus?.gmailConnected ? 'RECONNECT GMAIL' : 'CONNECT GMAIL'}
+            </button>
+          </div>
+        {/if}
         {#if settings.emailStatus?.smtpConfigured || settings.emailStatus?.gmailConnected}
-          <div class="csv-actions">
+          <div class="csv-actions" style="margin-top: 0.75rem; gap: 0.75rem;">
             <input type="email" bind:value={emailTestTo} placeholder="Send a test email to…" style="max-width: 20rem;" />
             <button class="fungee-btn" type="button" on:click={sendTestEmail} disabled={!emailTestTo} style="width: auto; margin: 0;">SEND TEST</button>
           </div>
