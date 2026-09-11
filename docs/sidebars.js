@@ -17,7 +17,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Deployment',
-      items: ['deployment/docker', 'deployment/unraid'],
+      items: ['deployment/docker', 'deployment/unraid', 'deployment/env'],
     },
   ],
 };
