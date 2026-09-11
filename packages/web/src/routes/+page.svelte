@@ -50,6 +50,16 @@
   </div>
 </main>
 
+<a
+  class="github-corner"
+  href="https://github.com/GraphicHealer/FungeeHunt"
+  target="_blank"
+  rel="noreferrer"
+  aria-label="View Fungee-Hunt on GitHub"
+>
+  <span class="mdi mdi-github" aria-hidden="true"></span>
+</a>
+
 <style>
   .topbar {
     position: fixed;
@@ -111,5 +121,34 @@
     text-transform: uppercase;
     padding: 0.75rem 1rem;
     margin-bottom: 1.5rem;
+  }
+
+  .github-corner {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    transition: color 0.15s, border-color 0.15s, transform 0.1s;
+    z-index: 1000;
+  }
+
+  .github-corner:hover {
+    color: var(--brand);
+    border-color: var(--brand);
+    transform: scale(1.05);
+  }
+
+  .github-corner .mdi {
+    font-size: 1.75rem;
   }
 </style>
