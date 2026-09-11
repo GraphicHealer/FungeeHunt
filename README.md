@@ -2,6 +2,8 @@
 
 A self-hosted scavenger-hunt platform for groups, built for phones, projectors, and everything in between. One Game Master runs the show; players join with a simple code, complete tasks, and prove it with photos or videos. A live viewer keeps everyone watching the action.
 
+📚 **Full documentation: [docs.fungeehunt.com](https://docs.fungeehunt.com)**
+
 ## Who it is for
 
 - **Game Master** — creates the game, sets the rules, picks the tasks, manages players and teams, then starts the clock and reviews submissions.
@@ -55,93 +57,23 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 - One Docker image with the app and a Compose file that includes PostgreSQL
 - Recap video music by **Kevin MacLeod** (incompetech.com) — **do not redistribute the music from this repo; get it from https://incompetech.com/music/royalty-free/music.html**
 
-## Quick start on Unraid
+## Quick start
 
-Copy `my-fungee-hunt.xml` into the Unraid Docker user templates folder:
-
-```text
-/boot/config/plugins/dockerMan/templates-user/my-fungee-hunt.xml
-```
-
-After placing the file, refresh the Docker page in the Unraid web UI. Fungee-Hunt will appear under **User Templates**. You can then add it and fill in the `PG_*` variables to point at your Postgres container.
-
-## Quick start with Docker
-
-Review the defaults in `docker-compose.yml`, then run:
+The fastest way to run Fungee-Hunt is with Docker Compose:
 
 ```powershell
-docker compose up
-```
-
-On first run, deploy the Prisma migrations:
-
-```powershell
+docker compose up -d
 docker compose exec fungee-hunt npm run db:migrate
 ```
 
-The app will be available at `http://localhost:3000`.
+Then open `http://localhost:3000` and log in with the `GM_PASSPHRASE` value (default is `changeme`).
 
-To log in as the Game Master, use the `GM_PASSPHRASE` value (default is `changeme`).
+For full deployment options, environment variables, and Gmail setup, see the documentation:
 
-You can also run the pre-built image directly if you already have a Postgres database available:
-
-```powershell
-docker run -p 3000:3000 `
-  -e GM_PASSPHRASE=changeme `
-  -e PG_USER=fungeehunt `
-  -e PG_PASS=changeme `
-  -e PG_HOST=host.docker.internal `
-  -e PG_DATABASE=fungeehunt `
-  -e WEB_UI=3000 `
-  -e UPLOAD_DIR=/data/uploads `
-  -e LOG_LEVEL=debug `
-  -e TZ=America/New_York `
-  -v uploads_data:/data/uploads `
-  ghcr.io/graphichealer/fungeehunt:latest
-```
-
-## How to play
-
-### As the Game Master
-
-1. Open the app and click **Game Master Login**.
-2. Enter your passphrase and create a new game. The wizard lets you set the date, time, return bonus, food drive, and how many tasks to use.
-3. Build your task list manually, import a CSV, or select from the default library.
-4. Add or import players, then open **Teams** and click **AUTO-CREATE TEAMS**. Every team will get one Team Captain and one driver.
-5. When you are ready, click **START** on the dashboard. The clock starts, the code goes live, and Team Captains see a quick welcome.
-6. Use the **SPECTATOR** dropdown in the dashboard top bar to pair a TV or projector, or open the public viewer.
-7. Use the **ANNOUNCE** button to send pop-up messages to teams or captains during the game.
-8. Review incoming submissions from the dashboard grid and approve or reject them. If the game is in automatic approval mode, submissions are accepted as soon as they arrive.
-9. Click **END** when the time is up.
-10. After the game, you can render a recap video and browse the archive.
-
-### As a player
-
-1. Open `/play/{CODE}` (or the join link).
-2. Enter your display name and whether you have a car.
-3. Wait for the Game Master to start the game.
-4. Browse your task list and complete challenges. The first task is always the `Team Photo`.
-5. Watch the public viewer to see how your team is doing.
-
-### As a Team Captain
-
-When the game starts, the app will show you a quick popup explaining your role. Your team shares the same task list, so focus on coordinating who does what and getting everyone back before the return-time window closes.
-
-### As a spectator
-
-Open `/spectator` on the display to get a 6-digit pairing code, then have the Game Master pair it from the dashboard. Once paired, `/view/{CODE}` shows the live scoreboard, countdown, and the most recent photos for that game. It is designed for TVs and projectors.
-
-## Customizing the task list
-
-Default tasks can be managed in **System Settings**. You can download the current list as a CSV, edit it in any spreadsheet, and upload it back. For a single game, use **Import Tasks** on the GM dashboard or in the GM Tasks page. You can also save any task from the GM task editor back to the default library with the **Save to Database** button.
-
-The CSV columns are:
-
-```
-title, description, points, proofType, photoCount, category
-```
-
-`proofType` can be `PHOTO`, `PHOTOS`, or `VIDEO`. `photoCount` is optional and only used for `PHOTOS` tasks.
+- [Docker & Compose](https://docs.fungeehunt.com/docs/deployment/docker)
+- [Unraid template](https://docs.fungeehunt.com/docs/deployment/unraid)
+- [Environment variables](https://docs.fungeehunt.com/docs/deployment/env)
+- [Email setup](https://docs.fungeehunt.com/docs/admin/email)
 
 ## Local development
 
@@ -158,31 +90,13 @@ npm install
 
 ### 2. Set up environment
 
-```powershell
-cp .env.example .env
-```
-
-Edit `.env` for local dev:
-
-```text
-GM_PASSPHRASE=your-secret-gm-passphrase
-PG_USER=fungeehunt
-PG_PASS=your-local-postgres-password
-PG_HOST=localhost
-PG_DATABASE=fungeehunt
-WEB_UI=3000
-UPLOAD_DIR=./uploads
-```
-
-Create the uploads directory:
+Create a `.env` file in the repo root with the required variables and create the uploads directory. See the [environment variables reference](https://docs.fungeehunt.com/docs/deployment/env) for the full list.
 
 ```powershell
 mkdir uploads
 ```
 
 ### 3. Run Prisma migrations
-
-The `PG_*` variables are used to build the connection string automatically.
 
 ```powershell
 npm run db:migrate
@@ -195,7 +109,7 @@ npm run db:generate
 npm run dev --workspace=@fungeehunt/server
 ```
 
-The API runs on `http://localhost:3000` and auto-reloads on changes.
+The API runs on `http://localhost:3000`.
 
 ### 5. Start the web app
 
@@ -233,63 +147,10 @@ npm run build --workspace=@fungeehunt/web
 ├── packages/server   # Express + Prisma + Socket.io API
 ├── packages/web      # SvelteKit PWA frontend
 ├── packages/shared   # Shared TypeScript types
+├── docs              # Docusaurus documentation site
 ├── docker-compose.yml
 └── Dockerfile
 ```
-
-## Important environment variables
-
-| Variable | Purpose |
-| --- | --- |
-| `GM_PASSPHRASE` | Passphrase used to log in as Game Master |
-| `SESSION_SECRET` | Optional. Secret for signing GM/player tokens; leave unset to auto-generate one on first boot (stored in the database) |
-| `TRUST_PROXY` | Optional. Number of reverse proxies in front of the app so rate limiting sees real client IPs (defaults to 0) |
-| `PG_USER` | PostgreSQL user |
-| `PG_PASS` | PostgreSQL password |
-| `PG_HOST` | PostgreSQL host |
-| `PG_PORT` | PostgreSQL port (defaults to 5432) |
-| `PG_DATABASE` | PostgreSQL database name |
-| `UPLOAD_DIR` | Where player uploads are stored |
-| `PUBLIC_URL` | Optional. Public URL of this deployment, e.g. `https://fungee.rdagitz.net`. Used by emails for links. If omitted, the URL from the create-game request is stored per-game |
-| `WEB_UI` | Port the server listens on |
-| `GMAIL_CLIENT_ID` | Optional. Google OAuth client ID for Gmail sending; when set (with the secret below), the Admin → Settings "Connect with Gmail" flow works without entering credentials in the UI |
-| `GMAIL_CLIENT_SECRET` | Optional. Google OAuth client secret for Gmail sending |
-| `SMTP_HOST` | Optional. SMTP server host; when set with `SMTP_PORT` and `SMTP_FROM`, email is sent via SMTP instead of Gmail |
-| `SMTP_PORT` | Optional. SMTP server port (e.g. 465 or 587) |
-| `SMTP_USER` | Optional. SMTP username |
-| `SMTP_PASS` | Optional. SMTP password |
-| `SMTP_FROM` | Optional. From address |
-| `SMTP_SECURE` | Optional. `true` for implicit TLS (port 465), `false` for STARTTLS (defaults to true) |
-
-### Email setup
-
-Email is configured entirely server-side via environment variables — there are no UI controls for it. If `SMTP_HOST`, `SMTP_PORT`, and `SMTP_FROM` are set, all mail is sent via SMTP. Otherwise, if `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET` are set, mail is sent through a connected Gmail account.
-
-#### Gmail OAuth (recommended)
-
-Create the Google OAuth credentials once, then connect the sending account:
-
-1. Go to [console.cloud.google.com](https://console.cloud.google.com) and create a project (or pick an existing one).
-2. **APIs & Services → Library** → search for "Gmail API" → **Enable**.
-3. **APIs & Services → OAuth consent screen** → choose **External**, fill in the app name and your email. On the **Scopes** step, add the scope `https://mail.google.com/` (full Gmail access — needed to send mail). On **Test users**, add the Gmail address you'll send from (e.g. `fungeehunt@gmail.com`) — while the app is in "Testing" mode only listed test users can complete the flow.
-4. **APIs & Services → Credentials** → **Create Credentials → OAuth client ID** → Application type: **Web application** → under **Authorized redirect URIs** add:
-   `https://<your-host>/api/gm/settings/email/callback`
-   (use the exact public URL of your deployment, including the port if non-standard).
-5. Copy the **Client ID** and **Client Secret** into your environment as `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET`, then restart the container.
-6. Open `https://<your-host>/admin` and log in — a **"Gmail OAuth detected"** prompt appears automatically. Click **YES, CONNECT** and sign in as the sending account.
-7. The resulting refresh token and account address are stored in the database — no further action needed, and they survive restarts.
-
-If you ever need to trigger the connect flow manually (e.g. you dismissed the prompt), visit:
-
-```
-https://<your-host>/api/gm/settings/email/connect?key=<admin GM token>
-```
-
-(the admin token is the `gmToken` value in your browser's localStorage while logged in to `/admin`).
-
-#### SMTP (alternative)
-
-Set `SMTP_HOST`, `SMTP_PORT`, and `SMTP_FROM` (plus `SMTP_USER`/`SMTP_PASS`/`SMTP_SECURE` as needed). When a complete SMTP config exists it is always used in preference to Gmail.
 
 ## Music attribution
 
