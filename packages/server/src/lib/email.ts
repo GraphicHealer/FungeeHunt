@@ -1,6 +1,30 @@
 import nodemailer from 'nodemailer';
 import { db } from '../db/client';
 import { config } from '../config';
+import { logger } from './logger';
+
+/**
+ * In-memory per-recipient email rate limiter.
+ * Prevents one actor from using repeated game creation to spam an arbitrary address.
+ * For a multi-replica deployment this would need Redis; for self-hosted single-container it's fine.
+ */
+const EMAIL_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const EMAIL_RATE_LIMIT_MAX = 10;
+const emailAttempts = new Map<string, number[]>();
+
+function checkEmailRateLimit(to: string) {
+  const now = Date.now();
+  const recipients = to.split(',').map((a) => a.trim().toLowerCase()).filter(Boolean);
+  for (const recipient of recipients) {
+    const history = emailAttempts.get(recipient) ?? [];
+    const recent = history.filter((t) => now - t < EMAIL_RATE_LIMIT_WINDOW_MS);
+    if (recent.length >= EMAIL_RATE_LIMIT_MAX) {
+      throw new Error(`Email rate limit exceeded for ${recipient}`);
+    }
+    recent.push(now);
+    emailAttempts.set(recipient, recent);
+  }
+}
 
 type SmtpConfig = { host: string; port: number; user?: string; pass?: string; from: string; secure: boolean };
 
@@ -134,6 +158,7 @@ export async function sendGameDeleteWarningEmail(game: { name: string; code: str
 }
 
 export async function sendEmail(to: string, subject: string, text: string, html?: string) {
+  checkEmailRateLimit(to);
   const backend = await emailBackend();
   if (!backend) throw new Error('Email is not configured');
 

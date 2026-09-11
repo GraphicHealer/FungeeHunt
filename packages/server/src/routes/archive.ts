@@ -1,16 +1,21 @@
 import { Router } from 'express';
 import { db } from '../db/client';
+import { getClientIp, recordFailure } from '../lib/ipBan';
 
 const router = Router({ mergeParams: true });
 
 router.get('/', async (req: any, res: any) => {
+  const ip = getClientIp(req);
   const { code } = req.params as any;
   try {
     const game = await db.game.findUnique({
       where: { code: (code ?? '').toUpperCase() },
       select: { id: true, name: true, code: true, status: true },
     });
-    if (!game) return res.status(404).json({ error: 'Game not found' });
+    if (!game) {
+      recordFailure(ip);
+      return res.status(404).json({ error: 'Game not found' });
+    }
 
     if (game.status !== 'COMPLETED') {
       return res.json({ game: { name: game.name, code: game.code, status: game.status }, teams: [] });

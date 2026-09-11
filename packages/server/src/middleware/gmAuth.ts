@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyGmToken } from '../lib/auth';
+import { getClientIp, recordFailure } from '../lib/ipBan';
 
 // req.params is not populated for params in an app.use()/router.use() mount path, so fall back to the URL.
 function gameIdFromUrl(url: string): string | undefined {
@@ -8,9 +9,11 @@ function gameIdFromUrl(url: string): string | undefined {
 }
 
 export function gmAuth(req: Request, res: Response, next: NextFunction) {
+  const ip = getClientIp(req);
   const header = req.headers.authorization ?? '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';
   if (!token) {
+    recordFailure(ip);
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
@@ -20,16 +23,17 @@ export function gmAuth(req: Request, res: Response, next: NextFunction) {
       (req.params as any).gameId ?? gameIdFromUrl(req.originalUrl) ?? (req.body as any)?.gameId;
     if (payload.gameId) {
       if (!gameId) {
-        console.warn('gmAuth 403: game token on admin path', req.path, 'tokenGameId', payload.gameId);
+        recordFailure(ip);
         return res.status(403).json({ error: 'Game token cannot access admin endpoints' });
       }
       if (gameId !== payload.gameId) {
-        console.warn('gmAuth 403: gameId mismatch', { path: req.path, urlGameId: gameId, tokenGameId: payload.gameId });
+        recordFailure(ip);
         return res.status(403).json({ error: 'Token does not match this game' });
       }
     }
     next();
   } catch {
+    recordFailure(ip);
     res.status(401).json({ error: 'Unauthorized' });
   }
 }

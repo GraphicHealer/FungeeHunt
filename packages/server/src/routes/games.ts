@@ -7,6 +7,7 @@ import { getBaseUrl } from '../lib/urls';
 import { sendPushToCaptains, sendPushToTeams, sendPushToPlayer } from '../lib/push';
 import { scheduleBonusPushForGame } from '../lib/pushSweep';
 import { gmAuth } from '../middleware/gmAuth';
+import { logger } from '../lib/logger';
 import { createGmToken } from '../lib/auth';
 import { sendGameCreatedEmail } from '../lib/email';
 import { uploadPath } from '../lib/uploads';
@@ -192,7 +193,7 @@ async function syncAutoRuleSections(game: any) {
     }
 
   } catch (err) {
-    console.error('sync rules failed', err);
+    logger.error('sync rules failed', err);
   }
 }
 
@@ -305,11 +306,11 @@ router.post('/', async (req: any, res: any) => {
       const base = getBaseUrl(req);
       const gmLink = `${base}/gm/${game.id}/dashboard?key=${gmToken}`;
       sendGameCreatedEmail({ ...game, gmEmail: game.gmEmail }, gmLink).catch((err) =>
-        console.error('gm creation email failed', err),
+        logger.error('gm creation email failed', err),
       );
     }
   } catch (err) {
-    console.error('create game failed', err);
+    logger.error('create game failed', err);
     res.status(500).json({ error: 'Could not create game' });
   }
 });
@@ -382,7 +383,7 @@ router.get('/', async (req: any, res: any) => {
     );
     res.json(stats);
   } catch (err) {
-    console.error('list games failed', err);
+    logger.error('list games failed', err);
     res.status(500).json({ error: 'Could not list games' });
   }
 });
@@ -393,7 +394,7 @@ router.get('/:gameId', async (req: any, res: any) => {
     if (!game) return res.status(404).json({ error: 'Game not found' });
     res.json(withJoinUrl(getBaseUrl(req), game));
   } catch (err) {
-    console.error('get game failed', err);
+    logger.error('get game failed', err);
     res.status(500).json({ error: 'Could not load game' });
   }
 });
@@ -407,7 +408,7 @@ router.delete('/:gameId', async (req: any, res: any) => {
     if (!deleted) return res.status(404).json({ error: 'Game not found' });
     res.status(204).end();
   } catch (err) {
-    console.error('delete game failed', err);
+    logger.error('delete game failed', err);
     res.status(500).json({ error: 'Could not delete game' });
   }
 });
@@ -469,7 +470,7 @@ router.patch('/:gameId', async (req: any, res: any) => {
 
     res.json(withJoinUrl(getBaseUrl(req), game));
   } catch (err) {
-    console.error('update game failed', err);
+    logger.error('update game failed', err);
     res.status(500).json({ error: 'Could not update game' });
   }
 });
@@ -512,7 +513,7 @@ router.post('/:gameId/announce', async (req: any, res: any) => {
 
     res.json({ sent: true });
   } catch (err) {
-    console.error('announce failed', err);
+    logger.error('announce failed', err);
     res.status(500).json({ error: 'Could not send announcement' });
   }
 });
@@ -529,7 +530,7 @@ router.get('/:gameId/chat/unread', async (req: any, res: any) => {
     for (const c of counts as any) result[c.teamId] = c._count.teamId;
     res.json(result);
   } catch (err) {
-    console.error('chat unread failed', err);
+    logger.error('chat unread failed', err);
     res.status(500).json({ error: 'Could not load unread counts' });
   }
 });
@@ -547,7 +548,7 @@ router.get('/:gameId/chat/:teamId', async (req: any, res: any) => {
     });
     res.json(messages);
   } catch (err) {
-    console.error('load gm chat failed', err);
+    logger.error('load gm chat failed', err);
     res.status(500).json({ error: 'Could not load chat' });
   }
 });
@@ -573,7 +574,7 @@ router.post('/:gameId/chat/:teamId', async (req: any, res: any) => {
     }
     res.status(201).json(msg);
   } catch (err) {
-    console.error('send gm chat failed', err);
+    logger.error('send gm chat failed', err);
     res.status(500).json({ error: 'Could not send message' });
   }
 });
@@ -593,7 +594,7 @@ router.post('/:gameId/chat/:teamId/read', async (req: any, res: any) => {
     io?.emit(`game:${game.code.toUpperCase()}`, { type: 'chat' });
     res.status(204).end();
   } catch (err) {
-    console.error('mark gm chat read failed', err);
+    logger.error('mark gm chat read failed', err);
     res.status(500).json({ error: 'Could not mark read' });
   }
 });

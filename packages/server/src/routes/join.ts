@@ -1,14 +1,19 @@
 import { Router } from 'express';
 import { db } from '../db/client';
 import { createPlayerToken } from '../lib/auth';
+import { getClientIp, recordFailure } from '../lib/ipBan';
 
 const router = Router();
 
 router.get('/:code', async (req, res) => {
+  const ip = getClientIp(req);
   const { code } = req.params as any;
   try {
     const game = await db.game.findUnique({ where: { code: (code ?? '').toUpperCase() } });
-    if (!game) return res.status(404).json({ error: 'Game not found' });
+    if (!game) {
+      recordFailure(ip);
+      return res.status(404).json({ error: 'Game not found' });
+    }
     res.json({ exists: true, status: game.status });
   } catch (err) {
     console.error('check game failed', err);
@@ -17,6 +22,7 @@ router.get('/:code', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+  const ip = getClientIp(req);
   const { code, displayName, hasCar } = req.body ?? {};
   const trimmed = displayName ? displayName.trim() : '';
   if (!code || !trimmed) {
@@ -25,7 +31,10 @@ router.post('/', async (req, res) => {
 
   try {
     const game = await db.game.findUnique({ where: { code: code.toUpperCase() } });
-    if (!game) return res.status(404).json({ error: 'Game not found' });
+    if (!game) {
+      recordFailure(ip);
+      return res.status(404).json({ error: 'Game not found' });
+    }
 
     let player = await db.player.findFirst({
       where: {
