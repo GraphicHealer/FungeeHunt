@@ -5,7 +5,6 @@
 const config = {
   title: 'Fungee-Hunt',
   tagline: 'Self-hosted scavenger-hunt platform documentation',
-  favicon: 'img/favicon.ico',
 
   url: 'https://docs.fungeehunt.com',
   baseUrl: '/',
@@ -41,13 +40,8 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: 'img/logo.png',
       navbar: {
         title: 'Fungee-Hunt',
-        logo: {
-          alt: 'Fungee-Hunt logo',
-          src: 'img/logo.svg',
-        },
         items: [
           {
             type: 'docSidebar',
