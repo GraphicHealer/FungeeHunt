@@ -9,7 +9,6 @@ export async function playerAuth(req: Request, res: Response, next: NextFunction
   const header = req.headers.authorization ?? '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';
   if (!token) {
-    recordFailure(ip);
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -29,17 +28,13 @@ export async function playerAuth(req: Request, res: Response, next: NextFunction
         },
       },
     });
-    if (!player) {
-      recordFailure(ip);
-      throw new Error('player not found');
-    }
+    if (!player) throw new Error('player not found');
 
     (req as any).gameId = game.id;
     (res.locals as any).player = { ...toSafePlayer(player), team: player.team ? toSafeTeam(player.team) : null };
     (res.locals as any).game = game;
     next();
   } catch (err: any) {
-    recordFailure(ip);
     res.status(401).json({ error: err?.message ?? 'Unauthorized' });
   }
 }
