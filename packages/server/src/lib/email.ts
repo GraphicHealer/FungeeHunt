@@ -95,8 +95,8 @@ export function renderEmail(title: string, bodyHtml: string, cta?: { text: strin
     <div style="max-width:28rem;margin:0 auto;">
       <h1 class="fh-brand" style="color:#0366d6;font-size:1.5rem;margin:0 0 1rem;text-align:center;">FUNGEE-HUNT</h1>
       <div class="fh-card" style="background:#ffffff;border:1px solid #d0d7de;border-radius:0.75rem;box-shadow:0 4px 16px rgba(31,35,40,0.08);padding:2rem;">
-        <h2 class="fh-brand" style="color:#0366d6;font-size:1.25rem;margin:0 0 1rem;">${title}</h2>
-        <div class="fh-text" style="color:#1f2328;">${bodyHtml}</div>
+        <h2 class="fh-brand" style="color:#0366d6;font-size:1.25rem;margin:0 0 1rem;text-align:center;">${title}</h2>
+        <div class="fh-text" style="color:#1f2328;text-align:center;">${bodyHtml}</div>
         <div style="text-align:center;">${button}</div>
       </div>
       <p class="fh-muted" style="color:#656d76;font-size:0.8rem;text-align:center;margin:1.5rem 0 0;">Sent by Fungee-Hunt — self-hosted scavenger hunts.</p>
@@ -115,17 +115,27 @@ export function gameBaseUrl(game: { baseUrl?: string | null }) {
   return (config.PUBLIC_URL ?? game.baseUrl ?? '').replace(/\/$/, '');
 }
 
+function centeredCodeBox(content: string) {
+  return `<div style="display:inline-block;background:#f5f7fa;border:1px solid #d0d7de;border-radius:0.5rem;padding:0.75rem 1.25rem;font-family:monospace,Consolas,Menlo,Courier,monospace;font-size:1.2rem;word-break:break-all;text-align:center;">${content}</div>`;
+}
+
+function playerInfoBlock(code: string, joinUrl: string) {
+  return `<p style="margin:0.25rem 0 0;color:#656d76;font-size:0.9rem;">Player code</p>` +
+    `<div style="margin:0.25rem 0 1rem;">${centeredCodeBox(escapeHtml(code))}</div>` +
+    `<p style="margin:0.5rem 0 0;color:#656d76;font-size:0.9rem;">Or copy this link:</p>` +
+    `<div style="margin:0.25rem 0 1rem;"><a href="${joinUrl}" style="text-decoration:none;color:inherit;">${centeredCodeBox(escapeHtml(joinUrl))}</a></div>`;
+}
+
 export async function sendGameCreatedEmail(game: { name: string; code: string; gmEmail: string; baseUrl?: string | null }, gmLink?: string) {
   const base = gameBaseUrl(game);
   const joinUrl = `${base}/play/${game.code}`;
   const body =
     `<p>Your game <strong>${escapeHtml(game.name)}</strong> is set up and ready.</p>` +
-    `<p>Players join with code <strong style="font-family:monospace;font-size:1.2rem;letter-spacing:0.2em;">${escapeHtml(game.code)}</strong> or this link:<br><a href="${joinUrl}">${joinUrl}</a></p>` +
-    (gmLink ? `<p>Your Game Master link (keep it private — anyone with it has full control):<br><a href="${gmLink}">${gmLink}</a></p>` : '');
+    playerInfoBlock(game.code, joinUrl);
   await sendEmail(
     game.gmEmail,
     `Fungee-Hunt: "${game.name}" created`,
-    `Game "${game.name}" created. Join: ${joinUrl}${gmLink ? `\nGM link: ${gmLink}` : ''}`,
+    `Game "${game.name}" created.\nPlayer code: ${game.code}\nJoin: ${joinUrl}${gmLink ? `\nGM link: ${gmLink}` : ''}`,
     renderEmail('Game created', body, gmLink ? { text: 'OPEN GM DASHBOARD', url: gmLink } : undefined),
   );
 }
@@ -136,11 +146,11 @@ export async function sendGameReminderEmail(game: { name: string; code: string; 
   const when = game.startAt ? game.startAt.toLocaleString() : 'soon';
   const body =
     `<p>Reminder: <strong>${escapeHtml(game.name)}</strong> starts at <strong>${when}</strong>.</p>` +
-    `<p>Players join with code <strong style="font-family:monospace;font-size:1.2rem;letter-spacing:0.2em;">${escapeHtml(game.code)}</strong> or this link:<br><a href="${joinUrl}">${joinUrl}</a></p>`;
+    playerInfoBlock(game.code, joinUrl);
   await sendEmail(
     game.gmEmail,
     `Fungee-Hunt: "${game.name}" starts soon`,
-    `Reminder: "${game.name}" starts at ${when}. Join: ${joinUrl}`,
+    `Reminder: "${game.name}" starts at ${when}.\nPlayer code: ${game.code}\nJoin: ${joinUrl}${gmLink ? `\nGM link: ${gmLink}` : ''}`,
     renderEmail('Game starts soon', body, gmLink ? { text: 'OPEN GM DASHBOARD', url: gmLink } : undefined),
   );
 }
