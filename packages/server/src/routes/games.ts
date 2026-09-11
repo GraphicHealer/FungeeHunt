@@ -36,7 +36,7 @@ function buildGameData(body: any, partial = false) {
   const data: any = {};
   if (body.gmEmail !== undefined || !partial) {
     const e = typeof body.gmEmail === 'string' ? body.gmEmail.trim().toLowerCase() : '';
-    data.gmEmail = e || null;
+    data.gmEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : null;
   }
 
   if (body.name !== undefined || !partial) {
@@ -232,7 +232,6 @@ router.post('/', async (req: any, res: any) => {
 
     const code = await generateGameCode();
     const gameData = buildGameData(body);
-    console.warn('create game body bonus', { bonusStart: body.bonusStart, bonusEnd: body.bonusEnd, hasBonusTask: !!body.bonusTask });
     const game = await db.game.create({
       data: {
         code,
@@ -240,7 +239,7 @@ router.post('/', async (req: any, res: any) => {
         ...gameData,
       },
     });
-    console.warn('created game bonus', { bonusStart: game.bonusStart, bonusEnd: game.bonusEnd });
+
 
     const defaultTasks = settings.defaultTasks ? JSON.parse(settings.defaultTasks) : [];
     const defaultRules = settings.defaultRules ? JSON.parse(settings.defaultRules) : [];
