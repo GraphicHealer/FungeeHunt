@@ -20,4 +20,4 @@ docker compose up -d
 
 Then open `http://localhost:3000`.
 
-See [Docker deployment](./deployment/docker.md) and [Unraid](./deployment/unraid.md) for platform-specific details.
+See [Docker deployment](./deployment/docker.md), [Unraid](./deployment/unraid.md), and the [environment variables reference](./deployment/env.md) for platform-specific details.

@@ -4,6 +4,64 @@ sidebar_position: 2
 
 # Unraid
 
-A community template is available. Point the container at a PostgreSQL database (the official Postgres container or a separate host) and mount `UPLOAD_DIR` to a cache or array share.
+A community template is available that uses the pre-built `ghcr.io/graphichealer/fungeehunt:latest` image. It does **not** include a PostgreSQL container, so you will need a separate Postgres container or external database.
 
-Set the required environment variables from the README before starting the container.
+## Import the template
+
+1. Place the XML file below into your Unraid app templates directory (usually `boot/config/plugins/dockerMan/templates-user/`).
+2. Refresh the Docker page in the Unraid web UI.
+3. Fungee-Hunt will appear under **User Templates**.
+4. Add the container and fill in the `PG_*` variables to point at your Postgres container.
+
+## Template XML
+
+```xml
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>fungee-hunt</Name>
+  <Repository>ghcr.io/graphichealer/fungeehunt:latest</Repository>
+  <Registry>https://ghcr.io/graphichealer/fungeehunt</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/graphichealer/fungeehunt/issues</Support>
+  <Project>https://github.com/graphichealer/fungeehunt</Project>
+  <Overview>Fungee-Hunt is a self-hosted scavenger-hunt platform for groups. One Game Master runs the show; players join with a code, complete tasks, and prove it with photos or videos. A live viewer keeps everyone watching the action.</Overview>
+  <Category>Game servers: Other</Category>
+  <WebUI>http://[IP]:[PORT:3000]/</WebUI>
+  <TemplateURL/>
+  <Icon/>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>A PostgreSQL database is required. You can run it from another Unraid container (e.g., `postgres:18`) and point these variables at it.</Requires>
+  <Config Name="Web UI port" Target="3000" Default="3000" Mode="tcp" Description="Port for the Fungee-Hunt web interface" Type="Port" Display="always" Required="true" Mask="false">3000</Config>
+  <Config Name="Uploads" Target="/data/uploads" Default="/mnt/user/appdata/fungeehunt/uploads" Mode="rw" Description="Where player uploads are stored" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/fungeehunt/uploads</Config>
+  <Config Name="PG_USER" Target="PG_USER" Default="fungeehunt" Mode="" Description="PostgreSQL user" Type="Variable" Display="always" Required="true" Mask="false">fungeehunt</Config>
+  <Config Name="PG_PASS" Target="PG_PASS" Default="changeme" Mode="" Description="PostgreSQL password" Type="Variable" Display="always" Required="true" Mask="true">changeme</Config>
+  <Config Name="PG_HOST" Target="PG_HOST" Default="postgres" Mode="" Description="PostgreSQL host or container name" Type="Variable" Display="always" Required="true" Mask="false">postgres</Config>
+  <Config Name="PG_PORT" Target="PG_PORT" Default="5432" Mode="" Description="PostgreSQL port" Type="Variable" Display="always" Required="true" Mask="false">5432</Config>
+  <Config Name="PG_DATABASE" Target="PG_DATABASE" Default="fungeehunt" Mode="" Description="PostgreSQL database name" Type="Variable" Display="always" Required="true" Mask="false">fungeehunt</Config>
+  <Config Name="GM_PASSPHRASE" Target="GM_PASSPHRASE" Default="changeme" Mode="" Description="Passphrase used to log in as Game Master" Type="Variable" Display="always" Required="true" Mask="false">changeme</Config>
+  <Config Name="SESSION_SECRET" Target="SESSION_SECRET" Default="" Mode="" Description="Optional token-signing secret. Leave blank to auto-generate one on first boot (stored in the database)." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="TRUST_PROXY" Target="TRUST_PROXY" Default="0" Mode="" Description="Number of reverse proxies in front of the app (so rate limiting sees real client IPs)." Type="Variable" Display="advanced" Required="false" Mask="false">0</Config>
+  <Config Name="WEB_UI" Target="WEB_UI" Default="3000" Mode="" Description="Port the server listens on" Type="Variable" Display="advanced" Required="false" Mask="false">3000</Config>
+  <Config Name="UPLOAD_DIR" Target="UPLOAD_DIR" Default="/data/uploads" Mode="" Description="Upload directory inside the container" Type="Variable" Display="advanced" Required="false" Mask="false">/data/uploads</Config>
+  <Config Name="LOG_LEVEL" Target="LOG_LEVEL" Default="info" Mode="" Description="Log level (debug, info, warn, error)" Type="Variable" Display="advanced" Required="false" Mask="false">info</Config>
+  <Config Name="TZ" Target="TZ" Default="America/New_York" Mode="" Description="Container timezone" Type="Variable" Display="advanced" Required="false" Mask="false">America/New_York</Config>
+</Container>
+```
+
+After the container starts, run the database migrations from the Unraid Docker console:
+
+```bash
+docker exec fungee-hunt npm run db:migrate
+```
+
+## Postgres on Unraid
+
+You can run a Postgres container from the Community Applications plugin (template `postgres:18`) with `POSTGRES_DB=fungeehunt`, `POSTGRES_USER=fungeehunt`, and a strong `POSTGRES_PASSWORD`. Point the `PG_*` variables in the Fungee-Hunt template at that container.
