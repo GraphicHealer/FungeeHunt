@@ -7,6 +7,8 @@ import { gmailCredentials, renderEmail, sendEmail, smtpConfig } from '../lib/ema
 import { getBaseUrl } from '../lib/urls';
 import { verifyGmToken } from '../lib/auth';
 import { gmAuth } from '../middleware/gmAuth';
+import { logger } from '../lib/logger';
+import { getClientIp, recordFailure } from '../lib/ipBan';
 
 const router = Router();
 
@@ -45,14 +47,19 @@ function publicSettings(settings: SystemSettings) {
 // (browser navigation cannot send Authorization headers). No UI uses this — it
 // exists purely so an operator can connect the mailbox after setting env vars.
 router.get('/email/connect', async (req, res) => {
+  const ip = getClientIp(req);
   const creds = gmailCredentials();
   if (!creds) {
     return res.status(400).send('GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET are not set on the server');
   }
   try {
     const payload = verifyGmToken(String(req.query.key ?? ''));
-    if ((payload as any).gameId) return res.status(403).send('Admin token required');
+    if ((payload as any).gameId) {
+      recordFailure(ip);
+      return res.status(403).send('Admin token required');
+    }
   } catch {
+    recordFailure(ip);
     return res.status(401).send('Unauthorized');
   }
   const state = randomBytes(16).toString('hex');
@@ -104,7 +111,7 @@ router.get('/email/callback', async (req, res) => {
     });
     const tokens: any = await tokenRes.json();
     if (!tokenRes.ok || !tokens.refresh_token) {
-      console.error('gmail token exchange failed', tokens);
+      logger.error('gmail token exchange failed', tokens);
       return res.redirect('/admin/settings?email=error');
     }
 
@@ -127,7 +134,7 @@ router.get('/email/callback', async (req, res) => {
       } catch { /* email stays empty */ }
     }
     if (!email) {
-      console.error('gmail oauth succeeded but account email could not be resolved');
+      logger.error('gmail oauth succeeded but account email could not be resolved');
       return res.redirect('/admin/settings?email=error');
     }
 
@@ -137,7 +144,7 @@ router.get('/email/callback', async (req, res) => {
     });
     res.redirect('/admin/settings?email=connected');
   } catch (err) {
-    console.error('gmail oauth callback failed', err);
+    logger.error('gmail oauth callback failed', err);
     res.redirect('/admin/settings?email=error');
   }
 });
@@ -148,7 +155,7 @@ router.get('/', async (_req, res) => {
     if (!settings) return res.status(404).json({ error: 'Settings not found' });
     res.json(publicSettings(settings));
   } catch (err) {
-    console.error('get settings failed', err);
+    logger.error('get settings failed', err);
     res.status(500).json({ error: 'Could not load settings' });
   }
 });
@@ -189,7 +196,7 @@ router.post('/email/test', async (req, res) => {
     );
     res.json({ sent: true });
   } catch (err) {
-    console.error('test email failed', err);
+    logger.error('test email failed', err);
     res.status(500).json({ error: 'Could not send test email' });
   }
 });
@@ -213,7 +220,7 @@ router.get('/export', async (_req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename="fungeehunt-settings.json"');
     res.json({ version: 1, exportedAt: new Date().toISOString(), settings: rest });
   } catch (err) {
-    console.error('export settings failed', err);
+    logger.error('export settings failed', err);
     res.status(500).json({ error: 'Could not export settings' });
   }
 });
@@ -232,7 +239,7 @@ router.post('/import', async (req, res) => {
     });
     res.json(publicSettings(updated));
   } catch (err) {
-    console.error('import settings failed', err);
+    logger.error('import settings failed', err);
     res.status(500).json({ error: 'Could not import settings' });
   }
 });
@@ -249,7 +256,7 @@ router.patch('/', async (req, res) => {
 
     res.json(publicSettings(updated));
   } catch (err) {
-    console.error('update settings failed', err);
+    logger.error('update settings failed', err);
     res.status(500).json({ error: 'Could not update settings' });
   }
 });
@@ -274,7 +281,7 @@ router.post('/tasks', async (req: any, res: any) => {
     });
     res.json({ count: tasks.length });
   } catch (err) {
-    console.error('import default tasks failed', err);
+    logger.error('import default tasks failed', err);
     res.status(500).json({ error: 'Could not import tasks' });
   }
 });
@@ -309,7 +316,7 @@ router.post('/default-tasks', async (req: any, res: any) => {
     });
     res.json({ updated, count: list.length });
   } catch (err) {
-    console.error('save default task failed', err);
+    logger.error('save default task failed', err);
     res.status(500).json({ error: 'Could not save task to database' });
   }
 });

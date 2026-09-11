@@ -3,6 +3,7 @@ import * as QRCode from 'qrcode';
 import { db } from '../db/client';
 import { getBaseUrl } from '../lib/urls';
 import { toSafeTeam } from '../lib/safePlayer';
+import { getClientIp, recordFailure } from '../lib/ipBan';
 
 const router = Router({ mergeParams: true });
 
@@ -15,10 +16,14 @@ function formatDuration(ms: number): string {
 }
 
 router.get('/', async (req, res) => {
+  const ip = getClientIp(req);
   const { code } = req.params as any;
   try {
     const game = await db.game.findUnique({ where: { code: code.toUpperCase() } });
-    if (!game) return res.status(404).json({ error: 'Game not found' });
+    if (!game) {
+      recordFailure(ip);
+      return res.status(404).json({ error: 'Game not found' });
+    }
 
     const rawTeams = await db.team.findMany({
       where: { gameId: game.id },
