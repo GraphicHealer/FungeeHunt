@@ -1,6 +1,6 @@
 import { logger } from './logger';
 
-const MAX_FAILURES = 5;
+const MAX_FAILURES = 15;
 const FAILURE_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const BAN_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
