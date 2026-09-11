@@ -1,11 +1,23 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
   import ChatWidget from '$lib/ChatWidget.svelte';
   import { gmToken, setGmToken } from '$lib/gmToken';
   import { toast } from '$lib/toast';
+
+  // Consume the one-time ?key= token as early as possible, before any child +page onMount fires.
+  if (browser) {
+    const key = $page.url.searchParams.get('key');
+    if (key && $page.params.gameId) {
+      setGmToken($page.params.gameId, key);
+      const u = new URL(location.href);
+      u.searchParams.delete('key');
+      history.replaceState(null, '', u.pathname + u.search + u.hash);
+    }
+  }
 
   let game: any = null;
   let loadError = '';
@@ -88,13 +100,6 @@
   }
 
   onMount(async () => {
-    const key = $page.url.searchParams.get('key');
-    if (key) {
-      setGmToken($page.params.gameId ?? '', key);
-      const u = new URL($page.url);
-      u.searchParams.delete('key');
-      history.replaceState(null, '', u.pathname + u.search + u.hash);
-    }
     await load();
     remainingStr = remaining();
     if (game?.code) {
