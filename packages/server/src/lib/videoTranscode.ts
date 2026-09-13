@@ -10,6 +10,7 @@ import { uploadPath } from './uploads';
 const MAX_CONCURRENT = 2;
 const TARGET_MAX_HEIGHT = 720;
 const SKIP_BITRATE_BPS = 3_000_000; // 3 Mbps for H.264-ish, reasonable mobile ceiling
+const MAX_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour, also avoids 32-bit setTimeout overflow
 const CRF = 24;
 const PRESET = 'faster';
 const AUDIO_BITRATE = '128k';
@@ -71,7 +72,9 @@ class VideoTranscodeQueue {
       return this.mark(job.submissionId, 'FAILED');
     }
 
-    const estimatedBitRate = probe.bitRate || (statSync(input).size * 8 / probe.duration);
+    const hasBitRate = probe.bitRate > 0;
+    const canEstimate = Number.isFinite(probe.duration) && probe.duration > 0 && probe.duration <= 3600;
+    const estimatedBitRate = hasBitRate ? probe.bitRate : (canEstimate ? (statSync(input).size * 8 / probe.duration) : Infinity);
     const shouldSkip =
       probe.height <= TARGET_MAX_HEIGHT &&
       Number.isFinite(estimatedBitRate) &&
@@ -86,7 +89,7 @@ class VideoTranscodeQueue {
     const outDisk = path.join(config.UPLOAD_DIR, job.gameId, outFilename);
     const outUrl = `/uploads/${job.gameId}/${outFilename}`;
 
-    const timeoutMs = Math.max(60, (probe.duration || 60) * 3 + 30) * 1000;
+    const timeoutMs = Math.min(MAX_TIMEOUT_MS, Math.max(60, (probe.duration || 60) * 3 + 30) * 1000);
 
     try {
       await runFfmpeg(input, outDisk, timeoutMs);
@@ -200,9 +203,9 @@ function ffprobe(file: string): Promise<ProbeInfo> {
   return new Promise((resolve, reject) => {
     const args = [
       '-v', 'error',
-      '-select_streams', 'v:0',
-      '-show_entries', 'stream=width,height,bit_rate,duration',
-      '-of', 'csv=p=0',
+      '-of', 'json',
+      '-show_streams',
+      '-show_format',
       file,
     ];
 
@@ -221,21 +224,26 @@ function ffprobe(file: string): Promise<ProbeInfo> {
       if (code !== 0) {
         return reject(new Error(`ffprobe exited ${code}: ${error}`));
       }
-      const parts = output.trim().split(',');
-      if (parts.length < 4) {
-        return reject(new Error(`ffprobe unexpected output: ${output}`));
+      try {
+        const parsed = JSON.parse(output);
+        const videoStream = (parsed.streams ?? []).find((s: any) => s.codec_type === 'video');
+        const fmt = parsed.format ?? {};
+        if (!videoStream) {
+          return reject(new Error('ffprobe: no video stream found'));
+        }
+        const result: ProbeInfo = {
+          width: Number(videoStream.width) || 0,
+          height: Number(videoStream.height) || 0,
+          bitRate: Number(videoStream.bit_rate ?? fmt.bit_rate) || 0,
+          duration: Number(fmt.duration ?? videoStream.duration) || 0,
+        };
+        if (result.width === 0 || result.height === 0) {
+          return reject(new Error('ffprobe: could not read stream dimensions'));
+        }
+        resolve(result);
+      } catch (err) {
+        reject(new Error(`ffprobe could not parse output: ${err}`));
       }
-      const [width, height, bitRate, duration] = parts;
-      const result: ProbeInfo = {
-        width: parseInt(width, 10) || 0,
-        height: parseInt(height, 10) || 0,
-        bitRate: parseInt(bitRate, 10) || 0,
-        duration: parseFloat(duration) || 0,
-      };
-      if (result.width === 0 || result.height === 0 || result.duration === 0) {
-        return reject(new Error(`ffprobe could not read stream info`));
-      }
-      resolve(result);
     });
 
     child.on('error', reject);
