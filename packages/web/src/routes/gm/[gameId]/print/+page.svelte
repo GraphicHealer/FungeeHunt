@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
+  import { escapeHtml } from '$lib/escapeHtml';
   import { gmToken } from '$lib/gmToken';
 
   const gameId = $page.params.gameId;
@@ -80,7 +81,7 @@
           {#each rules as rule (rule.id)}
             <div class="rule">
               <h2>{rule.title}</h2>
-              <p>{@html rule.body.replace(/\n/g, '<br />')}</p>
+              <p>{@html escapeHtml(rule.body).replace(/\n/g, '<br />')}</p>
             </div>
           {/each}
         </div>

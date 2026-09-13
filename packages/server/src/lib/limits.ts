@@ -48,7 +48,7 @@ function checkValue(key: string, value: any, path: string[]): string | null {
 
   if (typeof value === 'number') {
     if (POINT_FIELDS.has(key) && !isValidPoint(value)) {
-      return `${path.join('.')} must be a non-negative number`;
+      return `${path.join('.')} must be a positive number`;
     }
     return null;
   }
@@ -56,7 +56,7 @@ function checkValue(key: string, value: any, path: string[]): string | null {
   if (typeof value === 'string') {
     if (POINT_FIELDS.has(key)) {
       if (!isValidPoint(value)) {
-        return `${path.join('.')} must be a non-negative number`;
+        return `${path.join('.')} must be a positive number`;
       }
       return null;
     }
