@@ -6,6 +6,7 @@ import { db } from '../db/client';
 import { config } from '../config';
 import { logger } from './logger';
 import { getIo } from './io';
+import { ensureVideoThumb, moveVideoThumb } from './videoThumb';
 import { uploadPath } from './uploads';
 
 const MAX_CONCURRENT = 2;
@@ -130,6 +131,9 @@ class VideoTranscodeQueue {
         data: { proofUrl: outUrl, proofUrls: [outUrl], videoStatus: 'READY' },
       });
       this.safeDelete(input);
+      if (!moveVideoThumb(input, outDisk)) {
+        await ensureVideoThumb(outDisk);
+      }
       this.emit(job, 'READY');
       logger.info('video transcode: complete', { submissionId: job.submissionId, outUrl });
     } catch (err) {
