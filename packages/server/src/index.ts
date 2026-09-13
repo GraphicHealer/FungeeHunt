@@ -22,6 +22,7 @@ import settingsRoute from './routes/settings';
 import recapRoute from './routes/recap';
 import { seedSystemSettings, seedStyleProfiles } from './lib/defaults';
 import { logger } from './lib/logger';
+import { setIo } from './lib/io';
 import { startPushSweep } from './lib/pushSweep';
 import { startAutoDeleteSweep } from './lib/autoDelete';
 import { gmAuth } from './middleware/gmAuth';
@@ -36,6 +37,7 @@ const io = new Server(server, {
   cors: { origin: '*' },
 });
 
+setIo(io);
 app.set('io', io);
 app.set('trust proxy', config.TRUST_PROXY);
 

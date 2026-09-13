@@ -1,25 +1,12 @@
-import { execFile } from 'node:child_process';
 import { rmSync } from 'node:fs';
 import { Router } from 'express';
 import { db } from '../db/client';
 import { playerAuth } from '../middleware/playerAuth';
 import { sniffUploadKind, upload, uploadPath } from '../lib/uploads';
+import { videoTranscodeQueue } from '../lib/videoTranscode';
+import { generateVideoThumb } from '../lib/videoThumb';
 
 const router = Router({ mergeParams: true });
-
-function generateVideoThumb(input: string, output: string) {
-  return new Promise<void>((resolve, reject) => {
-    execFile('ffmpeg', [
-      '-y',
-      '-ss', '00:00:00.250',
-      '-i', input,
-      '-vf', 'scale=480:480:force_original_aspect_ratio=decrease',
-      '-frames:v', '1',
-      '-q:v', '2',
-      output,
-    ], (err) => (err ? reject(err) : resolve()));
-  });
-}
 
 router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: any) => {
   const { taskId } = req.params as any;
@@ -93,6 +80,8 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
     const proofUrl = urls[0];
     const status = game.submissionMode === 'AUTOMATIC' ? 'COMPLETED' : 'SUBMITTED';
 
+    const videoStatus = allVideos ? 'PENDING' : 'READY';
+
     let submission;
     if (existing && existing.status === 'INCOMPLETE') {
       submission = await db.submission.update({
@@ -101,6 +90,7 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
           proofUrl,
           proofUrls: urls,
           status,
+          videoStatus,
           submittedAt: new Date(),
           reviewedAt: null,
           reason: null,
@@ -114,8 +104,13 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
           proofUrl,
           proofUrls: urls,
           status,
+          videoStatus,
         },
       });
+    }
+
+    if (allVideos) {
+      videoTranscodeQueue.add({ submissionId: submission.id, gameId: game.id, gameCode: game.code, proofUrl });
     }
 
     const io = req.app.get('io') as any;

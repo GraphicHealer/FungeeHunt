@@ -58,6 +58,10 @@
     return sub.proofUrl.endsWith('.mp4') || sub.proofUrl.endsWith('.mov') || sub.proofUrl.endsWith('.webm');
   }
 
+  function viewerReady(sub: any) {
+    return !isVideo(sub) || sub.videoStatus === 'READY';
+  }
+
   function random(min: number, max: number) {
     return Math.random() * (max - min) + min;
   }
@@ -161,6 +165,7 @@
     if (!newData?.length) return;
     const items: any[] = [];
     for (const sub of newData) {
+      if (!viewerReady(sub)) continue;
       if (sub.task?.proofType === 'PHOTOS' && sub.proofUrls?.length) {
         for (let i = 0; i < sub.proofUrls.length; i++) {
           const url = sub.proofUrls[i];
@@ -203,6 +208,7 @@
     loadPlacements();
     const seed: any[] = [];
     for (const sub of recentData) {
+      if (!viewerReady(sub)) continue;
       if (sub.task?.proofType === 'PHOTOS' && sub.proofUrls?.length) {
         for (let i = 0; i < sub.proofUrls.length; i++) {
           const url = sub.proofUrls[i];
