@@ -2,6 +2,8 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
 
+  const version = import.meta.env.VITE_APP_VERSION ?? 'dev';
+
   let code = '';
   let error = $page.url.searchParams.get('notfound') === '1'
     ? 'That game does not exist. Please check the code and try again.'
@@ -49,6 +51,8 @@
     <button class="fungee-btn" on:click={join} disabled={!code.trim()}>JOIN GAME</button>
   </div>
 </main>
+
+<span class="version-tag" title="Fungee-Hunt version">v{version}</span>
 
 <a
   class="github-corner"
@@ -150,5 +154,20 @@
 
   .github-corner .mdi {
     font-size: 1.75rem;
+  }
+
+  .version-tag {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 4.5rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: monospace;
+    padding: 0.25rem 0.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+    z-index: 1000;
   }
 </style>
