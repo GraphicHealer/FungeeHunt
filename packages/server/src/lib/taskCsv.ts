@@ -41,7 +41,7 @@ export function parseTaskRows(rows: string[][]): any[] {
   return rows.slice(1).map((row) => {
     const title = (get(row, 'title') || '').trim();
     const description = (get(row, 'description') || '').trim();
-    const points = Number(get(row, 'points')) || 0;
+    const points = Math.max(0, Number(get(row, 'points')) || 0);
     const proofType = (get(row, 'prooftype') || 'PHOTO').toUpperCase().trim();
     const validProofType = ['PHOTO', 'VIDEO', 'PHOTOS'].includes(proofType) ? proofType : 'PHOTO';
     const photoCountRaw = get(row, 'photocount').trim();

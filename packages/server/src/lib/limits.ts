@@ -30,10 +30,36 @@ export const FIELD_LIMITS: Record<string, number> = {
 
 const DEFAULT_LIMIT = 5_000;
 
+// Numeric point fields that must be finite and non-negative (and may be decimal).
+export const POINT_FIELDS = new Set([
+  'points',
+  'returnPoints',
+  'foodDrivePointsPerItem',
+  'returnBonusPoints',
+]);
+
+function isValidPoint(value: any): boolean {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0;
+}
+
 function checkValue(key: string, value: any, path: string[]): string | null {
   if (value == null) return null;
 
+  if (typeof value === 'number') {
+    if (POINT_FIELDS.has(key) && !isValidPoint(value)) {
+      return `${path.join('.')} must be a non-negative number`;
+    }
+    return null;
+  }
+
   if (typeof value === 'string') {
+    if (POINT_FIELDS.has(key)) {
+      if (!isValidPoint(value)) {
+        return `${path.join('.')} must be a non-negative number`;
+      }
+      return null;
+    }
     const limit = FIELD_LIMITS[key] ?? DEFAULT_LIMIT;
     if (value.length > limit) {
       return `${path.join('.')} exceeds ${limit} characters`;

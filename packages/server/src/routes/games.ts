@@ -65,13 +65,13 @@ function buildGameData(body: any, partial = false) {
   if (body.returnEnd !== undefined || !partial) {
     data.returnEnd = asDate(body.returnEnd);
   }
-  if (body.returnPoints !== undefined || !partial) {
+  if (body.returnPoints !== undefined) {
     data.returnPoints = asInt(body.returnPoints);
   }
   if (body.foodDriveEnabled !== undefined || !partial) {
     data.foodDriveEnabled = asBool(body.foodDriveEnabled);
   }
-  if (body.foodDrivePointsPerItem !== undefined || !partial) {
+  if (body.foodDrivePointsPerItem !== undefined) {
     data.foodDrivePointsPerItem = asInt(body.foodDrivePointsPerItem);
   }
   if (body.foodDrivePermissible !== undefined || !partial) {
@@ -258,7 +258,7 @@ router.post('/', async (req: any, res: any) => {
           gameId: game.id,
           title: t.title ?? 'Task',
           description: t.description ?? '',
-          points: Number(t.points) || 0,
+          points: Math.max(0, Number(t.points) || 0),
           proofType: ['PHOTO', 'VIDEO', 'PHOTOS'].includes(t.proofType) ? t.proofType : 'PHOTO',
           photoCount: t.photoCount ? Number(t.photoCount) : null,
           delayMinutes: t.delayMinutes ? Number(t.delayMinutes) : null,
@@ -274,7 +274,7 @@ router.post('/', async (req: any, res: any) => {
           gameId: game.id,
           title: (bonusTask.title ?? 'Bonus task').trim(),
           description: bonusTask.description ?? '',
-          points: Number(bonusTask.points) || 0,
+          points: Math.max(0, Number(bonusTask.points) || 0),
           proofType: ['PHOTO', 'VIDEO', 'PHOTOS'].includes(bonusTask.proofType) ? bonusTask.proofType : 'PHOTO',
           photoCount: bonusTask.photoCount ? Number(bonusTask.photoCount) : null,
           delayMinutes: bonusTask.delayMinutes ? Number(bonusTask.delayMinutes) : null,
