@@ -27,6 +27,7 @@ import { startAutoDeleteSweep } from './lib/autoDelete';
 import { gmAuth } from './middleware/gmAuth';
 import { gmLoginLimiter, createGameLimiter, codeLookupLimiter, submitLimiter } from './middleware/rateLimit';
 import { ipBanMiddleware } from './middleware/ipBan';
+import { validateInput } from './middleware/validateInput';
 import { loadSessionSecret } from './lib/auth';
 
 const app = express();
@@ -41,6 +42,7 @@ app.set('trust proxy', config.TRUST_PROXY);
 app.use(ipBanMiddleware);
 
 app.use(express.json({ limit: '1mb' }));
+app.use(validateInput);
 app.use('/uploads', express.static(config.UPLOAD_DIR, {
   setHeaders: (res, filePath) => {
     res.set('X-Content-Type-Options', 'nosniff');
