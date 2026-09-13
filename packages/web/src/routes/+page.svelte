@@ -52,7 +52,7 @@
   </div>
 </main>
 
-<span class="version-tag" title="Fungee-Hunt version">v{version}</span>
+<span class="version-tag" title="Fungee-Hunt version">{version}</span>
 
 <a
   class="github-corner"
