@@ -71,6 +71,7 @@
       <p><strong>Team:</strong> {sub.team?.name ?? 'Unknown'}</p>
       <p><strong>Task:</strong> {sub.task?.title ?? ''}</p>
       <p><strong>Status:</strong> {sub.status}</p>
+      {#if sub.videoStatus && sub.videoStatus !== 'READY'}<p><strong>Video:</strong> {sub.videoStatus === 'FAILED' ? 'Transcode failed — original shown' : 'Processing…'}</p>{/if}
       {#if sub.reason}<p class="reason"><strong>Reason:</strong> {sub.reason}</p>{/if}
     </div>
 
@@ -78,7 +79,11 @@
       <div class="proof" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
         {#each [...new Set([sub.proofUrl, ...(sub.proofUrls ?? [])])].filter(Boolean) as url (url)}
           {#if sub.task?.proofType === 'VIDEO'}
-            <video src={url} controls></video>
+            {#if sub.videoStatus === 'PENDING' || sub.videoStatus === 'PROCESSING'}
+              <p style="color: var(--muted);">Video is being processed for review…</p>
+            {:else}
+              <video src={url} controls></video>
+            {/if}
           {:else}
             <img src={url} alt="Proof" />
           {/if}

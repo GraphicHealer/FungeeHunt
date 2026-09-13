@@ -110,18 +110,19 @@ model Task {
 }
 
 model Submission {
-  id          String           @id @default(cuid())
+  id          String                  @id @default(cuid())
   taskId      String
   teamId      String
   proofUrl    String
-  proofUrls   String[]         @default([])
+  proofUrls   String[]                @default([])
   status      SubmissionStatus
-  isHighlight Boolean          @default(false)
+  videoStatus SubmissionVideoStatus   @default(READY)
+  isHighlight Boolean                 @default(false)
   reason      String?
-  submittedAt DateTime         @default(now())
+  submittedAt DateTime                @default(now())
   reviewedAt  DateTime?
-  task        Task             @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  team        Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  task        Task                    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  team        Team                    @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, teamId])
 }
@@ -223,6 +224,13 @@ enum SubmissionStatus {
 enum RecapVideoStatus {
   PENDING
   RENDERING
+  READY
+  FAILED
+}
+
+enum SubmissionVideoStatus {
+  PENDING
+  PROCESSING
   READY
   FAILED
 }
