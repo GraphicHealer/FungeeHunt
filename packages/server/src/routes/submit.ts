@@ -124,7 +124,7 @@ router.post('/', playerAuth, upload.array('proof', 10), async (req: any, res: an
     }
 
     if (allVideos) {
-      videoTranscodeQueue.add({ submissionId: submission.id, gameId: game.id, proofUrl });
+      videoTranscodeQueue.add({ submissionId: submission.id, gameId: game.id, gameCode: game.code, proofUrl });
     }
 
     const io = req.app.get('io') as any;

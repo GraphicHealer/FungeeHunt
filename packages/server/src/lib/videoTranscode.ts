@@ -5,6 +5,7 @@ import path from 'node:path';
 import { db } from '../db/client';
 import { config } from '../config';
 import { logger } from './logger';
+import { getIo } from './io';
 import { uploadPath } from './uploads';
 
 const MAX_CONCURRENT = 2;
@@ -25,6 +26,7 @@ interface ProbeInfo {
 interface Job {
   submissionId: string;
   gameId: string;
+  gameCode: string;
   proofUrl: string;
 }
 
@@ -51,7 +53,7 @@ class VideoTranscodeQueue {
     const input = uploadPath(job.proofUrl);
     if (!input) {
       logger.error('video transcode: missing input path', { submissionId: job.submissionId });
-      return this.mark(job.submissionId, 'FAILED');
+      return this.mark(job, 'FAILED');
     }
 
     try {
@@ -59,6 +61,7 @@ class VideoTranscodeQueue {
         where: { id: job.submissionId },
         data: { videoStatus: 'PROCESSING' },
       });
+      this.emit(job, 'PROCESSING');
     } catch (err) {
       logger.error('video transcode: could not mark PROCESSING', err);
       return;
@@ -69,7 +72,7 @@ class VideoTranscodeQueue {
       probe = await ffprobe(input);
     } catch (err) {
       logger.error('video transcode: ffprobe failed', { input, err });
-      return this.mark(job.submissionId, 'FAILED');
+      return this.mark(job, 'FAILED');
     }
 
     const hasBitRate = probe.bitRate > 0;
@@ -82,7 +85,7 @@ class VideoTranscodeQueue {
 
     if (shouldSkip) {
       logger.info('video transcode: skipping, source is already small enough', { input, probe });
-      return this.mark(job.submissionId, 'READY');
+      return this.mark(job, 'READY');
     }
 
     const outFilename = `t-${randomBytes(8).toString('hex')}.mp4`;
@@ -96,7 +99,7 @@ class VideoTranscodeQueue {
     } catch (err: any) {
       logger.error('video transcode: ffmpeg failed', { input, err: err.message });
       this.safeDelete(outDisk);
-      return this.mark(job.submissionId, 'FAILED');
+      return this.mark(job, 'FAILED');
     }
 
     let outputInfo: ProbeInfo | null = null;
@@ -105,7 +108,7 @@ class VideoTranscodeQueue {
     } catch (err) {
       logger.error('video transcode: output ffprobe failed', { outDisk, err });
       this.safeDelete(outDisk);
-      return this.mark(job.submissionId, 'FAILED');
+      return this.mark(job, 'FAILED');
     }
 
     const stats = statSync(outDisk);
@@ -117,7 +120,7 @@ class VideoTranscodeQueue {
     if (!valid) {
       logger.error('video transcode: output validation failed', { outDisk, outputInfo, size: stats.size });
       this.safeDelete(outDisk);
-      return this.mark(job.submissionId, 'FAILED');
+      return this.mark(job, 'FAILED');
     }
 
     // Replace references only after the output is confirmed valid; then remove the original.
@@ -127,19 +130,32 @@ class VideoTranscodeQueue {
         data: { proofUrl: outUrl, proofUrls: [outUrl], videoStatus: 'READY' },
       });
       this.safeDelete(input);
+      this.emit(job, 'READY');
       logger.info('video transcode: complete', { submissionId: job.submissionId, outUrl });
     } catch (err) {
       logger.error('video transcode: db swap failed, keeping original', err);
       this.safeDelete(outDisk);
-      return this.mark(job.submissionId, 'FAILED');
+      return this.mark(job, 'FAILED');
     }
   }
 
-  private async mark(submissionId: string, status: 'READY' | 'FAILED') {
+  private async mark(job: Job, status: 'PROCESSING' | 'READY' | 'FAILED') {
     try {
-      await db.submission.update({ where: { id: submissionId }, data: { videoStatus: status } });
+      await db.submission.update({ where: { id: job.submissionId }, data: { videoStatus: status } });
+      this.emit(job, status);
     } catch (err) {
-      logger.error('video transcode: could not mark status', { submissionId, status, err });
+      logger.error('video transcode: could not mark status', { submissionId: job.submissionId, status, err });
+    }
+  }
+
+  private emit(job: Job, status: 'PROCESSING' | 'READY' | 'FAILED') {
+    try {
+      const io = getIo();
+      if (io) {
+        io.emit(`game:${job.gameCode.toUpperCase()}`, { type: 'submission', submissionId: job.submissionId, videoStatus: status });
+      }
+    } catch (err) {
+      logger.error('video transcode: socket emit failed', err);
     }
   }
 
