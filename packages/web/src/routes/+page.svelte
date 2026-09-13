@@ -159,7 +159,7 @@
   .version-tag {
     position: fixed;
     bottom: 1.25rem;
-    right: 4.5rem;
+    left: 1rem;
     font-size: 0.75rem;
     color: var(--muted);
     font-family: monospace;
