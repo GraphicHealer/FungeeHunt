@@ -491,7 +491,7 @@
       <h3>Send Announcement</h3>
       <textarea
         class="fungee-textarea"
-        bind:value={announcementMessage}
+        bind:value={announcementMessage} maxlength="1000"
         placeholder="Type your message..."
         rows="4"
         style="width: 100%; margin-bottom: 0.75rem;"

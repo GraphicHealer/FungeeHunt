@@ -213,7 +213,7 @@
         <label for="rbw">Default window length (minutes)</label>
         <input id="rbw" type="number" bind:value={settings.returnBonusWindowMinutes} min="1" />
         <label for="rbp">Default points</label>
-        <input id="rbp" type="number" step="0.1" bind:value={settings.returnBonusPoints} min="0" />
+        <input id="rbp" type="number" min="0.01" step="any" bind:value={settings.returnBonusPoints} />
       </section>
 
       <section class="card">
@@ -234,11 +234,11 @@
           Captains can update food drive count
         </label>
         <label for="fdpp">Default points per item</label>
-        <input id="fdpp" type="number" step="0.1" bind:value={settings.foodDrivePointsPerItem} min="0" />
+        <input id="fdpp" type="number" min="0.01" step="any" bind:value={settings.foodDrivePointsPerItem} />
         <label for="fdperm">Default permissible items</label>
-        <textarea id="fdperm" bind:value={settings.foodDrivePermissible} />
+        <textarea id="fdperm" bind:value={settings.foodDrivePermissible} maxlength="1000" />
         <label for="fdsug">Default suggested items</label>
-        <textarea id="fdsug" bind:value={settings.foodDriveSuggested} />
+        <textarea id="fdsug" bind:value={settings.foodDriveSuggested} maxlength="1000" />
       </section>
 
       <section class="card">
@@ -292,7 +292,7 @@
         {/if}
         {#if settings.emailStatus?.smtpConfigured || settings.emailStatus?.gmailConnected}
           <div class="csv-actions" style="margin-top: 0.75rem; gap: 0.75rem;">
-            <input type="email" bind:value={emailTestTo} placeholder="Send a test email to…" style="max-width: 20rem;" />
+            <input type="email" bind:value={emailTestTo} maxlength="254" placeholder="Send a test email to…" style="max-width: 20rem;" />
             <button class="fungee-btn" type="button" on:click={sendTestEmail} disabled={!emailTestTo} style="width: auto; margin: 0;">SEND TEST</button>
           </div>
         {/if}

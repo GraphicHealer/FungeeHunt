@@ -152,7 +152,7 @@
         <h3>Add Offline Player</h3>
 
         <label for="displayName">Display Name</label>
-        <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" />
+        <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" maxlength="50" />
 
         <label for="carValue">Has a car available to drive</label>
         <select id="carValue" bind:value={carValue} required>
@@ -179,7 +179,7 @@
         <h3>Edit Player</h3>
 
         <label for="editName">Display Name</label>
-        <input id="editName" type="text" bind:value={editName} placeholder="Player name" />
+        <input id="editName" type="text" bind:value={editName} placeholder="Player name" maxlength="50" />
 
         <label for="editCarValue">Has a car available to drive</label>
         <select id="editCarValue" bind:value={editCarValue} required>

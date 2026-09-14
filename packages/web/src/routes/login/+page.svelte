@@ -31,7 +31,7 @@
     <p class="fungee-subtitle">Enter the passphrase to access the admin dashboard.</p>
 
     <label class="fungee-label" for="passphrase">Passphrase</label>
-    <input class="fungee-input" id="passphrase" type="password" bind:value={passphrase} use:focus />
+    <input class="fungee-input" id="passphrase" type="password" bind:value={passphrase} maxlength="500" use:focus />
 
     {#if error}<p class="fungee-error">{error}</p>{/if}
 

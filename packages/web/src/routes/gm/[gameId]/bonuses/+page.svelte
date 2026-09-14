@@ -358,7 +358,7 @@
           <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
 
           <label class="fungee-label" for="rp">Points</label>
-          <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={retPoints} min="0" />
+          <input class="fungee-input" id="rp" type="number" min="0.01" step="any" bind:value={retPoints} />
         {/if}
 
         {#if error}<p class="fungee-error">{error}</p>{/if}
@@ -408,13 +408,13 @@
             </select>
           {:else}
             <label class="fungee-label" for="ct">Title</label>
-            <input class="fungee-input" id="ct" type="text" bind:value={customTitle} placeholder="Title" />
+            <input class="fungee-input" id="ct" type="text" bind:value={customTitle} placeholder="Title" maxlength="200" />
 
             <label class="fungee-label" for="cd">Description</label>
-            <textarea class="fungee-textarea" id="cd" bind:value={customDescription} placeholder="Description"></textarea>
+            <textarea class="fungee-textarea" id="cd" bind:value={customDescription} placeholder="Description" maxlength="2000"></textarea>
 
             <label class="fungee-label" for="cp">Points</label>
-            <input class="fungee-input" id="cp" type="number" step="0.1" bind:value={customPoints} />
+            <input class="fungee-input" id="cp" type="number" min="0.01" step="any" bind:value={customPoints} />
 
             <label class="fungee-label" for="cpt">Proof Type</label>
             <select class="fungee-input" id="cpt" bind:value={customProofType}>
@@ -453,11 +453,11 @@
 
         {#if fdEnabled}
           <label class="fungee-label" for="fdpp">Points Per Item</label>
-          <input class="fungee-input" id="fdpp" type="number" step="0.1" bind:value={fdPoints} min="0" />
+          <input class="fungee-input" id="fdpp" type="number" min="0.01" step="any" bind:value={fdPoints} />
           <label class="fungee-label" for="fdperm">Permissible Items</label>
-          <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc."></textarea>
+          <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc." maxlength="1000"></textarea>
           <label class="fungee-label" for="fdsug">Suggested Items</label>
-          <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc."></textarea>
+          <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc." maxlength="1000"></textarea>
         {/if}
 
         {#if error}<p class="fungee-error">{error}</p>{/if}

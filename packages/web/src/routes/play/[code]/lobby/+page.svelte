@@ -109,7 +109,7 @@
         <div class="team-name">
           {#if editing}
             <form class="team-name" on:submit|preventDefault={rename}>
-              <input class="fungee-input" type="text" bind:value={newName} placeholder="Team name" style="flex: 1; margin: 0;" />
+              <input class="fungee-input" type="text" bind:value={newName} placeholder="Team name" maxlength="100" style="flex: 1; margin: 0;" />
               <button class="fungee-btn" style="width: auto; margin: 0;" type="submit">
                 <span class="mdi mdi-check"></span>
               </button>

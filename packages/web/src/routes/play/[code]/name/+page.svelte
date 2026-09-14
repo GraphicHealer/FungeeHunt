@@ -45,7 +45,7 @@
     <p class="fungee-code">{code}</p>
 
     <label class="fungee-label" for="name">What's your name?</label>
-    <input class="fungee-input" id="name" type="text" bind:value={displayName} />
+    <input class="fungee-input" id="name" type="text" bind:value={displayName} maxlength="50" />
 
     <label class="fungee-label" for="car">Will you have a car available to drive?</label>
     <select class="fungee-input" id="car" bind:value={carValue} required>

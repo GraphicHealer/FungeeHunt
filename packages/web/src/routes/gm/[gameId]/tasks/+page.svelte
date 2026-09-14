@@ -466,7 +466,7 @@
           </button>
           {#if showSetPoints}
             <div class="set-points-popover" transition:scale={{ duration: 180, start: 0.95 }}>
-              <input type="number" step="0.1" bind:value={bulkPoints} placeholder="Points" />
+              <input type="number" min="0.01" step="any" bind:value={bulkPoints} placeholder="Points" />
               <button class="fungee-btn" type="button" on:click={bulkSetPoints}>
                 Apply
               </button>
@@ -532,13 +532,13 @@
         <h3>{editId ? 'Edit Task' : 'Add Task'}</h3>
 
         <label for="title">Title</label>
-        <input id="title" type="text" bind:value={title} placeholder="Title" />
+        <input id="title" type="text" bind:value={title} placeholder="Title" maxlength="200" />
 
         <label for="description">Description</label>
-        <textarea id="description" bind:value={description} placeholder="Description" />
+        <textarea id="description" bind:value={description} placeholder="Description" maxlength="2000" />
 
         <label for="points">Points</label>
-        <input id="points" type="number" step="0.1" bind:value={points} />
+        <input id="points" type="number" min="0.01" step="any" bind:value={points} />
 
         <label for="proofType">Proof Type</label>
         <select id="proofType" bind:value={proofType}>
@@ -563,7 +563,7 @@
         {/if}
 
         <label for="order">Order</label>
-        <input id="order" type="number" bind:value={order} />
+        <input id="order" type="number" min="1" bind:value={order} />
 
         {#if error}<p class="error">{error}</p>{/if}
 

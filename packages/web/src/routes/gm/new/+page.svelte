@@ -287,7 +287,7 @@
         <form on:submit|preventDefault={() => step = 2}>
           <h2 class="fungee-section-title">1. Basics</h2>
           <label class="fungee-label" for="name">Game Name</label>
-          <input class="fungee-input" id="name" type="text" bind:value={name} use:focus />
+          <input class="fungee-input" id="name" type="text" bind:value={name} maxlength="100" use:focus />
 
           <label class="fungee-label" for="date">Date</label>
           <input class="fungee-input" id="date" type="date" bind:value={date} />
@@ -327,7 +327,7 @@
             <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
 
             <label class="fungee-label" for="rp">Points</label>
-            <input class="fungee-input" id="rp" type="number" step="0.1" bind:value={returnPoints} />
+            <input class="fungee-input" id="rp" type="number" min="0.01" step="any" bind:value={returnPoints} />
           {/if}
 
           <div class="fungee-btn-row">
@@ -402,11 +402,11 @@
           </label>
           {#if foodDriveEnabled}
             <label class="fungee-label" for="fdpp">Points Per Item</label>
-            <input class="fungee-input" id="fdpp" type="number" bind:value={foodDrivePointsPerItem} use:focus />
+            <input class="fungee-input" id="fdpp" type="number" min="0.01" step="any" bind:value={foodDrivePointsPerItem} use:focus />
             <label class="fungee-label" for="fdperm">Permissible Items</label>
-            <textarea class="fungee-textarea" id="fdperm" bind:value={foodDrivePermissible} placeholder="Cans, boxes, etc."></textarea>
+            <textarea class="fungee-textarea" id="fdperm" bind:value={foodDrivePermissible} maxlength="1000" placeholder="Cans, boxes, etc."></textarea>
             <label class="fungee-label" for="fdsug">Suggested Items</label>
-            <textarea class="fungee-textarea" id="fdsug" bind:value={foodDriveSuggested} placeholder="Peanut butter, soup, etc."></textarea>
+            <textarea class="fungee-textarea" id="fdsug" bind:value={foodDriveSuggested} maxlength="1000" placeholder="Peanut butter, soup, etc."></textarea>
           {/if}
 
           <div class="fungee-btn-row">
@@ -430,7 +430,7 @@
           </p>
 
           <label class="fungee-label" for="gm-email">Your Email (optional)</label>
-          <input class="fungee-input" id="gm-email" type="email" bind:value={gmEmail} placeholder="you@example.com" use:focus />
+          <input class="fungee-input" id="gm-email" type="email" bind:value={gmEmail} maxlength="254" placeholder="you@example.com" use:focus />
 
           {#if error}<p class="fungee-error">{error}</p>{/if}
 

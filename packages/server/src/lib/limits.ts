@@ -5,10 +5,14 @@ export const FIELD_LIMITS: Record<string, number> = {
   title: 200,        // task title, rule title, bonus title
   description: 2000, // task / rule descriptions
   content: 2000,     // rule sections, messages
+  body: 2000,        // rule body
   message: 1000,     // GM announcements or chat
   note: 1000,
   notes: 1000,
+  reason: 1000,      // rejection reasons
   category: 100,
+  foodDrivePermissible: 1000,
+  foodDriveSuggested: 1000,
   email: 254,
   gmEmail: 254,
   to: 254,

@@ -181,7 +181,7 @@
         <h3>{editId ? 'Edit Team' : 'Add Team'}</h3>
 
         <label for="team-name">Team Name</label>
-        <input id="team-name" type="text" bind:value={name} placeholder="Optional" />
+        <input id="team-name" type="text" bind:value={name} placeholder="Optional" maxlength="100" />
 
         <label for="manager">Team Captain</label>
         <select id="manager" bind:value={managerId}>

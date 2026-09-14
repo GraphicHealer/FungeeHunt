@@ -133,9 +133,9 @@
       <form on:submit|preventDefault={applyEdit}>
         <h3>Edit Section</h3>
         <label class="fungee-label" for="title">Title</label>
-        <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" />
+        <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" maxlength="200" />
         <label class="fungee-label" for="body">Body</label>
-        <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" />
+        <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" maxlength="2000" />
         <div class="fungee-btn-row">
           <button class="fungee-btn secondary" type="button" on:click={closeModal}>CANCEL</button>
           <button class="fungee-btn danger" type="button" on:click={remove}>REMOVE</button>
