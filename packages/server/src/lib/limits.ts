@@ -1,4 +1,6 @@
-import { FIELD_LIMITS, DEFAULT_LIMIT, POINT_FIELDS } from '@fungeehunt/shared';
+import { FIELD_LIMITS, POINT_FIELDS } from '@fungeehunt/shared';
+
+const DEFAULT_LIMIT = 5_000;
 
 function isValidPoint(value: any): boolean {
   const n = Number(value);
