@@ -15,6 +15,8 @@ COPY . .
 
 ENV DATABASE_URL=postgresql://placeholder:placeholder@placeholder:5432/placeholder
 
+RUN npm run build --workspace=@fungeehunt/shared
+
 RUN npx prisma generate --schema=packages/server/src/db/schema.prisma
 
 ARG VERSION=dev
