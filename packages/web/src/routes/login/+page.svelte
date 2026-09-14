@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { FIELD_LIMITS } from '$lib/limits';
 
   let passphrase = '';
   let error = '';
@@ -31,7 +32,7 @@
     <p class="fungee-subtitle">Enter the passphrase to access the admin dashboard.</p>
 
     <label class="fungee-label" for="passphrase">Passphrase</label>
-    <input class="fungee-input" id="passphrase" type="password" bind:value={passphrase} maxlength="500" use:focus />
+    <input class="fungee-input" id="passphrase" type="password" bind:value={passphrase} maxlength={FIELD_LIMITS.passphrase} use:focus />
 
     {#if error}<p class="fungee-error">{error}</p>{/if}
 

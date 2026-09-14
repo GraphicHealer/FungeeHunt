@@ -4,6 +4,7 @@
   import { io } from 'socket.io-client';
   import { fade, scale } from 'svelte/transition';
   import { gmToken } from './gmToken';
+  import { FIELD_LIMITS } from './limits';
 
   $: code = $page.params.code ?? '';
   $: gameId = $page.params.gameId ?? '';
@@ -301,7 +302,7 @@
             </div>
           {/if}
           <button type="button" class="emoji-toggle" on:click={() => (pickerOpen = !pickerOpen)}><span class="mdi mdi-emoticon-happy-outline"></span></button>
-          <input class="chat-input" type="text" bind:value={input} maxlength="1000" bind:this={chatInput} placeholder="Type a message…" />
+          <input class="chat-input" type="text" bind:value={input} maxlength={FIELD_LIMITS.message} bind:this={chatInput} placeholder="Type a message…" />
           <button class="chat-send" type="submit"><span class="mdi mdi-send"></span></button>
         </form>
       {/if}

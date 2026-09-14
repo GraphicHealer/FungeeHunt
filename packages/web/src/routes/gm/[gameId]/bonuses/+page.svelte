@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { gmToken } from '$lib/gmToken';
+  import { FIELD_LIMITS, POINT_MIN } from '$lib/limits';
 
   const gameId = $page.params.gameId;
 
@@ -358,7 +359,7 @@
           <button class="fungee-btn secondary" type="button" on:click={randomizeReturn} style="width: auto; margin: 0;">RANDOMIZE</button>
 
           <label class="fungee-label" for="rp">Points</label>
-          <input class="fungee-input" id="rp" type="number" min="0.01" step="any" bind:value={retPoints} />
+          <input class="fungee-input" id="rp" type="number" min={POINT_MIN} step="any" bind:value={retPoints} />
         {/if}
 
         {#if error}<p class="fungee-error">{error}</p>{/if}
@@ -408,13 +409,13 @@
             </select>
           {:else}
             <label class="fungee-label" for="ct">Title</label>
-            <input class="fungee-input" id="ct" type="text" bind:value={customTitle} placeholder="Title" maxlength="200" />
+            <input class="fungee-input" id="ct" type="text" bind:value={customTitle} placeholder="Title" maxlength={FIELD_LIMITS.title} />
 
             <label class="fungee-label" for="cd">Description</label>
-            <textarea class="fungee-textarea" id="cd" bind:value={customDescription} placeholder="Description" maxlength="2000"></textarea>
+            <textarea class="fungee-textarea" id="cd" bind:value={customDescription} placeholder="Description" maxlength={FIELD_LIMITS.description}></textarea>
 
             <label class="fungee-label" for="cp">Points</label>
-            <input class="fungee-input" id="cp" type="number" min="0.01" step="any" bind:value={customPoints} />
+            <input class="fungee-input" id="cp" type="number" min={POINT_MIN} step="any" bind:value={customPoints} />
 
             <label class="fungee-label" for="cpt">Proof Type</label>
             <select class="fungee-input" id="cpt" bind:value={customProofType}>
@@ -453,11 +454,11 @@
 
         {#if fdEnabled}
           <label class="fungee-label" for="fdpp">Points Per Item</label>
-          <input class="fungee-input" id="fdpp" type="number" min="0.01" step="any" bind:value={fdPoints} />
+          <input class="fungee-input" id="fdpp" type="number" min={POINT_MIN} step="any" bind:value={fdPoints} />
           <label class="fungee-label" for="fdperm">Permissible Items</label>
-          <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc." maxlength="1000"></textarea>
+          <textarea class="fungee-textarea" id="fdperm" bind:value={fdPermissible} placeholder="Cans, boxes, etc." maxlength={FIELD_LIMITS.foodDrivePermissible}></textarea>
           <label class="fungee-label" for="fdsug">Suggested Items</label>
-          <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc." maxlength="1000"></textarea>
+          <textarea class="fungee-textarea" id="fdsug" bind:value={fdSuggested} placeholder="Peanut butter, soup, etc." maxlength={FIELD_LIMITS.foodDriveSuggested}></textarea>
         {/if}
 
         {#if error}<p class="fungee-error">{error}</p>{/if}

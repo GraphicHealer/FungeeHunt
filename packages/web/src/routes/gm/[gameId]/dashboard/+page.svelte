@@ -7,6 +7,7 @@
   import { formatPoints } from '$lib/format';
   import { downloadTemplate } from '$lib/taskCsv';
   import { gmToken } from '$lib/gmToken';
+  import { FIELD_LIMITS } from '$lib/limits';
   import SubmissionReview from '$lib/SubmissionReview.svelte';
 
   const gameId = $page.params.gameId ?? '';
@@ -491,7 +492,7 @@
       <h3>Send Announcement</h3>
       <textarea
         class="fungee-textarea"
-        bind:value={announcementMessage} maxlength="1000"
+        bind:value={announcementMessage} maxlength={FIELD_LIMITS.message}
         placeholder="Type your message..."
         rows="4"
         style="width: 100%; margin-bottom: 0.75rem;"

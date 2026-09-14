@@ -5,6 +5,7 @@
   import { fade, scale } from 'svelte/transition';
   import { io } from 'socket.io-client';
   import { formatPoints } from '$lib/format';
+  import { FIELD_LIMITS } from '$lib/limits';
 
   const code = $page.params.code ?? '';
 
@@ -85,7 +86,7 @@
     {#if state}
       {#if isManager() && editing}
         <form class="team-name" on:submit|preventDefault={rename} style="display: flex; gap: 0.5rem; align-items: center; margin: 0 0 0.5rem;">
-          <input class="fungee-input" type="text" bind:value={newName} placeholder="Team name" maxlength="100" style="flex: 1; margin: 0;" />
+          <input class="fungee-input" type="text" bind:value={newName} placeholder="Team name" maxlength={FIELD_LIMITS.name} style="flex: 1; margin: 0;" />
           <button class="fungee-btn" style="width: auto; margin: 0;" type="submit" title="Save team name">
             <span class="mdi mdi-check"></span>
           </button>

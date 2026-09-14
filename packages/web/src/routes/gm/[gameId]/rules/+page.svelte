@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { gmToken } from '$lib/gmToken';
+  import { FIELD_LIMITS } from '$lib/limits';
 
   const gameId = $page.params.gameId;
 
@@ -133,9 +134,9 @@
       <form on:submit|preventDefault={applyEdit}>
         <h3>Edit Section</h3>
         <label class="fungee-label" for="title">Title</label>
-        <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" maxlength="200" />
+        <input class="fungee-input" id="title" type="text" bind:value={editTitle} placeholder="Section title" maxlength={FIELD_LIMITS.title} />
         <label class="fungee-label" for="body">Body</label>
-        <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" maxlength="2000" />
+        <textarea class="fungee-textarea" id="body" bind:value={editBody} placeholder="Section body" maxlength={FIELD_LIMITS.body} />
         <div class="fungee-btn-row">
           <button class="fungee-btn secondary" type="button" on:click={closeModal}>CANCEL</button>
           <button class="fungee-btn danger" type="button" on:click={remove}>REMOVE</button>

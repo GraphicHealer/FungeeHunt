@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { gmToken } from '$lib/gmToken';
+  import { FIELD_LIMITS } from '$lib/limits';
 
   const gameId = $page.params.gameId;
 
@@ -152,7 +153,7 @@
         <h3>Add Offline Player</h3>
 
         <label for="displayName">Display Name</label>
-        <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" maxlength="50" />
+        <input id="displayName" type="text" bind:value={displayName} placeholder="Player name" maxlength={FIELD_LIMITS.displayName} />
 
         <label for="carValue">Has a car available to drive</label>
         <select id="carValue" bind:value={carValue} required>
@@ -179,7 +180,7 @@
         <h3>Edit Player</h3>
 
         <label for="editName">Display Name</label>
-        <input id="editName" type="text" bind:value={editName} placeholder="Player name" maxlength="50" />
+        <input id="editName" type="text" bind:value={editName} placeholder="Player name" maxlength={FIELD_LIMITS.displayName} />
 
         <label for="editCarValue">Has a car available to drive</label>
         <select id="editCarValue" bind:value={editCarValue} required>
