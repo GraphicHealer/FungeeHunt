@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import { FIELD_LIMITS } from '$lib/limits';
 
   const version = import.meta.env.VITE_APP_VERSION ?? 'dev';
 
@@ -44,7 +45,7 @@
       bind:value={code}
       placeholder="74KJP2"
       autocomplete="off"
-      maxlength="8"
+      maxlength={FIELD_LIMITS.code}
     />
 
     {#if error}<p class="fungee-error" style="margin-top: 1rem;">{error}</p>{/if}

@@ -1,42 +1,4 @@
-export const FIELD_LIMITS: Record<string, number> = {
-  // User-facing text fields
-  displayName: 50,
-  name: 100,         // game name, team name, anything called "name"
-  title: 200,        // task title, rule title, bonus title
-  description: 2000, // task / rule descriptions
-  content: 2000,     // rule sections, messages
-  message: 1000,     // GM announcements or chat
-  note: 1000,
-  notes: 1000,
-  category: 100,
-  email: 254,
-  gmEmail: 254,
-  to: 254,
-  from: 254,
-  subject: 200,
-  code: 8,           // game codes
-
-  // Large data that may come in as JSON/CSV strings
-  csv: 1_000_000,
-  defaultTasks: 2_000_000,
-  defaultRules: 2_000_000,
-  taskCategories: 1_000_000,
-
-  // URLs / tokens
-  baseUrl: 500,
-  proofUrl: 500,
-  callbackUrl: 500,
-};
-
-const DEFAULT_LIMIT = 5_000;
-
-// Numeric point fields that must be finite and non-negative (and may be decimal).
-export const POINT_FIELDS = new Set([
-  'points',
-  'returnPoints',
-  'foodDrivePointsPerItem',
-  'returnBonusPoints',
-]);
+import { FIELD_LIMITS, DEFAULT_LIMIT, POINT_FIELDS } from '@fungeehunt/shared';
 
 function isValidPoint(value: any): boolean {
   const n = Number(value);

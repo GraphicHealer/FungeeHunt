@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
+  import { FIELD_LIMITS } from '$lib/limits';
 
   const code = $page.params.code;
   let displayName = '';
@@ -45,7 +46,7 @@
     <p class="fungee-code">{code}</p>
 
     <label class="fungee-label" for="name">What's your name?</label>
-    <input class="fungee-input" id="name" type="text" bind:value={displayName} />
+    <input class="fungee-input" id="name" type="text" bind:value={displayName} maxlength={FIELD_LIMITS.displayName} />
 
     <label class="fungee-label" for="car">Will you have a car available to drive?</label>
     <select class="fungee-input" id="car" bind:value={carValue} required>

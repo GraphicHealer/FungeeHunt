@@ -10,6 +10,7 @@
     "check": "svelte-kit sync && svelte-check"
   },
   "dependencies": {
+    "@fungeehunt/shared": "0.1.0",
     "@mdi/font": "^7.4.47",
     "socket.io-client": "^4.7.5"
   },

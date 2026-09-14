@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { fade, scale } from 'svelte/transition';
   import { gmToken } from '$lib/gmToken';
+  import { FIELD_LIMITS } from '$lib/limits';
 
   const gameId = $page.params.gameId;
 
@@ -181,7 +182,7 @@
         <h3>{editId ? 'Edit Team' : 'Add Team'}</h3>
 
         <label for="team-name">Team Name</label>
-        <input id="team-name" type="text" bind:value={name} placeholder="Optional" />
+        <input id="team-name" type="text" bind:value={name} placeholder="Optional" maxlength={FIELD_LIMITS.name} />
 
         <label for="manager">Team Captain</label>
         <select id="manager" bind:value={managerId}>

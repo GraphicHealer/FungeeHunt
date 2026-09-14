@@ -3,6 +3,7 @@
   import { fade, scale } from 'svelte/transition';
   import { toast } from './toast';
   import { gmToken } from './gmToken';
+  import { FIELD_LIMITS } from './limits';
 
   export let gameId: string;
   export let sub: any;
@@ -94,7 +95,7 @@
     {#if rejecting}
       <form on:submit|preventDefault={() => review('INCOMPLETE')}>
         <label class="fungee-label" for="reason">Reason for rejecting (required)</label>
-        <textarea class="fungee-textarea" id="reason" bind:value={reason} placeholder="Explain why this submission is rejected…"></textarea>
+        <textarea class="fungee-textarea" id="reason" bind:value={reason} maxlength={FIELD_LIMITS.reason} placeholder="Explain why this submission is rejected…"></textarea>
         <div class="fungee-btn-row" style="margin-top: 1rem;">
           <button class="fungee-btn danger" type="submit">REJECT</button>
           <button class="fungee-btn" type="button" on:click={() => { rejecting = false; reason = ''; }}>CANCEL</button>
