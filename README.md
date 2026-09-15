@@ -38,6 +38,8 @@ A self-hosted scavenger-hunt platform for groups, built for phones, projectors, 
 
 <img src="docs/screenshots/player.png" alt="Player" width="400" />
 
+Many more screenshots of every page are in the [Game Master](https://docs.fungeehunt.com/docs/game-master/create-game) and [Gameplay](https://docs.fungeehunt.com/docs/gameplay/players) guides.
+
 ## Key features
 
 - Mobile-first player and captain experience
@@ -74,6 +76,8 @@ For full deployment options, environment variables, and Gmail setup, see the doc
 - [Unraid template](https://docs.fungeehunt.com/docs/deployment/unraid)
 - [Environment variables](https://docs.fungeehunt.com/docs/deployment/env)
 - [Email setup](https://docs.fungeehunt.com/docs/admin/email)
+- [Game Master guide](https://docs.fungeehunt.com/docs/game-master/create-game)
+- [Player, team and spectator guide](https://docs.fungeehunt.com/docs/gameplay/players)
 
 ## Local development
 
