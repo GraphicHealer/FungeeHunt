@@ -35,7 +35,7 @@ Capture conventions used so far: desktop/GM/viewer pages at **1600×1000**, play
    - **Used in:** `docs/docs/admin/email.md`
 
 8. `fungeehunt-08-admin-settings-backup.png`
-   - **What to capture:** The **Tutorial** and **Backup & Restore** sections.
+   - **What to capture:** The **Welcome Screen** and **Backup & Restore** sections.
    - **Used in:** `docs/docs/admin/settings.md`
 
 ## Still needed (Gmail OAuth — Google Cloud Console)

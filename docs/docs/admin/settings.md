@@ -52,9 +52,9 @@ Shows the current email status — *SMTP is configured and will be used*, *A Gma
 
 `!screenshot: fungeehunt-01-admin-settings-email.png` — The Email section with the status line, CONNECT GMAIL and SEND TEST.
 
-## Tutorial
+## Welcome Screen
 
-**RE-ENABLE TUTORIAL** shows the welcome screen again and resets this device's tour preference, so the wizard asks about the guided tour on next use.
+**SHOW WELCOME SCREEN AGAIN** re-displays the first-run *Welcome to Fungee-Hunt* pop-up on the next page load. The new-game tutorial is not controlled here — the [creation wizard](../game-master/create-game.md#tutorial-prompt) offers it on every device that has not yet declined or finished it.
 
 ## Backup & Restore
 
