@@ -8,7 +8,7 @@ Click **CREATE GAME** on the home page (or go to `/gm/new`). No login is needed 
 
 ## Tutorial prompt
 
-The first time you open the wizard on a device you are offered a guided tour. Choose **YES** to be walked through the wizard and dashboard, or **NO** to skip it. You can bring the tour back later from **Admin → System Settings → RE-ENABLE TUTORIAL**.
+When you open the wizard you are asked **Quick tutorial?** Choose **YES, SHOW ME** to be walked through the wizard and dashboard after the game is created, or **NO THANKS** to skip it. The answer is remembered per device: once you decline or finish the tour, that browser is not asked again.
 
 ![Tutorial prompt](/img/gm-wizard-tour-prompt.png)
 
