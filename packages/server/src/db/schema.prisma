@@ -196,6 +196,7 @@ enum GameStatus {
   NOT_STARTED
   LIVE
   COMPLETED
+  RESULTS
 }
 
 enum PlayerType {

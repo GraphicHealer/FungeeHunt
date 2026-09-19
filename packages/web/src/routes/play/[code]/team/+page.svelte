@@ -143,7 +143,7 @@
         As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
       </p>
       <p>
-        Make sure your phone is charged and ready once the game starts. Good luck!
+        Make sure your phone is charged and ready. Good luck!
       </p>
       <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
         <span class="mdi mdi-camera"></span>

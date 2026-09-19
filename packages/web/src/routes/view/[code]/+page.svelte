@@ -11,7 +11,6 @@
   let error = '';
   let countdownTimer: ReturnType<typeof setInterval> | null = null;
   let socket: any;
-  let recapPlayed = false;
   let myTeamId: string | null = null;
 
   let now = Date.now();
@@ -28,6 +27,13 @@
   let activeVideo: HTMLVideoElement | null = null;
   let activePhoto: HTMLImageElement | null = null;
   let stage: HTMLDivElement | null = null;
+
+  let viewSubmissions = false;
+  let mediaIndex = 0;
+  let mediaItems: any[] = [];
+  let galleryWrap: HTMLDivElement | null = null;
+
+  $: if (data?.game?.status !== 'RESULTS') viewSubmissions = false;
 
   const placementKey = `viewPlacement:${code.toUpperCase()}`;
   let placementMap: Record<string, any> = {};
@@ -50,6 +56,51 @@
     const m = Math.floor((totalSeconds % 3600) / 60);
     const s = totalSeconds % 60;
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function buildMediaItems() {
+    if (!data?.submissions) {
+      mediaItems = [];
+      return;
+    }
+    const items: any[] = [];
+    for (const sub of data.submissions) {
+      if (sub.task?.proofType === 'VIDEO') {
+        if (sub.videoStatus === 'READY' && sub.proofUrl) {
+          items.push({ type: 'video', url: sub.proofUrl, team: sub.team, task: sub.task });
+        }
+      } else if (sub.task?.proofType === 'PHOTOS' && sub.proofUrls?.length) {
+        for (const url of sub.proofUrls) {
+          items.push({ type: 'photo', url, team: sub.team, task: sub.task });
+        }
+      } else if (sub.proofUrl) {
+        items.push({ type: 'photo', url: sub.proofUrl, team: sub.team, task: sub.task });
+      }
+    }
+    mediaItems = items;
+    if (mediaIndex >= mediaItems.length) mediaIndex = 0;
+    if (mediaIndex < 0) mediaIndex = 0;
+  }
+
+  function prevMedia() {
+    if (!mediaItems.length) return;
+    mediaIndex = mediaIndex > 0 ? mediaIndex - 1 : mediaItems.length - 1;
+  }
+
+  function nextMedia() {
+    if (!mediaItems.length) return;
+    mediaIndex = mediaIndex < mediaItems.length - 1 ? mediaIndex + 1 : 0;
+  }
+
+  function onGalleryKey(e: KeyboardEvent) {
+    if (!viewSubmissions) return;
+    if (e.key === 'ArrowLeft' || e.key === 'Left') {
+      e.preventDefault();
+      prevMedia();
+    } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+      e.preventDefault();
+      nextMedia();
+    }
   }
 
   function isVideo(sub: any) {
@@ -192,6 +243,7 @@
       const isFirst = !data;
       data = next;
       setupTimers();
+      buildMediaItems();
       if (isFirst) {
         initRecent(next.recent ?? []);
       } else {
@@ -364,10 +416,13 @@
       }
       load();
     });
+
+    window.addEventListener('keydown', onGalleryKey);
   });
 
   onDestroy(() => {
     if (socket) socket.disconnect();
+    window.removeEventListener('keydown', onGalleryKey);
     if (countdownTimer) clearInterval(countdownTimer);
     if (photoTimer) clearTimeout(photoTimer);
   });
@@ -392,7 +447,58 @@
 
 <main class="viewer">
   {#if data}
-    {#if data.game.status === 'NOT_STARTED'}
+    {#if viewSubmissions}
+      <div class="submissions-gallery" bind:this={galleryWrap}>
+        <aside class="submissions-sidebar">
+          <div class="sidebar-rankings">
+            <h3>FINAL STANDINGS</h3>
+            <ol class="sidebar-standings">
+              {#each data.leaderboard as team, i (team.id)}
+                <li class="sidebar-team" class:winner={i === 0}>
+                  <span class="sidebar-rank">{i + 1}</span>
+                  <span class="sidebar-name">{team.name ?? 'Unnamed team'}</span>
+                  <span class="sidebar-score">{formatPoints(team.score)}</span>
+                </li>
+              {/each}
+            </ol>
+          </div>
+          <div class="sidebar-archive">
+            <h3>Download Submissions</h3>
+            {#if data.game.archiveQrUrl}
+              <img class="qr" src={data.game.archiveQrUrl} alt="Download submissions QR code" />
+            {/if}
+            <a class="viewer-url" href={data.game.archiveUrl} target="_blank" rel="noreferrer">{data.game.archiveUrl}</a>
+          </div>
+        </aside>
+
+        <section class="gallery-stage">
+          {#if mediaItems[mediaIndex]}
+            {@const item = mediaItems[mediaIndex]}
+            <div class="gallery-media">
+              {#if item.type === 'video'}
+                <video src={item.url} controls autoplay muted style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+              {:else}
+                <img src={item.url} alt="{item.task?.title ?? ''} by {item.team?.name ?? ''}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+              {/if}
+            </div>
+            <div class="gallery-meta">
+              <span class="gallery-task">{item.task?.title ?? ''}</span>
+              <span class="gallery-team">{item.team?.name ?? ''}</span>
+              <span class="gallery-count">{mediaIndex + 1} / {mediaItems.length}</span>
+            </div>
+          {:else}
+            <p class="gallery-empty">No submissions yet.</p>
+          {/if}
+
+          <button class="gallery-arrow gallery-arrow-left" on:click={prevMedia} aria-label="Previous" disabled={mediaItems.length <= 1}>
+            <span class="mdi mdi-chevron-left"></span>
+          </button>
+          <button class="gallery-arrow gallery-arrow-right" on:click={nextMedia} aria-label="Next" disabled={mediaItems.length <= 1}>
+            <span class="mdi mdi-chevron-right"></span>
+          </button>
+        </section>
+      </div>
+    {:else if data.game.status === 'NOT_STARTED'}
       <div class="viewer-join">
         <h1 class="viewer-title">{data.game.name}</h1>
         <p class="viewer-hint">Scan the QR code or visit the URL below to join</p>
@@ -410,6 +516,46 @@
         {:else}
           <p class="viewer-countdown">Waiting for the Game Master to start…</p>
         {/if}
+      </div>
+    {:else if data.game.status === 'RESULTS'}
+      <div class="results-stage">
+        <h1 class="viewer-title">{data.game.name}</h1>
+        <h2 class="results-subtitle">FINAL STANDINGS</h2>
+
+        {#if data.leaderboard[0]}
+          <div class="winner-card">
+            <span class="mdi mdi-trophy winner-icon" aria-hidden="true"></span>
+            <span class="winner-rank">1st</span>
+            <span class="winner-name">{data.leaderboard[0].name ?? 'Unnamed team'}</span>
+            <span class="winner-score">{formatPoints(data.leaderboard[0].score)} POINTS</span>
+          </div>
+        {/if}
+
+        {#if data.leaderboard.length > 1}
+          <div class="runner-up-grid">
+            {#each data.leaderboard.slice(1, 3) as team, i (team.id)}
+              <div class="runner-up-card">
+                <span class="runner-up-rank">{i + 2}</span>
+                <span class="runner-up-name">{team.name ?? 'Unnamed team'}</span>
+                <span class="runner-up-score">{formatPoints(team.score)} POINTS</span>
+              </div>
+            {/each}
+          </div>
+        {/if}
+
+        {#if data.leaderboard.length > 3}
+          <ol class="results-rest">
+            {#each data.leaderboard.slice(3) as team, i (team.id)}
+              <li class="results-rest-item">
+                <span class="rank">{i + 4}</span>
+                <span class="name">{team.name ?? 'Unnamed team'}</span>
+                <span class="score">{formatPoints(team.score)} POINTS</span>
+              </li>
+            {/each}
+          </ol>
+        {/if}
+
+        <button class="fungee-btn" style="margin-top: 1.5rem;" on:click={() => (viewSubmissions = true)}>VIEW SUBMISSIONS</button>
       </div>
     {:else}
       <header class="viewer-header">
@@ -441,7 +587,7 @@
           </section>
         {/if}
 
-      {#if data.game.status === 'COMPLETED' && (!data.game.recapVideoUrl || recapPlayed)}
+      {#if data.game.status === 'COMPLETED'}
         <section class="viewer-join viewer-archive">
           <h1 class="viewer-title">Download Submissions</h1>
           <p class="viewer-hint">Scan the QR code or visit the URL below to download every team&apos;s photos and videos</p>
@@ -517,19 +663,6 @@
           {/if}
         </div>
       </section>
-
-      {#if data.game.status === 'COMPLETED' && data.game.recapVideoUrl}
-        <section class="viewer-panel viewer-recap">
-          <h2>EVENT RECAP</h2>
-          <video
-            src={data.game.recapVideoUrl}
-            controls
-            on:ended={() => (recapPlayed = true)}
-            style="width: 100%; max-height: 60vh;"
-          ></video>
-          <p class="recap-attribution">Music by Kevin MacLeod - incompetech.com</p>
-        </section>
-      {/if}
 
       <footer class="viewer-panel viewer-feed">
         <h2>LATEST UPDATES</h2>
@@ -873,26 +1006,6 @@
     font-weight: bold;
   }
 
-  .viewer-recap {
-    margin-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .viewer-recap video {
-    border-radius: 0.5rem;
-    border: 1px solid var(--border);
-    background: #000;
-  }
-
-  .recap-attribution {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.95rem;
-    text-align: center;
-  }
-
   .viewer-feed {
     margin-top: 1rem;
   }
@@ -917,5 +1030,322 @@
 
   .viewer-error {
     color: var(--danger);
+  }
+
+  .results-stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    min-height: 100vh;
+  }
+
+  .results-subtitle {
+    margin: 0;
+    color: var(--success);
+    font-size: 1.5rem;
+    letter-spacing: 0.1rem;
+  }
+
+  .winner-card {
+    background: var(--card);
+    border: 2px solid var(--brand);
+    border-radius: 1rem;
+    padding: 2rem 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow);
+    min-width: 22rem;
+  }
+
+  .winner-icon {
+    font-size: 3rem;
+    color: var(--brand);
+  }
+
+  .winner-rank {
+    font-size: 1.25rem;
+    color: var(--brand);
+    font-weight: bold;
+  }
+
+  .winner-name {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .winner-score {
+    font-size: 1.5rem;
+    color: var(--success);
+    font-weight: bold;
+  }
+
+  .runner-up-grid {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .runner-up-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.25rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 14rem;
+  }
+
+  .runner-up-rank {
+    font-size: 1rem;
+    color: var(--brand);
+    font-weight: bold;
+  }
+
+  .runner-up-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .runner-up-score {
+    font-size: 1rem;
+    color: var(--success);
+    font-weight: bold;
+  }
+
+  .results-rest {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 40rem;
+  }
+
+  .results-rest-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .results-rest-item .rank {
+    width: 2.5rem;
+    text-align: center;
+    font-weight: bold;
+    color: var(--brand);
+  }
+
+  .results-rest-item .name {
+    flex: 1;
+    text-align: left;
+    color: var(--text);
+  }
+
+  .results-rest-item .score {
+    color: var(--success);
+    font-weight: bold;
+  }
+  .submissions-gallery {
+    display: grid;
+    grid-template-columns: 20rem 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    min-height: 100vh;
+    align-items: start;
+  }
+
+  .submissions-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: calc(100vh - 2rem);
+    position: sticky;
+    top: 1rem;
+  }
+
+  .sidebar-rankings {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .sidebar-rankings h3 {
+    margin: 0 0 0.75rem;
+    color: var(--brand);
+    font-size: 1.1rem;
+  }
+
+  .sidebar-standings {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sidebar-team {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--bg);
+    font-size: 0.95rem;
+  }
+
+  .sidebar-team.winner {
+    border: 1px solid var(--brand);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .sidebar-rank {
+    width: 1.75rem;
+    font-weight: bold;
+    color: var(--brand);
+  }
+
+  .sidebar-name {
+    flex: 1;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sidebar-score {
+    font-weight: bold;
+    color: var(--success);
+  }
+
+  .sidebar-archive {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .sidebar-archive h3 {
+    margin: 0 0 0.75rem;
+    color: var(--brand);
+    font-size: 1.1rem;
+  }
+
+  .sidebar-archive .qr {
+    max-width: 12rem;
+    margin: 0 auto 0.5rem;
+  }
+
+  .gallery-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 2rem);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    overflow: hidden;
+  }
+
+  .gallery-media {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .gallery-media img,
+  .gallery-media video {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+  }
+
+  .gallery-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--bg);
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+  }
+
+  .gallery-task {
+    font-weight: bold;
+    color: var(--brand);
+  }
+
+  .gallery-team {
+    color: var(--text);
+  }
+
+  .gallery-count {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .gallery-empty {
+    color: var(--muted);
+    font-size: 1.25rem;
+  }
+
+  .gallery-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 2.5rem;
+    cursor: pointer;
+  }
+
+  .gallery-arrow:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+
+  .gallery-arrow-left {
+    left: 1rem;
+  }
+
+  .gallery-arrow-right {
+    right: 1rem;
   }
 </style>

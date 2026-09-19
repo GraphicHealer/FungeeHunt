@@ -21,6 +21,12 @@
   let vapidPublicKey: string | null = null;
   let now = Date.now();
   let nowTimer: ReturnType<typeof setInterval> | null = null;
+
+  function isTaskWaiting(task: any) {
+    if (!task.delayMinutes || !state?.game?.startAt) return false;
+    const start = new Date(state.game.startAt).getTime();
+    return now < start + task.delayMinutes * 60_000;
+  }
   let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
   function token() {
@@ -301,6 +307,8 @@
                   <span>+{formatPoints(task.points)}</span>
                   {#if task.submission}
                     <span class="fungee-status {task.submission.status.toLowerCase()}">{statusLabel(task.submission.status)}</span>
+                  {:else if isTaskWaiting(task)}
+                    <span class="fungee-status waiting">Waiting</span>
                   {:else}
                     <span class="fungee-status">Available</span>
                   {/if}
@@ -409,7 +417,7 @@
         As Team Captain, your device is the one the team uses to submit photos/videos for tasks.
       </p>
       <p>
-        Make sure your phone is charged and ready once the game starts. Good luck!
+        Make sure your phone is charged and ready. Good luck!
       </p>
       <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; font-size: 2.5rem; color: var(--brand);">
         <span class="mdi mdi-camera"></span>

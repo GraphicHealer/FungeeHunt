@@ -82,6 +82,19 @@ router.get('/', async (req, res) => {
       task: taskMap.get(sub.taskId),
     }));
 
+    const submissions = completedSubmissions
+      .map((sub) => ({
+        ...sub,
+        team: teamMap.get(sub.teamId),
+        task: taskMap.get(sub.taskId),
+      }))
+      .filter((sub) => sub.task)
+      .sort((a: any, b: any) => {
+        const orderDiff = (a.task.order ?? 0) - (b.task.order ?? 0);
+        if (orderDiff !== 0) return orderDiff;
+        return (a.team?.name ?? '').localeCompare(b.team?.name ?? '');
+      });
+
     const joinUrl = `${getBaseUrl(req)}/play/${game.code}`;
     const qrUrl = await QRCode.toDataURL(joinUrl, { width: 512, margin: 2 });
     const archiveUrl = `${getBaseUrl(req)}/play/${game.code}`;
@@ -112,6 +125,7 @@ router.get('/', async (req, res) => {
       leaderboard,
       tasks,
       recent,
+      submissions,
       remaining: remainingMs ? formatDuration(remainingMs) : null,
     });
   } catch (err) {

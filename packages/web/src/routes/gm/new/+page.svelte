@@ -426,10 +426,6 @@
             <li>A reminder with the link about 2 hours before the game starts</li>
             <li>A warning shortly before the game is auto-deleted</li>
           </ul>
-          <p style="margin: 0 0 0.75rem; color: var(--muted); font-size: 0.85rem;">
-            Requires email to be configured on the server (see Admin settings).
-          </p>
-
           <label class="fungee-label" for="gm-email">Your Email (optional)</label>
           <input class="fungee-input" id="gm-email" type="email" bind:value={gmEmail} maxlength={FIELD_LIMITS.email} placeholder="you@example.com" use:focus />
 
