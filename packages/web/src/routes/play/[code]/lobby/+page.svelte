@@ -16,6 +16,7 @@
   let socket: any;
   let showAnnouncement = false;
   let announcementMessage = '';
+  let dismissedMessage = '';
 
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
@@ -26,14 +27,16 @@
   }
 
   function checkAnnouncement() {
-    if (state?.announcement?.message) {
+    if (state?.announcement?.message && state.announcement.message !== dismissedMessage) {
       announcementMessage = state.announcement.message;
       showAnnouncement = true;
     }
   }
 
   async function markAnnouncementRead() {
+    const message = announcementMessage;
     showAnnouncement = false;
+    dismissedMessage = message;
     await fetch(`/api/play/${code}/announce-read`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token()}` },

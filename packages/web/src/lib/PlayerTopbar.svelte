@@ -13,9 +13,12 @@
   let interval: ReturnType<typeof setInterval>;
   let showAnnouncement = false;
   let announcementMessage = '';
+  let dismissedMessage = '';
 
   async function markAnnouncementRead() {
+    const message = announcementMessage;
     showAnnouncement = false;
+    dismissedMessage = message;
     await fetch(`/api/play/${code}/announce-read`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token()}` },
@@ -53,7 +56,7 @@
     if (res.ok) {
       state = await res.json();
       remainingStr = remaining();
-      if (state?.announcement && state.announcement.message) {
+      if (state?.announcement && state.announcement.message && state.announcement.message !== dismissedMessage) {
         announcementMessage = state.announcement.message;
         showAnnouncement = true;
       }
@@ -77,6 +80,7 @@
         const matchTeam = state?.team && Array.isArray(payload.teamIds) && payload.teamIds.includes(state.team.id);
         const matchCaptain = !payload.captainsOnly || state?.player?.id === state?.team?.managerId;
         if (matchCaptain && (matchAll || matchTeam)) {
+          dismissedMessage = '';
           announcementMessage = payload.message;
           showAnnouncement = true;
         }

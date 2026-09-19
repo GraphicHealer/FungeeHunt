@@ -260,7 +260,10 @@
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token()}` },
     });
-    if (res.ok) await load();
+    if (res.ok) {
+      editId = '';
+      await load();
+    }
   }
 
   function toggleBulkMode() {

@@ -1165,10 +1165,13 @@
   }
   .submissions-gallery {
     display: grid;
-    grid-template-columns: 20rem 1fr;
+    grid-template-columns: 20rem minmax(0, 1fr);
     gap: 1rem;
     padding: 1rem;
-    min-height: 100vh;
+    height: 100vh;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow: hidden;
     align-items: start;
   }
 
@@ -1254,7 +1257,12 @@
   }
 
   .sidebar-archive .qr {
-    max-width: 12rem;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 12rem;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
     margin: 0 auto 0.5rem;
   }
 
@@ -1264,12 +1272,15 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 2rem);
+    height: calc(100vh - 2rem);
+    max-width: 100%;
+    min-width: 0;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 0.75rem;
     padding: 1rem;
     overflow: hidden;
+    box-sizing: border-box;
   }
 
   .gallery-media {
@@ -1278,6 +1289,7 @@
     justify-content: center;
     align-items: center;
     width: 100%;
+    max-width: 100%;
     min-height: 0;
   }
 
