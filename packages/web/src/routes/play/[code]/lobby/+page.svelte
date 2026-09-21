@@ -18,6 +18,8 @@
   let announcementMessage = '';
 
   const DISMISS_KEY = `dismissedAnnouncement:${code.toUpperCase()}`;
+
+  function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
   }
 
