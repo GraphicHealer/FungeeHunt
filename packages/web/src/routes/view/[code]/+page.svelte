@@ -243,7 +243,11 @@
       const isFirst = !data;
       data = next;
       setupTimers();
-      buildMediaItems();
+      if (data.game?.status === 'RESULTS') {
+        buildMediaItems();
+      } else {
+        mediaItems = [];
+      }
       if (isFirst) {
         initRecent(next.recent ?? []);
       } else {
