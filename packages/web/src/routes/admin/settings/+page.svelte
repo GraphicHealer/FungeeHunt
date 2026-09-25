@@ -35,10 +35,7 @@
     loading = false;
   }
 
-  async function reEnableTutorial() {
-    // The tutorial ask + Gmail prompt are remembered per device; clear them here.
-    localStorage.removeItem('gmTourPref');
-    localStorage.removeItem('gmTourNext');
+  async function showWelcomeAgain() {
     localStorage.removeItem('gmailSetupDismissed');
     const res = await fetch('/api/config', {
       method: 'PATCH',
@@ -49,9 +46,9 @@
       body: JSON.stringify({ welcomeShown: false }),
     });
     if (res.ok) {
-      toast.add('Welcome and tutorial prompts will reappear on this device', 'success');
+      toast.add('The welcome screen will be shown again', 'success');
     } else {
-      toast.add('Could not re-enable tutorial', 'error');
+      toast.add('Could not reset the welcome screen', 'error');
     }
   }
 
@@ -310,9 +307,9 @@
       </section>
 
       <section class="card" style="margin-top: 1rem;">
-        <h2>Tutorial</h2>
-        <p style="margin: 0 0 1rem; color: var(--muted);">Show the welcome screen again and reset this device's tutorial preference (the wizard will ask about the tour on next use).</p>
-        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={reEnableTutorial}>RE-ENABLE TUTORIAL</button>
+        <h2>Welcome Screen</h2>
+        <p style="margin: 0 0 1rem; color: var(--muted);">Show the first-run welcome screen again on the next page load. The new-game tutorial is offered by the wizard itself and remembered per device.</p>
+        <button class="fungee-btn" style="width: auto; margin: 0;" type="button" on:click={showWelcomeAgain}>SHOW WELCOME SCREEN AGAIN</button>
       </section>
     </form>
   {/if}
