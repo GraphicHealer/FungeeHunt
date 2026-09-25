@@ -430,7 +430,7 @@ const defaultTasks = [
   },
   {
     title: `Hot Ones: Local Edition`,
-    description: `Drink a serving of the spiciest hot sauce a nearby restaurant offers.`,
+    description: `Have a team member drink a serving of the spiciest hot sauce a nearby restaurant offers.`,
     points: 125,
     proofType: 'VIDEO',
     category: 'Games',

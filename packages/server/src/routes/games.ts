@@ -30,7 +30,7 @@ function asInt(value: any): number {
 }
 
 function validStatus(value: any): string | undefined {
-  return ['NOT_STARTED', 'LIVE', 'COMPLETED'].includes(value) ? value : undefined;
+  return ['NOT_STARTED', 'LIVE', 'COMPLETED', 'RESULTS'].includes(value) ? value : undefined;
 }
 
 function buildGameData(body: any, partial = false) {

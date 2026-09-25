@@ -21,7 +21,6 @@
   let socket: any;
   let interval: ReturnType<typeof setInterval>;
   let showImportModal = false;
-  let recap: any = null;
   let showAnnouncementModal = false;
   let announcementMessage = '';
   let announcementTeamIds: string[] = [];
@@ -112,7 +111,7 @@
     });
     if (res.ok) {
       await load();
-      toast.add(`Game ${status === 'LIVE' ? 'started' : status === 'COMPLETED' ? 'ended' : 'status updated'}`, 'success');
+      toast.add(`Game ${status === 'LIVE' ? 'started' : status === 'COMPLETED' ? 'ended' : status === 'RESULTS' ? 'results shown' : 'status updated'}`, 'success');
     } else {
       const data = await res.json();
       toast.add(data.error ?? 'Could not update game status', 'error');
@@ -198,56 +197,6 @@
     input.value = '';
   }
 
-  async function loadRecap() {
-    const res = await fetch(`/api/gm/games/${gameId}/recap`, {
-      headers: { Authorization: `Bearer ${token()}` },
-    });
-    if (res.ok) {
-      recap = await res.json();
-      recapProgress = recap?.progress ?? 0;
-      stopProgress();
-      if (recap?.status === 'RENDERING') startProgress();
-    }
-  }
-
-  let recapProgress = 0;
-  let progressInterval: ReturnType<typeof setInterval> | null = null;
-
-  async function startRecap() {
-    const res = await fetch(`/api/gm/games/${gameId}/recap`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token()}` },
-    });
-    if (res.ok) {
-      recap = await res.json();
-      recapProgress = 0;
-      startProgress();
-      toast.add('Recap render started', 'success');
-    } else {
-      const data = await res.json();
-      toast.add(data.error ?? 'Could not start recap', 'error');
-    }
-  }
-
-  function startProgress() {
-    if (progressInterval) clearInterval(progressInterval);
-    progressInterval = setInterval(() => {
-      loadRecap();
-    }, 800);
-  }
-
-  function stopProgress() {
-    if (progressInterval) {
-      clearInterval(progressInterval);
-      progressInterval = null;
-    }
-    if (recap?.status === 'READY') {
-      recapProgress = 100;
-    } else if (recap?.status === 'PENDING' || recap?.status === 'FAILED') {
-      recapProgress = 0;
-    }
-  }
-
   function thumbnailUrl(sub: any) {
     const type = sub.task?.proofType;
     if (type === 'PHOTOS' && sub.proofUrls?.length) return sub.proofUrls[0];
@@ -272,7 +221,6 @@
     await load();
     await loadSubmissions();
     await loadTeams();
-    await loadRecap();
     await loadSettings();
     if (game?.code) {
       socket = io({ transports: ['websocket', 'polling'] });
@@ -291,7 +239,6 @@
   onDestroy(() => {
     if (socket) socket.disconnect();
     if (interval) clearInterval(interval);
-    stopProgress();
   });
 </script>
 
@@ -304,7 +251,7 @@
           <p style="margin: 0;">
             This game and all of its uploaded photos and videos will be permanently deleted on
             <strong>{autoDeleteAt.toLocaleString()}</strong>.
-            Download the recap video and anything else you want to keep before then.
+            Download anything you want to keep before then.
           </p>
         </section>
       {/if}
@@ -376,38 +323,15 @@
           <button class="fungee-btn success" data-tour="start-game" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('LIVE')} disabled={game.status !== 'NOT_STARTED'}>START</button>
           <button class="fungee-btn danger" style="width: auto; flex: 1; min-width: 6rem;" on:click={() => setStatus('COMPLETED')} disabled={game.status !== 'LIVE'}>END</button>
           {#if game.status === 'COMPLETED'}
-            <a class="fungee-btn secondary" style="width: auto; flex: 1; min-width: 6rem; text-align: center;" href="/view/{game.code}/results">RESULTS</a>
-          {/if}
-          {#if game.status === 'COMPLETED'}
             <button
-              class="fungee-btn"
+              class="fungee-btn secondary"
               style="width: auto; flex: 1; min-width: 6rem;"
-              on:click={startRecap}
-              disabled={recap?.status === 'RENDERING'}
+              on:click={() => setStatus('RESULTS')}
             >
-              {recap?.status === 'READY' ? 'RE-RENDER RECAP' : 'GENERATE RECAP'}
+              VIEW RESULTS
             </button>
           {/if}
         </div>
-        {#if game.status === 'COMPLETED' && recap}
-          {#if recap.status === 'RENDERING'}
-            <div class="recap-progress" style="margin-top: 0.75rem;">
-              <div class="progress-label">Generating recap… {Math.round(recapProgress)}%</div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: {recapProgress}%"></div>
-              </div>
-            </div>
-          {:else if recap.status === 'READY' && recap.url}
-            <p class="recap-status" style="margin: 0.5rem 0 0; font-size: 0.9rem; color: var(--success);">
-              Recap ready
-            </p>
-            <a class="viewer-url" href={recap.url} target="_blank" rel="noreferrer" style="font-size: 0.9rem;">{recap.url}</a>
-          {:else if recap.status === 'FAILED'}
-            <p class="recap-status" style="margin: 0.5rem 0 0; font-size: 0.9rem; color: var(--danger);">
-              Recap failed. Try again.
-            </p>
-          {/if}
-        {/if}
       </section>
 
       {#if game.returnBonusEnabled}
@@ -795,29 +719,4 @@
     cursor: pointer;
   }
 
-  .recap-progress {
-    width: 100%;
-  }
-
-  .progress-label {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 0.25rem;
-  }
-
-  .progress-bar {
-    width: 100%;
-    height: 0.5rem;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 0.25rem;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--brand);
-    transition: width 0.3s ease;
-    border-radius: 0.25rem;
-  }
 </style>

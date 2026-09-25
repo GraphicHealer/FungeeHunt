@@ -14,12 +14,17 @@
   let showAnnouncement = false;
   let announcementMessage = '';
 
+  const DISMISS_KEY = `dismissedAnnouncement:${code.toUpperCase()}`;
+
   async function markAnnouncementRead() {
+    const message = announcementMessage;
+    sessionStorage.setItem(DISMISS_KEY, message);
     showAnnouncement = false;
     await fetch(`/api/play/${code}/announce-read`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token()}` },
     });
+    await load();
   }
 
   function token() {
@@ -53,7 +58,8 @@
     if (res.ok) {
       state = await res.json();
       remainingStr = remaining();
-      if (state?.announcement && state.announcement.message) {
+      const dismissed = sessionStorage.getItem(DISMISS_KEY);
+      if (state?.announcement && state.announcement.message && state.announcement.message !== dismissed) {
         announcementMessage = state.announcement.message;
         showAnnouncement = true;
       }
@@ -77,6 +83,8 @@
         const matchTeam = state?.team && Array.isArray(payload.teamIds) && payload.teamIds.includes(state.team.id);
         const matchCaptain = !payload.captainsOnly || state?.player?.id === state?.team?.managerId;
         if (matchCaptain && (matchAll || matchTeam)) {
+          const dismissed = sessionStorage.getItem(DISMISS_KEY);
+          if (payload.message === dismissed) return;
           announcementMessage = payload.message;
           showAnnouncement = true;
         }

@@ -207,10 +207,14 @@ router.post('/push-subscribe', async (req, res) => {
 
 router.post('/announce-read', async (req, res) => {
   const player = (res.locals as any).player;
+  const game = (res.locals as any).game;
   try {
+    const sentAt = game?.lastAnnouncementAt ? new Date(game.lastAnnouncementAt).getTime() : 0;
+    const now = Date.now();
+    const readAt = new Date(Math.max(now, sentAt + 1));
     await db.player.update({
       where: { id: player.id },
-      data: { lastAnnouncementReadAt: new Date() },
+      data: { lastAnnouncementReadAt: readAt },
     });
     res.status(204).end();
   } catch (err) {

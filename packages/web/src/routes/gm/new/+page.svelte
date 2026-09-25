@@ -18,6 +18,7 @@
   }
 
   let step = 1;
+  let emailReady = false;
 
   let name = 'Fungee-Hunt';
   let date = '';
@@ -132,6 +133,7 @@
     });
     if (sRes.ok) {
       const s = await sRes.json();
+      emailReady = !!(s.emailStatus?.smtpConfigured || s.emailStatus?.gmailConnected);
       returnBonusEnabled = s.returnBonusEnabled ?? true;
       returnBonusWindowMinutes = s.returnBonusWindowMinutes ?? 10;
       returnPoints = s.returnBonusPoints ?? 100;
@@ -395,7 +397,7 @@
           </div>
         </form>
       {:else if step === 5}
-        <form on:submit|preventDefault={() => step = 6}>
+        <form on:submit|preventDefault={() => (emailReady ? (step = 6) : createGame())}>
           <h2 class="fungee-section-title">5. Food Drive</h2>
           <label class="fungee-check">
             <input type="checkbox" bind:checked={foodDriveEnabled} />
@@ -415,7 +417,7 @@
             <button class="fungee-btn" type="submit" data-tour="step5-next">NEXT</button>
           </div>
         </form>
-      {:else if step === 6}
+      {:else if step === 6 && emailReady}
         <form on:submit|preventDefault={createGame}>
           <h2 class="fungee-section-title">6. Email Notifications</h2>
           <p style="margin: 0 0 0.5rem; color: var(--muted); font-size: 0.95rem;">
@@ -426,10 +428,6 @@
             <li>A reminder with the link about 2 hours before the game starts</li>
             <li>A warning shortly before the game is auto-deleted</li>
           </ul>
-          <p style="margin: 0 0 0.75rem; color: var(--muted); font-size: 0.85rem;">
-            Requires email to be configured on the server (see Admin settings).
-          </p>
-
           <label class="fungee-label" for="gm-email">Your Email (optional)</label>
           <input class="fungee-input" id="gm-email" type="email" bind:value={gmEmail} maxlength={FIELD_LIMITS.email} placeholder="you@example.com" use:focus />
 

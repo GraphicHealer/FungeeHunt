@@ -17,6 +17,8 @@
   let showAnnouncement = false;
   let announcementMessage = '';
 
+  const DISMISS_KEY = `dismissedAnnouncement:${code.toUpperCase()}`;
+
   function token() {
     return localStorage.getItem(`token:${code}`) ?? '';
   }
@@ -26,18 +28,22 @@
   }
 
   function checkAnnouncement() {
-    if (state?.announcement?.message) {
+    const dismissed = sessionStorage.getItem(DISMISS_KEY);
+    if (state?.announcement?.message && state.announcement.message !== dismissed) {
       announcementMessage = state.announcement.message;
       showAnnouncement = true;
     }
   }
 
   async function markAnnouncementRead() {
+    const message = announcementMessage;
+    sessionStorage.setItem(DISMISS_KEY, message);
     showAnnouncement = false;
     await fetch(`/api/play/${code}/announce-read`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token()}` },
     });
+    await load();
   }
 
   async function load() {
